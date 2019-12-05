@@ -9,6 +9,7 @@ using Toybox.Math;
 using Toybox.Activity;
 using Toybox.ActivityMonitor;
 using Toybox.SensorHistory;
+using Toybox.Application;
 
 class SundanceView extends WatchUi.WatchFace {
 	
@@ -18,14 +19,16 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var mountain;
 	hidden var stepsPic;
 	
+	// others
 	hidden var settings;
+	hidden var app;
+	hidden var value = null;
 	
 	// Sunset / sunrise vars
 	hidden var location = null;
 	hidden var gLocationLat = null;
     hidden var gLocationLng = null ;
-    hidden var value = null;
-
+    
     function initialize() {    
         WatchFace.initialize();
         imgBg = new WatchUi.Bitmap({
@@ -40,6 +43,7 @@ class SundanceView extends WatchUi.WatchFace {
             :locY=>191
         });        
         settings = System.getDeviceSettings();
+        app = Application.getApp();
     }
 
     // Load your resources here
@@ -66,9 +70,13 @@ class SundanceView extends WatchUi.WatchFace {
         var clockTime = System.getClockTime();
         var hours = clockTime.hour;
         if (!System.getDeviceSettings().is24Hour) {
+        	var ampm = View.findDrawableById("TimeAmPm");
+        	ampm.setText("AM");
             if (hours > 12) {
                 hours = hours - 12;
+                ampm.setText("PM");
             }
+            ampm.draw(dc);
         } else {
             if (Application.getApp().getProperty("UseMilitaryFormat")) {
                 timeFormat = "$1$$2$";
@@ -130,7 +138,23 @@ class SundanceView extends WatchUi.WatchFace {
 	        location = location.toDegrees(); // Array of Doubles.
         	gLocationLat = location[0].toFloat();
 			gLocationLng = location[1].toFloat();
-			var sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ false);
+			
+			app.setProperty("LastLocationLat", gLocationLat);
+			app.setProperty("LastLocationLng", gLocationLng);						
+		} else {
+			var lat = app.getProperty("LastLocationLat");
+			if (lat != null) {
+				gLocationLat = lat;
+			}
+
+			var lng = app.getProperty("LastLocationLng");
+			if (lng != null) {
+				gLocationLng = lng;
+			}			
+        }
+        
+        if (gLocationLat != null) {
+        	var sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ false);
 			// System.println(sunTimes[0]);
 			// System.println(sunTimes[1]);
 			
@@ -147,9 +171,9 @@ class SundanceView extends WatchUi.WatchFace {
 			var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
 			var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder 
 			dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-			dc.drawArc(halfWidth, halfWidth, rLocal - 2, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);			
-		} else {
-			value = "gps?";			
+			dc.drawArc(halfWidth, halfWidth, rLocal - 2, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
+        } else {
+        	value = "gps?";
         }
     }
 
@@ -410,5 +434,3 @@ class SundanceView extends WatchUi.WatchFace {
 		];
 	}
 }
-
-
