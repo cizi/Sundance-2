@@ -226,9 +226,9 @@ class SundanceView extends WatchUi.WatchFace {
 	    // 0 => New Moon
 	    // 1 => Waxing Crescent Moon
 	    // 2 => Quarter Moon
-	    // 3 => Waxing Gibbous Moon
+	    // 3 => Waning Gibbous Moon
 	    // 4 => Full Moon
-	    // 5 => Waning Gibbous Moon
+	    // 5 => Waxing Gibbous Moon
 	    // 6 => Last Quarter Moon
 	    // 7 => Waning Crescent Moon
 	    
