@@ -18,6 +18,7 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var moonPhase;
 	hidden var mountain;
 	hidden var stepsPic;
+	// hidden var bat;
 	
 	// others
 	hidden var settings;
@@ -41,7 +42,13 @@ class SundanceView extends WatchUi.WatchFace {
             :rezId=>Rez.Drawables.Mnt,
             :locX=>94,
             :locY=>191
-        });        
+        });    
+        
+        /* bat = new WatchUi.Bitmap({
+            :rezId=>Rez.Drawables.Bat,
+            :locX=>180,
+            :locY=>166
+        });  */       
         settings = System.getDeviceSettings();
         app = Application.getApp();
     }
@@ -64,11 +71,12 @@ class SundanceView extends WatchUi.WatchFace {
         
        	imgBg.draw(dc);
       	mountain.draw(dc);
+      	// bat.draw(dc);
  
         // Get the current time and format it correctly
         var timeFormat = "$1$:$2$";
-        var clockTime = System.getClockTime();
-        var hours = clockTime.hour;
+        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+        var hours = today.hour;
         if (!System.getDeviceSettings().is24Hour) {
         	var ampm = View.findDrawableById("TimeAmPm");
         	ampm.setText("AM");
@@ -83,15 +91,14 @@ class SundanceView extends WatchUi.WatchFace {
                 hours = hours.format("%02d");
             }
         }
-        var timeString = Lang.format(timeFormat, [hours, clockTime.min.format("%02d")]);
+        var timeString = Lang.format(timeFormat, [hours, today.min.format("%02d")]);
 
         // Update the view
         var time = View.findDrawableById("TimeLabel");
-        // view.setColor(Application.getApp().getProperty("ForegroundColor"));
         time.setText(timeString);
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
         time.draw(dc);
         
-        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
         var dateString = Lang.format(
 		    "$1$ $2$ $3$",
 		    [
@@ -100,17 +107,18 @@ class SundanceView extends WatchUi.WatchFace {
 		        today.month
 		    ]
 		);
-        var date = View.findDrawableById("DateLabel");
-        // view.setColor(Application.getApp().getProperty("ForegroundColor"));        
+        var date = View.findDrawableById("DateLabel");        
         date.setText(dateString);
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
         date.draw(dc);
         
         today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-        var moonPhaseNr = getMoonPhase(today.day, today.month, today.year);
+        var moonPhaseNr = getMoonPhase(today.year, today.month, today.day);
         drawMoonPhase(dc, moonPhaseNr);
         
         var alt = View.findDrawableById("Altitude");
         alt.setText(getAltitude());
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
         alt.draw(dc);   
         
         var info = ActivityMonitor.getInfo();
@@ -128,6 +136,7 @@ class SundanceView extends WatchUi.WatchFace {
         stepsPic.draw(dc);
         var stepsId = View.findDrawableById("TodaySteps");
         stepsId.setText(info.steps.toString() + "/" + info.stepGoal.toString());
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
         stepsId.draw(dc);
             
         
@@ -163,15 +172,15 @@ class SundanceView extends WatchUi.WatchFace {
 			var rLocal=halfWidth - 2;
 			var lineStart = 270 - (sunTimes[0] * 15);
 			var lineEnd = 270 - (sunTimes[1] * 15);
-			dc.setColor(0xFFFF00, Graphics.COLOR_BLACK);
+			dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
 			dc.drawArc(halfWidth, halfWidth, rLocal, Graphics.ARC_CLOCKWISE, lineStart, lineEnd);
 			
-			dc.setPenWidth(10);
+			dc.setPenWidth(12);
 			var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
 			var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
 			var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder 
-			dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-			dc.drawArc(halfWidth, halfWidth, rLocal - 2, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
+			dc.setColor(Application.getApp().getProperty("CurrentTimePointer"), Application.getApp().getProperty("BackgroundColor"));
+			dc.drawArc(halfWidth, halfWidth, rLocal - 4, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
         } else {
         	value = "gps?";
         }
@@ -191,8 +200,16 @@ class SundanceView extends WatchUi.WatchFace {
     function onEnterSleep() {
     }
     
-    function getMoonPhase(year, month, day)
-	{
+    // Return one of 8 moon phase by date 
+    // 0 => New Moon
+    // 1 => Waxing Crescent Moon
+    // 2 => Quarter Moon
+    // 3 => Waning Gibbous Moon
+    // 4 => Full Moon
+    // 5 => Waxing Gibbous Moon
+    // 6 => Last Quarter Moon
+    // 7 => Waning Crescent Moon
+    function getMoonPhase(year, month, day) {
 	    var c = 0;
 	    var e = 0;
 	    var jd = 0;
@@ -205,46 +222,37 @@ class SundanceView extends WatchUi.WatchFace {
 	
 	    ++month;
 	
-	    c = 365.25 * year;
+	    c = 365.25 * year;  
 	
 	    e = 30.6 * month;
-	
+		
 	    jd = c + e + day - 694039.09; //jd is total days elapsed
 	
-	    jd /= 29.5305882; //divide by the moon cycle
-	
+	    jd /= 29.5305882; //divide by the moon cycle	
+	      
 	    b = jd.toNumber(); //int(jd) -> b, take integer part of jd
 	
 	    jd -= b; //subtract integer part to leave fractional part of original jd
-	
-	    b = Math.round(jd * 8); //scale fraction from 0-8 and round
+		
+	    b = Math.round(jd * 8).abs(); //scale fraction from 0-8 and round
 	
 	    if (b >= 8 ) {
 	        b = 0; //0 and 8 are the same so turn 8 into 0
 	    }
-	
-	    // 0 => New Moon
-	    // 1 => Waxing Crescent Moon
-	    // 2 => Quarter Moon
-	    // 3 => Waning Gibbous Moon
-	    // 4 => Full Moon
-	    // 5 => Waxing Gibbous Moon
-	    // 6 => Last Quarter Moon
-	    // 7 => Waning Crescent Moon
 	    
-	    return b.abs();
+	    return b;
 	}
 	
+	// Draw a moon by phase
 	function drawMoonPhase(dc, phase) {
 		var xPos = (dc.getWidth() / 2) - 10;
         var yPos = 43;
-        if (phase == 0) {
-			moonPhase = new WatchUi.Bitmap({
-	            :rezId	=> Rez.Drawables.MP0,
-	            :locX	=> xPos,
-	            :locY	=> yPos
-	        });        
-        } else if (phase == 1) {
+		moonPhase = new WatchUi.Bitmap({
+	        :rezId	=> Rez.Drawables.MP0,
+	        :locX	=> xPos,
+	        :locY	=> yPos
+	    });        
+        if (phase == 1) {
 			moonPhase = new WatchUi.Bitmap({
 	            :rezId	=> Rez.Drawables.MP1,
 	            :locX	=> xPos,
