@@ -31,16 +31,17 @@ class SundanceView extends WatchUi.WatchFace {
     
     function initialize() {    
         WatchFace.initialize();
-        imgBg = new WatchUi.Bitmap({
-            :rezId=>Rez.Drawables.Bg,
-            :locX=>0,
-            :locY=>0
-        });      
-        
+                  
         mountain = new WatchUi.Bitmap({
             :rezId=>Rez.Drawables.Mnt,
             :locX=>94,
             :locY=>191
+        });
+        
+        stepsPic = new WatchUi.Bitmap({
+            :rezId=>Rez.Drawables.Steps,
+            :locX=>56,
+            :locY=>166
         });
            
         settings = System.getDeviceSettings();
@@ -50,6 +51,37 @@ class SundanceView extends WatchUi.WatchFace {
     // Load your resources here
     function onLayout(dc) {
         setLayout(Rez.Layouts.WatchFace(dc));
+        
+        if (dc.getWidth() == 240) {	// FENIX 5
+        	if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
+		        imgBg = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.Bg240,
+		            :locX=>0,
+		            :locY=>0
+		        });  
+	        } else {
+	        	imgBg = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.BgInvert240,
+		            :locX=>0,
+		            :locY=>0
+		        });
+	        }
+        
+        } else {
+        	if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
+		        imgBg = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.Bg,
+		            :locX=>0,
+		            :locY=>0
+		        });  
+	        } else {
+	        	imgBg = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.BgInvert,
+		            :locX=>0,
+		            :locY=>0
+		        });
+	        }
+        }
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -93,14 +125,7 @@ class SundanceView extends WatchUi.WatchFace {
         dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
         time.draw(dc);
         
-        var dateString = Lang.format(
-		    "$1$ $2$ $3$",
-		    [
-		        today.day_of_week.substring(0,3),
-		        today.day,
-		        today.month
-		    ]
-		);
+        var dateString = getFormatedDate();
         var date = View.findDrawableById("DateLabel");        
         date.setText(dateString);
         dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
@@ -116,14 +141,9 @@ class SundanceView extends WatchUi.WatchFace {
         alt.draw(dc);   
         
         var info = ActivityMonitor.getInfo();
-        stepsPic = new WatchUi.Bitmap({
-            :rezId=>Rez.Drawables.Steps,
-            :locX=>54,
-            :locY=>166
-        });
         stepsPic.draw(dc);
         var stepsId = View.findDrawableById("TodaySteps");
-        stepsId.setText("14987"); //info.steps.toString()); // + "/" + info.stepGoal.toString());
+        stepsId.setText(info.steps.toString()); // + "/" + info.stepGoal.toString());
         dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
         stepsId.draw(dc);
             
@@ -186,6 +206,25 @@ class SundanceView extends WatchUi.WatchFace {
 
     // Terminate any active timers and prepare for slow updates.
     function onEnterSleep() {
+    }
+    
+    function getFormatedDate() {
+    	var ret = "";
+    	if (Application.getApp().getProperty("DateFormat") <= 3) {
+    		var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+    		if (Application.getApp().getProperty("DateFormat") == 1) {
+    			ret = Lang.format("$1$ $2$ $3$", [today.day_of_week, today.day, today.month]);
+    		} else if (Application.getApp().getProperty("DateFormat") == 2) {
+    			ret = Lang.format("$1$ $2$ $3$", [today.day_of_week, today.month, today.day]);
+    		} else {
+    			ret = Lang.format("$1$ $2$", [today.day_of_week, today.day]);
+    		}  		
+    	} else {
+    		var today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+    		ret = Lang.format("$1$ / $2$", [today.month, today.day]);
+    	}
+    	
+    	return ret;
     }
     
     // Return one of 8 moon phase by date 
@@ -296,15 +335,15 @@ class SundanceView extends WatchUi.WatchFace {
       	dc.drawRectangle(batStartX, batteryStartY, batteryWidth, 13);	// battery
  		dc.drawRectangle(batStartX + batteryWidth, batteryStartY + 4, 2, 5);	// battery top
  		var batteryColor = Graphics.COLOR_GREEN;
- 		if (batteryColor <= 35) {
+ 		if (System.getSystemStats().battery <= 35) {
  			batteryColor = Graphics.COLOR_ORANGE;
- 		} else if (batteryColor <= 10) {
+ 		} else if (System.getSystemStats().battery <= 10) {
  			batteryColor = Graphics.COLOR_RED;
  		}
  		
  		dc.setColor(batteryColor, Application.getApp().getProperty("BackgroundColor"));
  		var batteryState = ((System.getSystemStats().battery / 10) * 2).toNumber();
- 		dc.fillRectangle(batStartX + 1, batteryStartY + 1, (20 - batteryState), 11);
+ 		dc.fillRectangle(batStartX + 1, batteryStartY + 1, batteryState, 11);
  		
  		var bat = View.findDrawableById("BatteryState");
         bat.setText(System.getSystemStats().battery.toNumber().toString() + "%");

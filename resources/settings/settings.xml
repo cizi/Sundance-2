@@ -13,6 +13,15 @@
             <listEntry value="0xFFFFFF">@Strings.ColorWhite</listEntry>
         </settingConfig>
     </setting>
+    
+    <setting propertyKey="@Properties.DateFormat" title="@Strings.DateFormatTitle">
+        <settingConfig type="list">
+            <listEntry value="1">@Strings.DateFormat1</listEntry>
+            <listEntry value="2">@Strings.DateFormat2</listEntry>
+            <listEntry value="3">@Strings.DateFormat3</listEntry>
+            <listEntry value="4">@Strings.DateFormat4</listEntry>
+        </settingConfig>
+    </setting>
 
     <setting propertyKey="@Properties.DaylightProgess" title="@Strings.DaylightProgessTitle">
         <settingConfig type="list">

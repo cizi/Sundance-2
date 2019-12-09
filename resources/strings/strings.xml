@@ -8,7 +8,15 @@
     <string id="CurrentTimePointerTitle">Current Time pointer Color</string>
     
     <string id="MilitaryFormatTitle">Military Format for 24 Hour Time</string>
-
+    <string id="DateFormatTitle">Date Format</string>
+    
+    <string id="DateFormat1">Day Date Month</string>
+    <string id="DateFormat2">Day Month Date </string>
+    <string id="DateFormat3">Day Date</string>
+    <string id="DateFormat4">Month / Date</string>
+   
+    
+    
     <string id="ColorBlack">Black</string>
     <string id="ColorDarkGray">Dark Gray</string>
     <string id="ColorLightGray">Light Gray</string>
