@@ -18,7 +18,6 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var moonPhase;
 	hidden var mountain;
 	hidden var stepsPic;
-	// hidden var bat;
 	
 	// others
 	hidden var settings;
@@ -42,13 +41,8 @@ class SundanceView extends WatchUi.WatchFace {
             :rezId=>Rez.Drawables.Mnt,
             :locX=>94,
             :locY=>191
-        });    
-        
-        /* bat = new WatchUi.Bitmap({
-            :rezId=>Rez.Drawables.Bat,
-            :locX=>180,
-            :locY=>166
-        });  */       
+        });
+           
         settings = System.getDeviceSettings();
         app = Application.getApp();
     }
@@ -71,8 +65,8 @@ class SundanceView extends WatchUi.WatchFace {
         
        	imgBg.draw(dc);
       	mountain.draw(dc);
-      	// bat.draw(dc);
- 
+      	drawBattery(dc);
+      	
         // Get the current time and format it correctly
         var timeFormat = "$1$:$2$";
         var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
@@ -122,20 +116,14 @@ class SundanceView extends WatchUi.WatchFace {
         alt.draw(dc);   
         
         var info = ActivityMonitor.getInfo();
-        var stepPosX = 94;
-        if (info.steps > 10) { stepPosX = 89; }
-        if (info.steps > 100) { stepPosX = 84; }
-        if (info.steps > 1000) { stepPosX = 79; }
-        if (info.steps > 1000) { stepPosX = 74; }
-  
         stepsPic = new WatchUi.Bitmap({
             :rezId=>Rez.Drawables.Steps,
-            :locX=>stepPosX,
+            :locX=>54,
             :locY=>166
         });
         stepsPic.draw(dc);
         var stepsId = View.findDrawableById("TodaySteps");
-        stepsId.setText(info.steps.toString() + "/" + info.stepGoal.toString());
+        stepsId.setText("14987"); //info.steps.toString()); // + "/" + info.stepGoal.toString());
         dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
         stepsId.draw(dc);
             
@@ -175,12 +163,12 @@ class SundanceView extends WatchUi.WatchFace {
 			dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
 			dc.drawArc(halfWidth, halfWidth, rLocal, Graphics.ARC_CLOCKWISE, lineStart, lineEnd);
 			
-			dc.setPenWidth(12);
+			dc.setPenWidth(15);
 			var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
 			var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
 			var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder 
 			dc.setColor(Application.getApp().getProperty("CurrentTimePointer"), Application.getApp().getProperty("BackgroundColor"));
-			dc.drawArc(halfWidth, halfWidth, rLocal - 4, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
+			dc.drawArc(halfWidth, halfWidth, rLocal - 3, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
         } else {
         	value = "gps?";
         }
@@ -296,6 +284,33 @@ class SundanceView extends WatchUi.WatchFace {
 	        }); 
 		}
         moonPhase.draw(dc); 
+	}
+	
+	// Draw battery witch % state
+	function drawBattery(dc) {
+		dc.setPenWidth(1);
+      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+      	var batStartX = 151;
+      	var batteryStartY = 168;
+      	var batteryWidth = 23;
+      	dc.drawRectangle(batStartX, batteryStartY, batteryWidth, 13);	// battery
+ 		dc.drawRectangle(batStartX + batteryWidth, batteryStartY + 4, 2, 5);	// battery top
+ 		var batteryColor = Graphics.COLOR_GREEN;
+ 		if (batteryColor <= 35) {
+ 			batteryColor = Graphics.COLOR_ORANGE;
+ 		} else if (batteryColor <= 10) {
+ 			batteryColor = Graphics.COLOR_RED;
+ 		}
+ 		
+ 		dc.setColor(batteryColor, Application.getApp().getProperty("BackgroundColor"));
+ 		var batteryState = ((System.getSystemStats().battery / 10) * 2).toNumber();
+ 		dc.fillRectangle(batStartX + 1, batteryStartY + 1, (20 - batteryState), 11);
+ 		
+ 		var bat = View.findDrawableById("BatteryState");
+        bat.setText(System.getSystemStats().battery.toNumber().toString() + "%");
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+       
+        bat.draw(dc);
 	}
 	
 	function getAltitude() {

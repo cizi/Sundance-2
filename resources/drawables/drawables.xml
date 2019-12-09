@@ -3,7 +3,6 @@
     <bitmap id="Bg" filename="images/bg.png" />
     <bitmap id="Mnt" filename="images/mountain.png" />
     <bitmap id="Steps" filename="images/steps.png" />
-    <!--  <bitmap id="Bat" filename="images/battery.png" />  -->
    
   <!-- Moon Phases -->
   	  <bitmap id="MP0" filename="images/moonPhases/mp0.png" />
