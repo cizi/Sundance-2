@@ -6,6 +6,8 @@
     <bitmap id="BgInvert240" filename="images/bg_invert240.png" />
     <bitmap id="Mnt" filename="images/mountain.png" />
     <bitmap id="Steps" filename="images/steps.png" />
+    <bitmap id="Bell" filename="images/bell.png" />
+    <bitmap id="BellInvert" filename="images/bell_invert.png" />
    
   <!-- Moon Phases -->
   	  <bitmap id="MP0" filename="images/moonPhases/mp0.png" />

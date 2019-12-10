@@ -18,11 +18,11 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var moonPhase;
 	hidden var mountain;
 	hidden var stepsPic;
+	hidden var bell;
 	
 	// others
 	hidden var settings;
 	hidden var app;
-	hidden var value = null;
 	
 	// Sunset / sunrise vars
 	hidden var location = null;
@@ -40,11 +40,10 @@ class SundanceView extends WatchUi.WatchFace {
         
         stepsPic = new WatchUi.Bitmap({
             :rezId=>Rez.Drawables.Steps,
-            :locX=>56,
+            :locX=>54,
             :locY=>166
         });
-           
-        settings = System.getDeviceSettings();
+
         app = Application.getApp();
     }
 
@@ -73,13 +72,13 @@ class SundanceView extends WatchUi.WatchFace {
 		            :rezId=>Rez.Drawables.Bg,
 		            :locX=>0,
 		            :locY=>0
-		        });  
+		        });
 	        } else {
 	        	imgBg = new WatchUi.Bitmap({
 		            :rezId=>Rez.Drawables.BgInvert,
 		            :locX=>0,
 		            :locY=>0
-		        });
+		        }); 
 	        }
         }
     }
@@ -94,10 +93,12 @@ class SundanceView extends WatchUi.WatchFace {
     function onUpdate(dc) {
     	// Call the parent onUpdate function to redraw the layout
         View.onUpdate(dc);
+        settings = System.getDeviceSettings();
         
        	imgBg.draw(dc);
       	mountain.draw(dc);
       	drawBattery(dc);
+      	drawBell(dc);
       	
         // Get the current time and format it correctly
         var timeFormat = "$1$:$2$";
@@ -189,8 +190,6 @@ class SundanceView extends WatchUi.WatchFace {
 			var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder 
 			dc.setColor(Application.getApp().getProperty("CurrentTimePointer"), Application.getApp().getProperty("BackgroundColor"));
 			dc.drawArc(halfWidth, halfWidth, rLocal - 3, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
-        } else {
-        	value = "gps?";
         }
     }
 
@@ -207,6 +206,40 @@ class SundanceView extends WatchUi.WatchFace {
     // Terminate any active timers and prepare for slow updates.
     function onEnterSleep() {
     }
+    
+    // Will draw bell if is alarm set
+    function drawBell(dc) {
+    	if (settings.alarmCount > 0) {
+      		if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
+	  			bell = new WatchUi.Bitmap({
+			            :rezId=>Rez.Drawables.Bell,
+			            :locX=>122,
+			            :locY=>167
+			        }); 
+      		} else {
+	      			bell = new WatchUi.Bitmap({
+			            :rezId=>Rez.Drawables.BellInvert,
+			            :locX=>122,
+			            :locY=>167
+			        }); 
+	        }
+  		} else {
+  			if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
+  				bell = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.BellInvert,
+		            :locX=>122,
+		            :locY=>167
+		        });		 
+      		} else {
+      			bell = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.Bell,
+		            :locX=>122,
+		            :locY=>167
+		        });  		
+      		}
+      	}
+      	bell.draw(dc);
+    } 
     
     function getFormatedDate() {
     	var ret = "";
