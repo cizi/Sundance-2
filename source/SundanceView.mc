@@ -361,7 +361,11 @@ class SundanceView extends WatchUi.WatchFace {
 	// Draw battery witch % state
 	function drawBattery(dc) {
 		dc.setPenWidth(1);
-      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+		if (System.getSystemStats().battery <= 10) {
+	      	dc.setColor(Graphics.COLOR_RED, Application.getApp().getProperty("BackgroundColor"));
+		} else {
+	      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+		}
       	var batStartX = 151;
       	var batteryStartY = 168;
       	var batteryWidth = 23;
@@ -376,7 +380,7 @@ class SundanceView extends WatchUi.WatchFace {
  		
  		dc.setColor(batteryColor, Application.getApp().getProperty("BackgroundColor"));
  		var batteryState = ((System.getSystemStats().battery / 10) * 2).toNumber();
- 		dc.fillRectangle(batStartX + 1, batteryStartY + 1, batteryState, 11);
+ 		dc.fillRectangle(batStartX + 1, batteryStartY + 1, batteryState + 1, 11);
  		
  		var bat = View.findDrawableById("BatteryState");
         bat.setText(System.getSystemStats().battery.toNumber().toString() + "%");
