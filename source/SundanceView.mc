@@ -19,6 +19,7 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var mountain;
 	hidden var stepsPic;
 	hidden var bell;
+	hidden var bt;
 	
 	// others
 	hidden var settings;
@@ -49,7 +50,7 @@ class SundanceView extends WatchUi.WatchFace {
 
     // Load your resources here
     function onLayout(dc) {
-        setLayout(Rez.Layouts.WatchFace(dc));
+        setLayout(Rez.Layouts.WatchFace(dc));     
         
         if (dc.getWidth() == 240) {	// FENIX 5
         	if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
@@ -59,11 +60,11 @@ class SundanceView extends WatchUi.WatchFace {
 		            :locY=>0
 		        });  
 	        } else {
-	        	imgBg = new WatchUi.Bitmap({
+	        	/* imgBg = new WatchUi.Bitmap({
 		            :rezId=>Rez.Drawables.BgInvert240,
 		            :locX=>0,
 		            :locY=>0
-		        });
+		        }); */
 	        }
         
         } else {
@@ -74,13 +75,13 @@ class SundanceView extends WatchUi.WatchFace {
 		            :locY=>0
 		        });
 	        } else {
-	        	imgBg = new WatchUi.Bitmap({
+	        	/* imgBg = new WatchUi.Bitmap({
 		            :rezId=>Rez.Drawables.BgInvert,
 		            :locX=>0,
 		            :locY=>0
-		        }); 
+		        }); */
 	        }
-        }
+        }  
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -94,11 +95,12 @@ class SundanceView extends WatchUi.WatchFace {
     	// Call the parent onUpdate function to redraw the layout
         View.onUpdate(dc);
         settings = System.getDeviceSettings();
-        
+
        	imgBg.draw(dc);
       	mountain.draw(dc);
       	drawBattery(dc);
       	drawBell(dc);
+      	drawBtConnection(dc);
       	
         // Get the current time and format it correctly
         var timeFormat = "$1$:$2$";
@@ -217,11 +219,11 @@ class SundanceView extends WatchUi.WatchFace {
 			            :locY=>167
 			        }); 
       		} else {
-	      			bell = new WatchUi.Bitmap({
-			            :rezId=>Rez.Drawables.BellInvert,
-			            :locX=>122,
-			            :locY=>167
-			        }); 
+      			bell = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.BellInvert,
+		            :locX=>122,
+		            :locY=>167
+		        }); 
 	        }
   		} else {
   			if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
@@ -240,6 +242,40 @@ class SundanceView extends WatchUi.WatchFace {
       	}
       	bell.draw(dc);
     } 
+    
+    // Draw BT connection status
+    function drawBtConnection(dc) {
+    	if ((settings has : phoneConnected) && (settings.phoneConnected)) {
+      		if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
+	  			bt = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.Bt,
+		            :locX=>122,
+		            :locY=>210
+		        }); 
+      		} else {
+      			bt = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.BtInvert,
+		            :locX=>122,
+		            :locY=>210
+		        }); 
+	        }
+  		} else {
+  			if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
+  				bt = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.BtInvert,
+		            :locX=>122,
+		            :locY=>210
+		        });		 
+      		} else {
+      			bt = new WatchUi.Bitmap({
+		            :rezId=>Rez.Drawables.Bt,
+		            :locX=>122,
+		            :locY=>210
+		        });  		
+      		}
+      	}
+      	bt.draw(dc);
+    }
     
     function getFormatedDate() {
     	var ret = "";

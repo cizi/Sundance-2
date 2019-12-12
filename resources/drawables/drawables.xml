@@ -1,13 +1,15 @@
 <drawables>
     <bitmap id="LauncherIcon" filename="launcher_icon.png" />
     <bitmap id="Bg" filename="images/bg.png" />
-    <bitmap id="BgInvert" filename="images/bg_invert.png" />
+    <!-- <bitmap id="BgInvert" filename="images/bg_invert.png" /> -->
     <bitmap id="Bg240" filename="images/bg240.png" />
-    <bitmap id="BgInvert240" filename="images/bg_invert240.png" />
+    <!-- <bitmap id="BgInvert240" filename="images/bg_invert240.png" />  -->
     <bitmap id="Mnt" filename="images/mountain.png" />
     <bitmap id="Steps" filename="images/steps.png" />
     <bitmap id="Bell" filename="images/bell.png" />
     <bitmap id="BellInvert" filename="images/bell_invert.png" />
+    <bitmap id="Bt" filename="images/bt.png" />
+    <bitmap id="BtInvert" filename="images/bt_invert.png" />
    
   <!-- Moon Phases -->
   	  <bitmap id="MP0" filename="images/moonPhases/mp0.png" />
