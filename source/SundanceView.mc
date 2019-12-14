@@ -16,7 +16,6 @@ class SundanceView extends WatchUi.WatchFace {
 	// pictures
 	hidden var imgBg;
 	hidden var moonPhase;
-	hidden var mountain;
 	hidden var stepsPic;
 	hidden var bell;
 	hidden var bt;
@@ -32,12 +31,6 @@ class SundanceView extends WatchUi.WatchFace {
     
     function initialize() {    
         WatchFace.initialize();
-                  
-        mountain = new WatchUi.Bitmap({
-            :rezId=>Rez.Drawables.Mnt,
-            :locX=>94,
-            :locY=>191
-        });
         
         stepsPic = new WatchUi.Bitmap({
             :rezId=>Rez.Drawables.Steps,
@@ -97,9 +90,12 @@ class SundanceView extends WatchUi.WatchFace {
         settings = System.getDeviceSettings();
 
        	imgBg.draw(dc);
-      	mountain.draw(dc);
+       	
+      	drawMountain(94, 191, dc);
+      	drawSun(130, 180, dc, true);
+      	
       	drawBattery(dc);
-      	drawBell(dc);
+      	// drawBell(dc);
       	drawBtConnection(dc);
       	
         // Get the current time and format it correctly
@@ -242,6 +238,45 @@ class SundanceView extends WatchUi.WatchFace {
       	}
       	bell.draw(dc);
     } 
+    
+    // Draw a mountain like vector
+    function drawMountain(posX, posY, dc) {
+    	dc.setPenWidth(2);
+    	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
+    	dc.drawLine(posX + 1, posY + 14, posX + 5, posY + 7);
+    	dc.drawLine(posX + 5, posY + 7, posX + 7, posY + 10);
+    	dc.drawLine(posX + 7, posY + 10, posX + 11, posY + 2);
+    	dc.drawLine(posX + 11, posY + 2, posX + 20, posY + 15);
+    }
+    
+    function drawSun(posX, posY, dc, up) {
+    	var radius = 8;
+    	var penWidth = 2;
+    	dc.setPenWidth(penWidth);
+    	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
+    	dc.fillCircle(posX, posY, radius);
+    	dc.drawLine(posX - 12, posY + 1 , posX + 14, posY + 1);
+    	
+    	// arrow down
+    	dc.drawLine(posX, posY - (radius * 2), posX, posY - (radius * 2) + 8);
+    	if (up) {
+    		dc.drawLine(posX, posY - (radius * 2) + 7, posX + 6, posY - (radius * 2) + 3);
+    		dc.drawLine(posX, posY - (radius * 2) + 7, posX - 6, posY - (radius * 2) + 3);
+    	} else {
+    		dc.drawLine(posX, posY - (radius * 2), posX + 6, posY - (radius * 2) + 3);
+    		dc.drawLine(posX, posY - (radius * 2), posX - 6, posY - (radius * 2) + 3);
+    	}
+    	
+    	// beams
+    	dc.drawLine(posX - 7, posY - radius - 1, posX - radius - 2, posY - radius - 3);
+    	dc.drawLine(posX + 7, posY - radius - 1, posX + radius + 2, posY - radius - 3);
+		dc.drawLine(posX - 10, posY - radius + 4, posX - radius - 5, posY - radius + 2);
+		dc.drawLine(posX + 10, posY - radius + 4, posX + radius + 5, posY - radius + 2);
+    	
+    	// hide second half of sun
+    	dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+    	dc.fillRectangle(posX - radius - 1, posY + penWidth, (radius * 2) + (penWidth * 2), radius);
+    }
     
     // Draw BT connection status
     function drawBtConnection(dc) {
