@@ -16,6 +16,13 @@
     </setting>
     -->
     
+    <setting propertyKey="@Properties.Opt1" title="@Strings.Opt1Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.MoonPhase</listEntry>
+            <listEntry value="1">@Strings.SunsetSunrise</listEntry>
+        </settingConfig>
+    </setting>
+    
     <setting propertyKey="@Properties.DateFormat" title="@Strings.DateFormatTitle">
         <settingConfig type="list">
             <listEntry value="1">@Strings.DateFormat1</listEntry>
@@ -28,22 +35,55 @@
     <setting propertyKey="@Properties.DaylightProgess" title="@Strings.DaylightProgessTitle">
         <settingConfig type="list">
             <listEntry value="0x000000">@Strings.ColorBlack</listEntry>
-            <listEntry value="0x0000FF">@Strings.ColorBlue</listEntry>
+            <listEntry value="0x00AAFF">@Strings.ColorBlue</listEntry>
             <listEntry value="0xFF0000">@Strings.ColorRed</listEntry>
             <listEntry value="0xFFFFFF">@Strings.ColorWhite</listEntry>
-            <listEntry value="0xFFFF00">@Strings.ColorYellow</listEntry>
+            <listEntry value="0xFFFF00">@Strings.ColorYellow</listEntry>            
+            <listEntry value="0xAAAAAA">@Strings.ColorLightGrey</listEntry>            
+            <listEntry value="0x555555">@Strings.ColorDarkGrey</listEntry>            
+            <listEntry value="0xFF5500">@Strings.ColorOrange</listEntry>            
+            <listEntry value="0x00FF00">@Strings.ColorGreen</listEntry>            
+            <listEntry value="0x00AA00">@Strings.ColorDarkGreen</listEntry>                      
+            <listEntry value="0x0000FF">@Strings.ColorDarkBlue</listEntry>            
+            <listEntry value="0xFF00FF">@Strings.ColorPink</listEntry>
+        </settingConfig>
+    </setting>
+    
+    <setting propertyKey="@Properties.DaylightProgessWidth" title="@Strings.DaylightProgessWidthTitle">
+        <settingConfig type="list">
+            <listEntry value="6">@Strings.width6</listEntry>
+            <listEntry value="8">@Strings.width8</listEntry>
+            <listEntry value="10">@Strings.width10</listEntry>
+            <listEntry value="12">@Strings.width12</listEntry>
         </settingConfig>
     </setting>
     
     <setting propertyKey="@Properties.CurrentTimePointer" title="@Strings.CurrentTimePointerTitle">
         <settingConfig type="list">
             <listEntry value="0x000000">@Strings.ColorBlack</listEntry>
-            <listEntry value="0x0000FF">@Strings.ColorBlue</listEntry>
+            <listEntry value="0x00AAFF">@Strings.ColorBlue</listEntry>
             <listEntry value="0xFF0000">@Strings.ColorRed</listEntry>
             <listEntry value="0xFFFFFF">@Strings.ColorWhite</listEntry>
-            <listEntry value="0xFFFF00">@Strings.ColorYellow</listEntry>
+            <listEntry value="0xFFFF00">@Strings.ColorYellow</listEntry>            
+            <listEntry value="0xAAAAAA">@Strings.ColorLightGrey</listEntry>            
+            <listEntry value="0x555555">@Strings.ColorDarkGrey</listEntry>            
+            <listEntry value="0xFF5500">@Strings.ColorOrange</listEntry>            
+            <listEntry value="0x00FF00">@Strings.ColorGreen</listEntry>            
+            <listEntry value="0x00AA00">@Strings.ColorDarkGreen</listEntry>                        
+            <listEntry value="0x0000FF">@Strings.ColorDarkBlue</listEntry>            
+            <listEntry value="0xFF00FF">@Strings.ColorPink</listEntry>
+        </settingConfig> 
+    </setting>
+    
+    <setting propertyKey="@Properties.CurrentTimePointerWidth" title="@Strings.CurrentTimePointerWidthTitle">
+        <settingConfig type="list">
+            <listEntry value="12">@Strings.width12</listEntry>
+            <listEntry value="14">@Strings.width14</listEntry>
+            <listEntry value="16">@Strings.width16</listEntry>
+            <listEntry value="18">@Strings.width18</listEntry>
         </settingConfig>
     </setting>
+    
 
     <setting propertyKey="@Properties.UseMilitaryFormat" title="@Strings.MilitaryFormatTitle">
         <settingConfig type="boolean" />

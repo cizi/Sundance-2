@@ -16,9 +16,7 @@ class SundanceView extends WatchUi.WatchFace {
 	// pictures
 	hidden var imgBg;
 	hidden var moonPhase;
-	hidden var stepsPic;
 	hidden var bell;
-	hidden var bt;
 	
 	// others
 	hidden var settings;
@@ -31,13 +29,6 @@ class SundanceView extends WatchUi.WatchFace {
     
     function initialize() {    
         WatchFace.initialize();
-        
-        stepsPic = new WatchUi.Bitmap({
-            :rezId=>Rez.Drawables.Steps,
-            :locX=>54,
-            :locY=>166
-        });
-
         app = Application.getApp();
     }
 
@@ -45,36 +36,22 @@ class SundanceView extends WatchUi.WatchFace {
     function onLayout(dc) {
         setLayout(Rez.Layouts.WatchFace(dc));     
         
-        if (dc.getWidth() == 240) {	// FENIX 5
-        	if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-		        imgBg = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.Bg240,
-		            :locX=>0,
-		            :locY=>0
-		        });  
-	        } else {
-	        	/* imgBg = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.BgInvert240,
-		            :locX=>0,
-		            :locY=>0
-		        }); */
-	        }
+    	// if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
+        imgBg = new WatchUi.Bitmap({
+            :rezId=>Rez.Drawables.Bg,
+            :locX=>0,
+            :locY=>0
+        });      
         
-        } else {
-        	if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-		        imgBg = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.Bg,
-		            :locX=>0,
-		            :locY=>0
-		        });
-	        } else {
-	        	/* imgBg = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.BgInvert,
-		            :locX=>0,
-		            :locY=>0
-		        }); */
-	        }
-        }  
+        //} else {
+        	/* imgBg = new WatchUi.Bitmap({
+	            :rezId=>Rez.Drawables.BgInvert,
+	            :locX=>0,
+	            :locY=>0
+	        }); 
+        } */
+        
+        
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -88,15 +65,16 @@ class SundanceView extends WatchUi.WatchFace {
     	// Call the parent onUpdate function to redraw the layout
         View.onUpdate(dc);
         settings = System.getDeviceSettings();
-
-       	imgBg.draw(dc);
-       	
-      	drawMountain(94, 191, dc);
-      	drawSun(130, 180, dc, true);
+      
+      	imgBg.draw(dc);
+     	drawMountain(94, 191, dc);      	
       	
       	drawBattery(dc);
-      	// drawBell(dc);
+      	drawBell(dc);
       	drawBtConnection(dc);
+      	drawNotification(dc);
+      	
+      	drawSteps(54, 180, dc);
       	
         // Get the current time and format it correctly
         var timeFormat = "$1$:$2$";
@@ -128,24 +106,18 @@ class SundanceView extends WatchUi.WatchFace {
         var date = View.findDrawableById("DateLabel");        
         date.setText(dateString);
         dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-        date.draw(dc);
+        date.draw(dc);      
         
-        today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-        var moonPhaseNr = getMoonPhase(today.year, today.month, today.day);
-        drawMoonPhase(dc, moonPhaseNr);
+        // Moon phase is requireds 
+        if (Application.getApp().getProperty("Opt1") == 0) {	
+        	today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+        	drawMoonPhase(dc, getMoonPhase(today.year, today.month, today.day));
+        }
         
         var alt = View.findDrawableById("Altitude");
         alt.setText(getAltitude());
         dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-        alt.draw(dc);   
-        
-        var info = ActivityMonitor.getInfo();
-        stepsPic.draw(dc);
-        var stepsId = View.findDrawableById("TodaySteps");
-        stepsId.setText(info.steps.toString()); // + "/" + info.stepGoal.toString());
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-        stepsId.draw(dc);
-            
+        alt.draw(dc);
         
         // Get today's sunrise/sunset times in current time zone.
         var location = Activity.getActivityInfo().currentLocation;
@@ -171,24 +143,58 @@ class SundanceView extends WatchUi.WatchFace {
         
         if (gLocationLat != null) {
         	var sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ false);
-			// System.println(sunTimes[0]);
-			// System.println(sunTimes[1]);
+        	// System.println(sunTimes[0]);
+        	
+			if ((sunTimes[0] != null) && (sunTimes[1] != null)) {      	
+	        	if (Application.getApp().getProperty("Opt1")) {	// sunset / sunrise is wanted by setting
+	        		var nextSunEvent = 0;
+
+					// Convert to same format as sunTimes, for easier comparison. Add a minute, so that e.g. if sun rises at
+					// 07:38:17, then 07:38 is already consided daytime (seconds not shown to user).
+					var now = today.hour + ((today.min + 1) / 60.0);
+	        	
+	        		// Before sunrise today: today's sunrise is next.
+					if (now < sunTimes[0]) {
+						nextSunEvent = sunTimes[0];
+						drawSun(105, 60, dc, false);
+					// After sunrise today, before sunset today: today's sunset is next.
+					} else if (now < sunTimes[1]) {
+						nextSunEvent = sunTimes[1];
+						drawSun(105, 60, dc, true);
+					// After sunset today: tomorrow's sunrise (if any) is next.
+					} else {
+						sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ true);
+						nextSunEvent = sunTimes[0];
+						drawSun(105, 60, dc, false);
+					}        		
+	      	
+			      	var sunTime = View.findDrawableById("SunTimes");		      	
+			      	var hour = Math.floor(nextSunEvent).toLong() % 24;
+					var min = Math.floor((nextSunEvent - Math.floor(nextSunEvent)) * 60);
+					var value = getFormattedTime(hour, min); // App.getApp().getFormattedTime(hour, min);
+					value = value[:hour] + ":" + value[:min] + value[:amPm]; 
+			      	
+			        sunTime.setText(value);
+			        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+			        sunTime.draw(dc);
+	        	}
 			
-			dc.setPenWidth(6);
-			var halfWidth=dc.getWidth() / 2;
-			var rLocal=halfWidth - 2;
-			var lineStart = 270 - (sunTimes[0] * 15);
-			var lineEnd = 270 - (sunTimes[1] * 15);
-			dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
-			dc.drawArc(halfWidth, halfWidth, rLocal, Graphics.ARC_CLOCKWISE, lineStart, lineEnd);
+				dc.setPenWidth(Application.getApp().getProperty("DaylightProgessWidth"));
+				var halfWidth=dc.getWidth() / 2;
+				var rLocal=halfWidth - 2;
+				var lineStart = 270 - (sunTimes[0] * 15);
+				var lineEnd = 270 - (sunTimes[1] * 15);
+				dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
+				dc.drawArc(halfWidth, halfWidth, rLocal, Graphics.ARC_CLOCKWISE, lineStart, lineEnd);
 			
-			dc.setPenWidth(15);
-			var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
-			var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
-			var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder 
-			dc.setColor(Application.getApp().getProperty("CurrentTimePointer"), Application.getApp().getProperty("BackgroundColor"));
-			dc.drawArc(halfWidth, halfWidth, rLocal - 3, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
-        }
+				dc.setPenWidth(15);
+				var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
+				var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
+				var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder 
+				dc.setColor(Application.getApp().getProperty("CurrentTimePointer"), Application.getApp().getProperty("BackgroundColor"));
+				dc.drawArc(halfWidth, halfWidth, rLocal - 3, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);			
+        	}
+    	}
     }
 
     // Called when this View is removed from the screen. Save the
@@ -249,6 +255,7 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.drawLine(posX + 11, posY + 2, posX + 20, posY + 15);
     }
     
+    // Draw sunset or sunrice image 
     function drawSun(posX, posY, dc, up) {
     	var radius = 8;
     	var penWidth = 2;
@@ -257,12 +264,12 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.fillCircle(posX, posY, radius);
     	dc.drawLine(posX - 12, posY + 1 , posX + 14, posY + 1);
     	
-    	// arrow down
+    	// arrow up
     	dc.drawLine(posX, posY - (radius * 2), posX, posY - (radius * 2) + 8);
     	if (up) {
     		dc.drawLine(posX, posY - (radius * 2) + 7, posX + 6, posY - (radius * 2) + 3);
     		dc.drawLine(posX, posY - (radius * 2) + 7, posX - 6, posY - (radius * 2) + 3);
-    	} else {
+    	} else {	// arrow down
     		dc.drawLine(posX, posY - (radius * 2), posX + 6, posY - (radius * 2) + 3);
     		dc.drawLine(posX, posY - (radius * 2), posX - 6, posY - (radius * 2) + 3);
     	}
@@ -278,40 +285,41 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.fillRectangle(posX - radius - 1, posY + penWidth, (radius * 2) + (penWidth * 2), radius);
     }
     
+    // Draw steps image
+    function drawSteps(posX, posY, dc) {
+    	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
+    	dc.fillCircle(posX, posY, 2);	// left bottom
+    	dc.fillCircle(posX, posY-8, 3); // left middle
+    	dc.fillCircle(posX, posY-10, 3); // left top
+    	
+    	dc.fillCircle(posX+12, posY-4, 2);	// right bottom
+    	dc.fillCircle(posX+12, posY-12, 3); // right middle
+    	dc.fillCircle(posX+12, posY-14, 3); // right top
+    	
+    	var info = ActivityMonitor.getInfo();
+        var stepsId = View.findDrawableById("TodaySteps");
+        stepsId.setText(info.steps.toString()); // + "/" + info.stepGoal.toString());
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+        stepsId.draw(dc);
+    }
+    
     // Draw BT connection status
     function drawBtConnection(dc) {
     	if ((settings has : phoneConnected) && (settings.phoneConnected)) {
-      		if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-	  			bt = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.Bt,
-		            :locX=>122,
-		            :locY=>210
-		        }); 
-      		} else {
-      			bt = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.BtInvert,
-		            :locX=>122,
-		            :locY=>210
-		        }); 
-	        }
-  		} else {
-  			if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-  				bt = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.BtInvert,
-		            :locX=>122,
-		            :locY=>210
-		        });		 
-      		} else {
-      			bt = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.Bt,
-		            :locX=>122,
-		            :locY=>210
-		        });  		
-      		}
-      	}
-      	bt.draw(dc);
+    		dc.setColor(Graphics.COLOR_BLUE, Application.getApp().getProperty("BackgroundColor"));
+       		dc.fillCircle(121, 217, 5);	
+   		}
     }
     
+    // Draw notification alarm
+    function drawNotification(dc) {
+    	if ((settings has : notificationCount) && (settings.notificationCount)) {
+    		dc.setColor(Graphics.COLOR_RED, Application.getApp().getProperty("BackgroundColor"));
+       		dc.fillCircle(136, 217, 5);	
+   		} 
+    }
+    
+    // Returns formated date by settings
     function getFormatedDate() {
     	var ret = "";
     	if (Application.getApp().getProperty("DateFormat") <= 3) {
@@ -352,21 +360,13 @@ class SundanceView extends WatchUi.WatchFace {
 	    }
 	
 	    ++month;
-	
 	    c = 365.25 * year;  
-	
 	    e = 30.6 * month;
-		
 	    jd = c + e + day - 694039.09; //jd is total days elapsed
-	
 	    jd /= 29.5305882; //divide by the moon cycle	
-	      
 	    b = jd.toNumber(); //int(jd) -> b, take integer part of jd
-	
 	    jd -= b; //subtract integer part to leave fractional part of original jd
-		
 	    b = Math.round(jd * 8).abs(); //scale fraction from 0-8 and round
-	
 	    if (b >= 8 ) {
 	        b = 0; //0 and 8 are the same so turn 8 into 0
 	    }
@@ -443,10 +443,10 @@ class SundanceView extends WatchUi.WatchFace {
       	dc.drawRectangle(batStartX, batteryStartY, batteryWidth, 13);	// battery
  		dc.drawRectangle(batStartX + batteryWidth, batteryStartY + 4, 2, 5);	// battery top
  		var batteryColor = Graphics.COLOR_GREEN;
- 		if (System.getSystemStats().battery <= 35) {
- 			batteryColor = Graphics.COLOR_ORANGE;
- 		} else if (System.getSystemStats().battery <= 10) {
+ 		if (System.getSystemStats().battery <= 10) {
  			batteryColor = Graphics.COLOR_RED;
+ 		} else if (System.getSystemStats().battery <= 35) {
+ 			batteryColor = Graphics.COLOR_ORANGE;
  		}
  		
  		dc.setColor(batteryColor, Application.getApp().getProperty("BackgroundColor"));
@@ -460,6 +460,7 @@ class SundanceView extends WatchUi.WatchFace {
         bat.draw(dc);
 	}
 	
+	// Returns altitude info with units
 	function getAltitude() {
 		// Note that Activity::Info.altitude is supported by CIQ 1.x, but elevation history only on select CIQ 2.x
 		// devices.
@@ -602,5 +603,36 @@ class SundanceView extends WatchUi.WatchFace {
 			/* localRise */ (deltaJRise * 24) + tzOffset,
 			/* localSet */ (deltaJSet * 24) + tzOffset
 		];
+	}
+	
+	// Return a formatted time dictionary that respects is24Hour settings.
+	// - hour: 0-23.
+	// - min:  0-59.
+	function getFormattedTime(hour, min) {
+		var amPm = "";
+
+		if (!System.getDeviceSettings().is24Hour) {
+			// #6 Ensure noon is shown as PM.
+			var isPm = (hour >= 12);
+			if (isPm) {				
+				// But ensure noon is shown as 12, not 00.
+				if (hour > 12) {
+					hour = hour - 12;
+				}
+				amPm = "p";
+			} else {				
+				// #27 Ensure midnight is shown as 12, not 00.
+				if (hour == 0) {
+					hour = 12;
+				}
+				amPm = "a";
+			}
+		}
+
+		return {
+			:hour => hour,
+			:min => min.format("%02d"),
+			:amPm => amPm
+		};
 	}
 }
