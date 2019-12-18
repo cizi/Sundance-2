@@ -14,7 +14,7 @@ using Toybox.Application;
 class SundanceView extends WatchUi.WatchFace {
 	
 	// pictures
-	hidden var imgBg;
+	// hidden var imgBg;
 	hidden var moonPhase;
 	hidden var bell;
 	
@@ -37,11 +37,11 @@ class SundanceView extends WatchUi.WatchFace {
         setLayout(Rez.Layouts.WatchFace(dc));     
         
     	// if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-        imgBg = new WatchUi.Bitmap({
+        /* imgBg = new WatchUi.Bitmap({
             :rezId=>Rez.Drawables.Bg,
             :locX=>0,
             :locY=>0
-        });      
+        });  */    
         
         //} else {
         	/* imgBg = new WatchUi.Bitmap({
@@ -66,8 +66,9 @@ class SundanceView extends WatchUi.WatchFace {
         View.onUpdate(dc);
         settings = System.getDeviceSettings();
       
-      	imgBg.draw(dc);
-     	drawMountain(94, 191, dc);      	
+      	//imgBg.draw(dc);
+      	drawDial(dc);
+     	drawMountain(94, 191, dc);
       	
       	drawBattery(dc);
       	drawBell(dc);
@@ -244,6 +245,45 @@ class SundanceView extends WatchUi.WatchFace {
       	}
       	bell.draw(dc);
     } 
+    
+    // Draw the master dial 
+    function drawDial(dc) {
+    	// this part is draw the net over all display
+    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+      	dc.setPenWidth(2);
+      	var halfScreen = dc.getWidth() / 2;
+      	var pointX = 0;
+      	var pointY = 0;
+      	var angleDeg = 0;
+      	for(var angle = 0; angle < 360; angle+=15) {
+	      	if ((angle != 0) && (angle != 90) && (angle != 180) && (angle != 270)) {
+	      		angleDeg = (angle * Math.PI) / 180;
+	      		pointX = ((halfScreen * Math.cos(angleDeg)) + halfScreen);
+	      		pointY = ((halfScreen * Math.sin(angleDeg)) + halfScreen);	      
+	      		dc.drawLine(halfScreen, halfScreen, pointX, pointY); 
+      		}
+      	}
+      	// hide the middle of the net to shows just pieces on the edge of the screen
+      	dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));     	
+      	dc.drawCircle(halfScreen, halfScreen, halfScreen - 1);
+      	dc.fillCircle(halfScreen, halfScreen, halfScreen - 8);
+      	
+      	// draw the master pieces in 24, 12, 6, 18 hours point
+      	var masterPointLen = 12;
+      	var masterPointWid = 4; 
+      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
+      	dc.setPenWidth(masterPointWid);
+      	dc.drawLine(halfScreen, 0, halfScreen, masterPointLen);
+      	dc.drawLine(halfScreen, dc.getWidth(), halfScreen, dc.getWidth() - masterPointLen); 
+      	dc.drawLine(0, halfScreen - (masterPointWid / 2), masterPointLen, halfScreen - (masterPointWid / 2)); 
+      	dc.drawLine(dc.getWidth(), halfScreen - (masterPointWid / 2), dc.getWidth() - masterPointLen, halfScreen - (masterPointWid / 2)); 
+    
+    	// numbers
+    	dc.drawText(halfScreen, 8, Graphics.FONT_TINY, "12", Graphics.TEXT_JUSTIFY_CENTER);	// 12
+    	dc.drawText(dc.getWidth() - 16, halfScreen - 18, Graphics.FONT_TINY, "18", Graphics.TEXT_JUSTIFY_RIGHT);	// 18
+    	dc.drawText(halfScreen, dc.getHeight() - 40, Graphics.FONT_TINY, "24", Graphics.TEXT_JUSTIFY_CENTER);	// 24
+    	dc.drawText(16, halfScreen - 18, Graphics.FONT_TINY, "09", Graphics.TEXT_JUSTIFY_LEFT);	// 09
+    }
     
     // Draw a mountain like vector
     function drawMountain(posX, posY, dc) {
