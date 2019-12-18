@@ -14,8 +14,6 @@ using Toybox.Application;
 class SundanceView extends WatchUi.WatchFace {
 	
 	// pictures
-	// hidden var imgBg;
-	hidden var moonPhase;
 	hidden var bell;
 	
 	// others
@@ -416,57 +414,37 @@ class SundanceView extends WatchUi.WatchFace {
 	
 	// Draw a moon by phase
 	function drawMoonPhase(dc, phase) {
-		var xPos = (dc.getWidth() / 2) - 10;
-        var yPos = 43;
-		moonPhase = new WatchUi.Bitmap({
-	        :rezId	=> Rez.Drawables.MP0,
-	        :locX	=> xPos,
-	        :locY	=> yPos
-	    });        
-        if (phase == 1) {
-			moonPhase = new WatchUi.Bitmap({
-	            :rezId	=> Rez.Drawables.MP1,
-	            :locX	=> xPos,
-	            :locY	=> yPos
-	        }); 
-		} else if (phase == 2) {
-			moonPhase = new WatchUi.Bitmap({
-	            :rezId	=> Rez.Drawables.MP2,
-	            :locX	=> xPos,
-	            :locY	=> yPos
-	        }); 
-		} else if (phase == 3) {
-			moonPhase = new WatchUi.Bitmap({
-	            :rezId	=> Rez.Drawables.MP3,
-	            :locX	=> xPos,
-	            :locY	=> yPos
-	        }); 
-		} else if (phase == 4) {
-			moonPhase = new WatchUi.Bitmap({
-	            :rezId	=> Rez.Drawables.MP4,
-	            :locX	=> xPos,
-	            :locY	=> yPos
-	        });
-		} else if (phase == 5) {
-			moonPhase = new WatchUi.Bitmap({
-	            :rezId	=> Rez.Drawables.MP5,
-	            :locX	=> xPos,
-	            :locY	=> yPos
-	        }); 
-		} else if (phase == 6) {
-			moonPhase = new WatchUi.Bitmap({
-	            :rezId	=> Rez.Drawables.MP6,
-	            :locX	=> xPos,
-	            :locY	=> yPos
-	        }); 
-		} else if (phase == 7) {
-			moonPhase = new WatchUi.Bitmap({
-	            :rezId	=> Rez.Drawables.MP7,
-	            :locX	=> xPos,
-	            :locY	=> yPos
-	        }); 
-		}
-        moonPhase.draw(dc); 
+		var xPos = (dc.getWidth() / 2);
+        var yPos = (dc.getHeight() / 5).toNumber(); //43;
+        var radius = 9;
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+        if (phase == 0) {
+	        dc.setPenWidth(2);
+        	dc.drawCircle(xPos, yPos, radius);
+        } else {
+        	dc.fillCircle(xPos, yPos, radius);
+        	if (phase == 1) {
+        		dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+        		dc.fillCircle(xPos - 5, yPos, radius);			
+			} else if (phase == 2) {
+				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+        		dc.fillRectangle(xPos - radius, yPos - radius, radius, (radius * 2) + 2);		
+			} else if (phase == 3) {
+				dc.setPenWidth(8);
+				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+				dc.drawArc(xPos + 5, yPos, radius + 5, Graphics.ARC_CLOCKWISE, 270, 90);
+			} else if (phase == 5) {
+				dc.setPenWidth(8);
+				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+				dc.drawArc(xPos - 5, yPos, radius + 5, Graphics.ARC_CLOCKWISE, 90, 270);				
+			} else if (phase == 6) {
+				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+        		dc.fillRectangle(xPos + (radius / 2) - 3, yPos - radius, radius, (radius * 2) + 2);
+			} else if (phase == 7) {
+				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+        		dc.fillCircle(xPos + 5, yPos, radius);	
+			}      	
+        }
 	}
 	
 	// Draw battery witch % state
