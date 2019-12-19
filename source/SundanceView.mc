@@ -268,7 +268,22 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.drawText(halfScreen, 8, Graphics.FONT_TINY, "12", Graphics.TEXT_JUSTIFY_CENTER);	// 12
     	dc.drawText(dc.getWidth() - 16, halfScreen - 18, Graphics.FONT_TINY, "18", Graphics.TEXT_JUSTIFY_RIGHT);	// 18
     	dc.drawText(halfScreen, dc.getHeight() - 40, Graphics.FONT_TINY, "24", Graphics.TEXT_JUSTIFY_CENTER);	// 24
-    	dc.drawText(16, halfScreen - 18, Graphics.FONT_TINY, "09", Graphics.TEXT_JUSTIFY_LEFT);	// 09
+    	dc.drawText(16, halfScreen - 18, Graphics.FONT_TINY, "06", Graphics.TEXT_JUSTIFY_LEFT);	// 06
+    	
+    	// numbers
+    	drawNrDial(dc);
+    }
+    
+    // Draw numbers in the dial
+    function drawNrDial(dc) {
+    	var halfWidth = dc.getWidth() / 2;
+    	var haldHeight = dc.getHeight() / 2;
+    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
+    	
+    	// 9
+    	var fnt09 = WatchUi.loadResource(Rez.Fonts.fntSd09);
+    	dc.drawText(46, 43, fnt09, "0", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(53, 37, fnt09, "9", Graphics.TEXT_JUSTIFY_CENTER);
     }
     
     // Draw sunset or sunrice image 

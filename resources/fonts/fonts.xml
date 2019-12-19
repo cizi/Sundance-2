@@ -1,3 +1,4 @@
 <fonts>
 	<font id="fntMonsterTwenty" filename="monster_twenty.fnt" filter="0123456789:" />
+	<font id="fntSd09" filename="sd09.fnt" filter="09" />
 </fonts>
