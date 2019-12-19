@@ -2,6 +2,4 @@
     <bitmap id="LauncherIcon" filename="launcher_icon.png" />
     <bitmap id="Bg" filename="images/bg.png" />
     <!-- <bitmap id="BgInvert" filename="images/bg_invert.png" /> -->
-    <bitmap id="Bell" filename="images/bell.png" />
-    <bitmap id="BellInvert" filename="images/bell_invert.png" />
 </drawables>

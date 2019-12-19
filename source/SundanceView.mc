@@ -13,10 +13,7 @@ using Toybox.Application;
 
 class SundanceView extends WatchUi.WatchFace {
 	
-	// pictures
-	hidden var bell;
-	
-	// others
+		// others
 	hidden var settings;
 	hidden var app;
 	
@@ -66,14 +63,17 @@ class SundanceView extends WatchUi.WatchFace {
       
       	//imgBg.draw(dc);
       	drawDial(dc);
-     	drawMountain(94, 191, dc);
+      	
+     	drawAltitude(dc);
       	
       	drawBattery(dc);
       	drawBell(dc);
       	drawBtConnection(dc);
       	drawNotification(dc);
       	
-      	drawSteps(54, 180, dc);
+      	var xPos = (dc.getWidth() / 5) + 2; // 54
+      	var yPos = (dc.getHeight() / 13) * 9; // 180
+      	drawSteps(xPos, yPos, dc);
       	
         // Get the current time and format it correctly
         var timeFormat = "$1$:$2$";
@@ -111,12 +111,7 @@ class SundanceView extends WatchUi.WatchFace {
         if (Application.getApp().getProperty("Opt1") == 0) {	
         	today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
         	drawMoonPhase(dc, getMoonPhase(today.year, today.month, today.day));
-        }
-        
-        var alt = View.findDrawableById("Altitude");
-        alt.setText(getAltitude());
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-        alt.draw(dc);
+        }        
         
         // Get today's sunrise/sunset times in current time zone.
         var location = Activity.getActivityInfo().currentLocation;
@@ -213,35 +208,28 @@ class SundanceView extends WatchUi.WatchFace {
     // Will draw bell if is alarm set
     function drawBell(dc) {
     	if (settings.alarmCount > 0) {
-      		if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-	  			bell = new WatchUi.Bitmap({
-			            :rezId=>Rez.Drawables.Bell,
-			            :locX=>122,
-			            :locY=>167
-			        }); 
-      		} else {
-      			bell = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.BellInvert,
-		            :locX=>122,
-		            :locY=>167
-		        }); 
-	        }
-  		} else {
-  			if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-  				bell = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.BellInvert,
-		            :locX=>122,
-		            :locY=>167
-		        });		 
-      		} else {
-      			bell = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.Bell,
-		            :locX=>122,
-		            :locY=>167
-		        });  		
-      		}
+    		var xPos = dc.getWidth() / 2;
+    		var yPos = ((dc.getHeight() / 6).toNumber() * 4) + 2;
+    		dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+    		dc.fillCircle(xPos, yPos, 8);
+    	
+    		// stands
+    		dc.setPenWidth(3);	
+    		dc.drawLine(xPos - 6, yPos, xPos - 8, yPos + 8);
+    		dc.drawLine(xPos + 6, yPos, xPos + 8, yPos + 8);
+    		
+    		dc.setPenWidth(2);	
+    		dc.drawLine(xPos - 4, yPos - 9, xPos - 9, yPos - 4);
+    		dc.drawLine(xPos + 5, yPos - 9, xPos + 10, yPos - 4);
+    		
+    		dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+    		dc.fillCircle(xPos, yPos, 6);
+    		
+    		// hands
+    		dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+    		dc.drawLine(xPos, yPos, xPos, yPos - 5);
+    		dc.drawLine(xPos, yPos, xPos - 2, yPos + 4);
       	}
-      	bell.draw(dc);
     } 
     
     // Draw the master dial 
@@ -283,16 +271,6 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.drawText(16, halfScreen - 18, Graphics.FONT_TINY, "09", Graphics.TEXT_JUSTIFY_LEFT);	// 09
     }
     
-    // Draw a mountain like vector
-    function drawMountain(posX, posY, dc) {
-    	dc.setPenWidth(2);
-    	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
-    	dc.drawLine(posX + 1, posY + 14, posX + 5, posY + 7);
-    	dc.drawLine(posX + 5, posY + 7, posX + 7, posY + 10);
-    	dc.drawLine(posX + 7, posY + 10, posX + 11, posY + 2);
-    	dc.drawLine(posX + 11, posY + 2, posX + 20, posY + 15);
-    }
-    
     // Draw sunset or sunrice image 
     function drawSun(posX, posY, dc, up) {
     	var radius = 8;
@@ -325,6 +303,9 @@ class SundanceView extends WatchUi.WatchFace {
     
     // Draw steps image
     function drawSteps(posX, posY, dc) {
+    	if (dc.getWidth() == 280) {	// FENIX 6X correction
+      		posX -= 10;
+      	}
     	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
     	dc.fillCircle(posX, posY, 2);	// left bottom
     	dc.fillCircle(posX, posY-8, 3); // left middle
@@ -335,17 +316,15 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.fillCircle(posX+12, posY-14, 3); // right top
     	
     	var info = ActivityMonitor.getInfo();
-        var stepsId = View.findDrawableById("TodaySteps");
-        stepsId.setText(info.steps.toString()); // + "/" + info.stepGoal.toString());
         dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-        stepsId.draw(dc);
+    	dc.drawText(posX + 22, posY - 16, Graphics.FONT_XTINY, info.steps.toString(), Graphics.TEXT_JUSTIFY_LEFT);
     }
     
     // Draw BT connection status
     function drawBtConnection(dc) {
     	if ((settings has : phoneConnected) && (settings.phoneConnected)) {
     		dc.setColor(Graphics.COLOR_BLUE, Application.getApp().getProperty("BackgroundColor"));
-       		dc.fillCircle(121, 217, 5);	
+       		dc.fillCircle((dc.getWidth() / 2) - 9, dc.getHeight() - 43, 5);	
    		}
     }
     
@@ -353,7 +332,7 @@ class SundanceView extends WatchUi.WatchFace {
     function drawNotification(dc) {
     	if ((settings has : notificationCount) && (settings.notificationCount)) {
     		dc.setColor(Graphics.COLOR_RED, Application.getApp().getProperty("BackgroundColor"));
-       		dc.fillCircle(136, 217, 5);	
+       		dc.fillCircle((dc.getWidth() / 2) + 6, dc.getHeight() - 43, 5);	
    		} 
     }
     
@@ -455,8 +434,11 @@ class SundanceView extends WatchUi.WatchFace {
 		} else {
 	      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
 		}
-      	var batStartX = 151;
-      	var batteryStartY = 168;
+      	var batStartX = (dc.getWidth() / 2) + 21; //151;
+      	var batteryStartY = ((dc.getHeight() / 6).toNumber() * 4) - 5;// 168;
+      	if (dc.getWidth() == 280) {	// FENIX 6X correction
+      		batStartX += 10;
+      	}
       	var batteryWidth = 23;
       	dc.drawRectangle(batStartX, batteryStartY, batteryWidth, 13);	// battery
  		dc.drawRectangle(batStartX + batteryWidth, batteryStartY + 4, 2, 5);	// battery top
@@ -471,11 +453,27 @@ class SundanceView extends WatchUi.WatchFace {
  		var batteryState = ((System.getSystemStats().battery / 10) * 2).toNumber();
  		dc.fillRectangle(batStartX + 1, batteryStartY + 1, batteryState + 1, 11);
  		
- 		var bat = View.findDrawableById("BatteryState");
-        bat.setText(System.getSystemStats().battery.toNumber().toString() + "%");
+ 		// x="180" y="164"
+ 		var batText = System.getSystemStats().battery.toNumber().toString() + "%";
         dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-       
-        bat.draw(dc);
+ 		dc.drawText(batStartX + 29, batteryStartY - 4, Graphics.FONT_XTINY, batText, Graphics.TEXT_JUSTIFY_LEFT);		
+	}
+	
+	function  drawAltitude(dc) {        
+        var xPos = (dc.getWidth() / 13) * 7; // "140" 
+        var yPos = ((dc.getHeight() / 4).toNumber() * 3) - 6;  // "189"
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+        dc.drawText(xPos, yPos, Graphics.FONT_XTINY, getAltitude(), Graphics.TEXT_JUSTIFY_CENTER);
+        
+        // coordinates correction
+        xPos = xPos - 46;
+        yPos = yPos + 2;
+        dc.setPenWidth(2);
+    	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
+    	dc.drawLine(xPos + 1, yPos + 14, xPos + 5, yPos + 7);
+    	dc.drawLine(xPos + 5, yPos + 7, xPos + 7, yPos + 10);
+    	dc.drawLine(xPos + 7, yPos + 10, xPos + 11, yPos + 2);
+    	dc.drawLine(xPos + 11, yPos + 2, xPos + 20, yPos + 15);
 	}
 	
 	// Returns altitude info with units
