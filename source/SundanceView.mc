@@ -280,10 +280,30 @@ class SundanceView extends WatchUi.WatchFace {
     	var haldHeight = dc.getHeight() / 2;
     	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
     	
-    	// 9
+    	// 10
+    	var fnt10 = WatchUi.loadResource(Rez.Fonts.fntSd10);
+    	dc.drawText(70, 23, fnt10, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(78, 19, fnt10, "0", Graphics.TEXT_JUSTIFY_CENTER);
+    	
+    	// 11
+    	var fnt11 = WatchUi.loadResource(Rez.Fonts.fntSd11);
+    	dc.drawText(96, 12, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(104, 10, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    	
+    	// 09
     	var fnt09 = WatchUi.loadResource(Rez.Fonts.fntSd09);
     	dc.drawText(46, 43, fnt09, "0", Graphics.TEXT_JUSTIFY_CENTER);
     	dc.drawText(53, 37, fnt09, "9", Graphics.TEXT_JUSTIFY_CENTER);
+    	
+    	// 08
+    	var fnt08 = WatchUi.loadResource(Rez.Fonts.fntSd08);
+    	dc.drawText(29, 67, fnt08, "0", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(34, 59, fnt08, "8", Graphics.TEXT_JUSTIFY_CENTER);
+    	
+    	// 07
+    	var fnt07 = WatchUi.loadResource(Rez.Fonts.fntSd07);
+    	dc.drawText(19, 95, fnt07, "0", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(22, 86, fnt07, "7", Graphics.TEXT_JUSTIFY_CENTER);
     }
     
     // Draw sunset or sunrice image 
