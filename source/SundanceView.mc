@@ -302,8 +302,8 @@ class SundanceView extends WatchUi.WatchFace {
     	
     	// 07
     	var fnt07 = WatchUi.loadResource(Rez.Fonts.fntSd07);
-    	dc.drawText(19, 95, fnt07, "0", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(22, 86, fnt07, "7", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(20, 95, fnt07, "0", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(23, 86, fnt07, "7", Graphics.TEXT_JUSTIFY_CENTER);
     }
     
     // Draw sunset or sunrice image 
