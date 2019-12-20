@@ -41,6 +41,10 @@
     <string id="width12">12</string> 
     <string id="width14">14</string> 
     <string id="width16">16</string> 
-    <string id="width18">18</string> 
+    <string id="width18">18</string>
+  
     
+    <string id="ShowNotificationAndConnectionTitle">Show connection and mobile event notification</string>   
+    <string id="OptionDisabled">Disabled</string> 
+       
 </strings>

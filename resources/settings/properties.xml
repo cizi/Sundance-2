@@ -11,7 +11,7 @@
     <property id="CurrentTimePointer" type="number">0xFF0000</property>
     <property id="DateFormat" type="number">1</property>
     
-    
+    <property id="ShowNotificationAndConnection" type="boolean">true</property>
     <property id="UseMilitaryFormat" type="boolean">false</property>
 
 </properties>

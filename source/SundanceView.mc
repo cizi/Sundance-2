@@ -68,8 +68,11 @@ class SundanceView extends WatchUi.WatchFace {
       	
       	drawBattery(dc);
       	drawBell(dc);
-      	drawBtConnection(dc);
-      	drawNotification(dc);
+      	
+      	if (Application.getApp().getProperty("ShowNotificationAndConnection")) {
+	      	drawBtConnection(dc);
+	      	drawNotification(dc);      	
+      	}
       	
       	var xPos = (dc.getWidth() / 5) + 2; // 54
       	var yPos = (dc.getHeight() / 13) * 9; // 180
@@ -101,11 +104,13 @@ class SundanceView extends WatchUi.WatchFace {
         dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
         time.draw(dc);
         
-        var dateString = getFormatedDate();
-        var date = View.findDrawableById("DateLabel");        
-        date.setText(dateString);
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-        date.draw(dc);      
+        if (Application.getApp().getProperty("DateFormat") != 5) {
+	        var dateString = getFormatedDate();
+	        var date = View.findDrawableById("DateLabel");        
+	        date.setText(dateString);
+	        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+	        date.draw(dc);      
+        }
         
         // Moon phase is requireds 
         if (Application.getApp().getProperty("Opt1") == 0) {	
@@ -140,7 +145,7 @@ class SundanceView extends WatchUi.WatchFace {
         	// System.println(sunTimes[0]);
         	
 			if ((sunTimes[0] != null) && (sunTimes[1] != null)) {      	
-	        	if (Application.getApp().getProperty("Opt1")) {	// sunset / sunrise is wanted by setting
+	        	if (Application.getApp().getProperty("Opt1") == 1) {	// sunset / sunrise is wanted by setting
 	        		var nextSunEvent = 0;
 
 					// Convert to same format as sunTimes, for easier comparison. Add a minute, so that e.g. if sun rises at
@@ -211,19 +216,19 @@ class SundanceView extends WatchUi.WatchFace {
     		var xPos = dc.getWidth() / 2;
     		var yPos = ((dc.getHeight() / 6).toNumber() * 4) + 2;
     		dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-    		dc.fillCircle(xPos, yPos, 8);
+    		dc.fillCircle(xPos, yPos, 7);
     	
     		// stands
     		dc.setPenWidth(3);	
-    		dc.drawLine(xPos - 6, yPos, xPos - 8, yPos + 8);
-    		dc.drawLine(xPos + 6, yPos, xPos + 8, yPos + 8);
+    		dc.drawLine(xPos - 5, yPos, xPos - 7, yPos + 7);
+    		dc.drawLine(xPos + 5, yPos, xPos + 7, yPos + 7);
     		
     		dc.setPenWidth(2);	
-    		dc.drawLine(xPos - 4, yPos - 9, xPos - 9, yPos - 4);
-    		dc.drawLine(xPos + 5, yPos - 9, xPos + 10, yPos - 4);
+    		dc.drawLine(xPos - 4, yPos - 8, xPos - 9, yPos - 3);
+    		dc.drawLine(xPos + 5, yPos - 8, xPos + 10, yPos - 3);
     		
     		dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
-    		dc.fillCircle(xPos, yPos, 6);
+    		dc.fillCircle(xPos, yPos, 5);
     		
     		// hands
     		dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
