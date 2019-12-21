@@ -16,7 +16,6 @@ class SundanceView extends WatchUi.WatchFace {
 	// pictures
 	hidden var imgBg;
 	hidden var moonPhase;
-	hidden var bell;
 	
 	// others
 	hidden var settings;
@@ -214,35 +213,28 @@ class SundanceView extends WatchUi.WatchFace {
     // Will draw bell if is alarm set
     function drawBell(dc) {
     	if (settings.alarmCount > 0) {
-      		if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-	  			bell = new WatchUi.Bitmap({
-			            :rezId=>Rez.Drawables.Bell,
-			            :locX=>122,
-			            :locY=>167
-			        }); 
-      		} else {
-      			bell = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.BellInvert,
-		            :locX=>122,
-		            :locY=>167
-		        }); 
-	        }
-  		} else {
-  			if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-  				bell = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.BellInvert,
-		            :locX=>122,
-		            :locY=>167
-		        });		 
-      		} else {
-      			bell = new WatchUi.Bitmap({
-		            :rezId=>Rez.Drawables.Bell,
-		            :locX=>122,
-		            :locY=>167
-		        });  		
-      		}
+    		var xPos = dc.getWidth() / 2;
+    		var yPos = ((dc.getHeight() / 6).toNumber() * 4) + 2;
+    		dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+    		dc.fillCircle(xPos, yPos, 7);
+    	
+    		// stands
+    		dc.setPenWidth(3);	
+    		dc.drawLine(xPos - 5, yPos, xPos - 7, yPos + 7);
+    		dc.drawLine(xPos + 5, yPos, xPos + 7, yPos + 7);
+    		
+    		dc.setPenWidth(2);	
+    		dc.drawLine(xPos - 4, yPos - 8, xPos - 9, yPos - 3);
+    		dc.drawLine(xPos + 5, yPos - 8, xPos + 10, yPos - 3);
+    		
+    		dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+    		dc.fillCircle(xPos, yPos, 5);
+    		
+    		// hands
+    		dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+    		dc.drawLine(xPos, yPos, xPos, yPos - 5);
+    		dc.drawLine(xPos, yPos, xPos - 2, yPos + 4);
       	}
-      	bell.draw(dc);
     } 
     
     // Draw a mountain like vector

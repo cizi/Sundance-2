@@ -20,6 +20,7 @@
         <settingConfig type="list">
             <listEntry value="0">@Strings.MoonPhase</listEntry>
             <listEntry value="1">@Strings.SunsetSunrise</listEntry>
+            <listEntry value="2">@Strings.OptionDisabled</listEntry>
         </settingConfig>
     </setting>
     
@@ -29,6 +30,7 @@
             <listEntry value="2">@Strings.DateFormat2</listEntry>
             <listEntry value="3">@Strings.DateFormat3</listEntry>
             <listEntry value="4">@Strings.DateFormat4</listEntry>
+            <listEntry value="5">@Strings.OptionDisabled</listEntry>
         </settingConfig>
     </setting>
 
@@ -84,9 +86,12 @@
         </settingConfig>
     </setting>
     
-
-    <setting propertyKey="@Properties.UseMilitaryFormat" title="@Strings.MilitaryFormatTitle">
+    <setting propertyKey="@Properties.ShowNotificationAndConnection" title="@Strings.ShowNotificationAndConnectionTitle">
         <settingConfig type="boolean" />
     </setting>
+    
+    <setting propertyKey="@Properties.UseMilitaryFormat" title="@Strings.MilitaryFormatTitle">
+        <settingConfig type="boolean" />
+    </setting>   
 
 </settings>
