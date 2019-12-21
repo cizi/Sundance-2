@@ -43,8 +43,12 @@
     <string id="width16">16</string> 
     <string id="width18">18</string>
   
-    
-    <string id="ShowNotificationAndConnectionTitle">Show connection and mobile event notification</string>   
+  	  
+    <string id="ShowStepsTitle">Show today's step counter</string>  
+    <string id="ShowAlarmIndicatorTitle">Show alarm indicator</string>    
+    <string id="ShowBatteryTitle">Show battery state</string>
+    <string id="ShowAltitudeTitle">Show altitude</string>     
+    <string id="ShowNotificationAndConnectionTitle">Show connection and notification indicator</string>   
     <string id="OptionDisabled">Disabled</string> 
        
 </strings>

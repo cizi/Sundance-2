@@ -86,6 +86,22 @@
         </settingConfig>
     </setting>
     
+    <setting propertyKey="@Properties.ShowSteps" title="@Strings.ShowStepsTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    
+    <setting propertyKey="@Properties.AlarmIndicator" title="@Strings.ShowAlarmIndicatorTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    
+    <setting propertyKey="@Properties.ShowBattery" title="@Strings.ShowBatteryTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    
+    <setting propertyKey="@Properties.ShowAltitude" title="@Strings.ShowAltitudeTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    
     <setting propertyKey="@Properties.ShowNotificationAndConnection" title="@Strings.ShowNotificationAndConnectionTitle">
         <settingConfig type="boolean" />
     </setting>

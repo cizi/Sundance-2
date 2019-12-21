@@ -63,11 +63,18 @@ class SundanceView extends WatchUi.WatchFace {
       
       	//imgBg.draw(dc);
       	drawDial(dc);
+      	    	
+      	if (Application.getApp().getProperty("ShowAltitude")) {
+	     	drawAltitude(dc);
+      	}
       	
-     	drawAltitude(dc);
-      	
-      	drawBattery(dc);
-      	drawBell(dc);
+      	if (Application.getApp().getProperty("ShowBattery")) {
+	      	drawBattery(dc);
+      	}
+     	
+      	if (Application.getApp().getProperty("AlarmIndicator")) {
+	      	drawBell(dc);
+      	}
       	
       	if (Application.getApp().getProperty("ShowNotificationAndConnection")) {
 	      	drawBtConnection(dc);
@@ -76,7 +83,10 @@ class SundanceView extends WatchUi.WatchFace {
       	
       	var xPos = (dc.getWidth() / 5) + 2; // 54
       	var yPos = (dc.getHeight() / 13) * 9; // 180
-      	drawSteps(xPos, yPos, dc);
+      	
+      	if (Application.getApp().getProperty("ShowSteps")) {
+	      	drawSteps(xPos, yPos, dc);
+      	}
       	
         // Get the current time and format it correctly
         var timeFormat = "$1$:$2$";
