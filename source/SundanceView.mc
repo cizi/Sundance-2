@@ -224,8 +224,8 @@ class SundanceView extends WatchUi.WatchFace {
     		dc.drawLine(xPos + 5, yPos, xPos + 7, yPos + 7);
     		
     		dc.setPenWidth(2);	
-    		dc.drawLine(xPos - 4, yPos - 8, xPos - 9, yPos - 3);
-    		dc.drawLine(xPos + 5, yPos - 8, xPos + 10, yPos - 3);
+    		dc.drawLine(xPos - 5, yPos - 7, xPos - 9, yPos - 3);
+    		dc.drawLine(xPos + 6, yPos - 7, xPos + 10, yPos - 3);
     		
     		dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
     		dc.fillCircle(xPos, yPos, 5);
