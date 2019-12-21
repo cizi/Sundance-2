@@ -86,6 +86,10 @@
         </settingConfig>
     </setting>
     
+    <setting propertyKey="@Properties.ShowFullDial" title="@Strings.ShowFullDiaTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    
     <setting propertyKey="@Properties.ShowSteps" title="@Strings.ShowStepsTitle">
         <settingConfig type="boolean" />
     </setting>

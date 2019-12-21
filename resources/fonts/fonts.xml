@@ -1,7 +1,7 @@
 <fonts>
-	<font id="fntSd09" filename="sd09.fnt" filter="09" />	
-	<font id="fntSd11" filename="sd11.fnt" filter="1" />
-	<font id="fntSd08" filename="sd08.fnt" filter="08" />
-	<font id="fntSd10" filename="sd10.fnt" filter="10" />
-	<font id="fntSd07" filename="sd07.fnt" filter="07" />
+	<font antialias="true" id="fntSd09" filename="sd09.fnt" filter="09" />	
+	<font antialias="true" id="fntSd11" filename="sd11.fnt" filter="1" />
+	<font antialias="true" id="fntSd08" filename="sd08.fnt" filter="08" />
+	<font antialias="true" id="fntSd10" filename="sd10.fnt" filter="10" />
+	<font antialias="true" id="fntSd07" filename="sd07.fnt" filter="07" />
 </fonts>

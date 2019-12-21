@@ -62,7 +62,10 @@ class SundanceView extends WatchUi.WatchFace {
         settings = System.getDeviceSettings();
       
       	//imgBg.draw(dc);
-      	drawDial(dc);
+      	drawDial(dc);												// main dial  	
+    	if (Application.getApp().getProperty("ShowFullDial")) {		// subdial small numbers
+	    	drawNrDial(dc);
+    	}
       	    	
       	if (Application.getApp().getProperty("ShowAltitude")) {
 	     	drawAltitude(dc);
@@ -284,9 +287,6 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.drawText(dc.getWidth() - 16, halfScreen - 18, Graphics.FONT_TINY, "18", Graphics.TEXT_JUSTIFY_RIGHT);	// 18
     	dc.drawText(halfScreen, dc.getHeight() - 40, Graphics.FONT_TINY, "24", Graphics.TEXT_JUSTIFY_CENTER);	// 24
     	dc.drawText(16, halfScreen - 18, Graphics.FONT_TINY, "06", Graphics.TEXT_JUSTIFY_LEFT);	// 06
-    	
-    	// numbers
-    	drawNrDial(dc);
     }
     
     // Draw numbers in the dial
