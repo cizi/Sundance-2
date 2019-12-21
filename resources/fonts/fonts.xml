@@ -4,4 +4,10 @@
 	<font antialias="true" id="fntSd08" filename="sd08.fnt" filter="08" />
 	<font antialias="true" id="fntSd10" filename="sd10.fnt" filter="10" />
 	<font antialias="true" id="fntSd07" filename="sd07.fnt" filter="07" />
+	
+	<font antialias="true" id="fntSd13" filename="sd13.fnt" filter="13" />
+	<font antialias="true" id="fntSd14" filename="sd14.fnt" filter="14" />
+	<font antialias="true" id="fntSd15" filename="sd15.fnt" filter="15" />
+	<font antialias="true" id="fntSd16" filename="sd16.fnt" filter="16" />
+	<font antialias="true" id="fntSd17" filename="sd17.fnt" filter="17" />
 </fonts>

@@ -1,9 +1,3 @@
 <layout id="WatchFace">
-    <drawable class="Background" />
-    <label id="TimeLabel" x="center" y="center" font="Graphics.FONT_SYSTEM_NUMBER_HOT" justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_WHITE" />
-    <label id="TimeAmPm" x="58" y="82" font="Graphics.FONT_XTINY" justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_WHITE" />
-    
-        <!-- @Fonts.fntMonsterTwenty -->
-    <label id="DateLabel" x="center" y="65" font="Graphics.FONT_TINY" justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_WHITE" />	
-	<label id="SunTimes" x="130" y="45" font="Graphics.FONT_XTINY" justification="Graphics.TEXT_JUSTIFY_LEFT" color="Graphics.COLOR_WHITE" />
+    <drawable class="Background" />	
 </layout>

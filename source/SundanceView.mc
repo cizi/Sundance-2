@@ -92,17 +92,17 @@ class SundanceView extends WatchUi.WatchFace {
       	}
       	
         // Get the current time and format it correctly
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
         var timeFormat = "$1$:$2$";
         var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
         var hours = today.hour;
         if (!System.getDeviceSettings().is24Hour) {
-        	var ampm = View.findDrawableById("TimeAmPm");
-        	ampm.setText("AM");
+        	var ampm = "AM";
             if (hours > 12) {
                 hours = hours - 12;
-                ampm.setText("PM");
-            }
-            ampm.draw(dc);
+                ampm = "PM";
+            }          
+            dc.drawText(58, 82, Graphics.FONT_XTINY, ampm, Graphics.TEXT_JUSTIFY_CENTER);
         } else {
             if (Application.getApp().getProperty("UseMilitaryFormat")) {
                 timeFormat = "$1$$2$";
@@ -110,19 +110,11 @@ class SundanceView extends WatchUi.WatchFace {
             }
         }
         var timeString = Lang.format(timeFormat, [hours, today.min.format("%02d")]);
-
-        // Update the view
-        var time = View.findDrawableById("TimeLabel");
-        time.setText(timeString);
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-        time.draw(dc);
+        dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) -  50, Graphics.FONT_SYSTEM_NUMBER_HOT, timeString, Graphics.TEXT_JUSTIFY_CENTER);
         
         if (Application.getApp().getProperty("DateFormat") != 5) {
 	        var dateString = getFormatedDate();
-	        var date = View.findDrawableById("DateLabel");        
-	        date.setText(dateString);
-	        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-	        date.draw(dc);      
+	        dc.drawText((dc.getWidth() / 2), 65, Graphics.FONT_TINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);    
         }
         
         // Moon phase is requireds 
@@ -179,16 +171,13 @@ class SundanceView extends WatchUi.WatchFace {
 						nextSunEvent = sunTimes[0];
 						drawSun(105, 60, dc, false);
 					}        		
-	      	
-			      	var sunTime = View.findDrawableById("SunTimes");		      	
+	      		      	
 			      	var hour = Math.floor(nextSunEvent).toLong() % 24;
 					var min = Math.floor((nextSunEvent - Math.floor(nextSunEvent)) * 60);
 					var value = getFormattedTime(hour, min); // App.getApp().getFormattedTime(hour, min);
-					value = value[:hour] + ":" + value[:min] + value[:amPm]; 
-			      	
-			        sunTime.setText(value);
-			        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
-			        sunTime.draw(dc);
+					value = value[:hour] + ":" + value[:min] + value[:amPm]; 			      	
+			        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
+			        dc.drawText(130, 45, Graphics.FONT_XTINY, value, Graphics.TEXT_JUSTIFY_LEFT);
 	        	}
 			
 				dc.setPenWidth(Application.getApp().getProperty("DaylightProgessWidth"));
@@ -295,30 +284,40 @@ class SundanceView extends WatchUi.WatchFace {
     	var haldHeight = dc.getHeight() / 2;
     	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
     	
-    	// 10
-    	var fnt10 = WatchUi.loadResource(Rez.Fonts.fntSd10);
-    	dc.drawText(70, 23, fnt10, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(78, 19, fnt10, "0", Graphics.TEXT_JUSTIFY_CENTER);
-    	
     	// 11
     	var fnt11 = WatchUi.loadResource(Rez.Fonts.fntSd11);
-    	dc.drawText(96, 12, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(104, 10, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(97, 13, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(105, 11, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    	
+    	// 10
+    	var fnt10 = WatchUi.loadResource(Rez.Fonts.fntSd10);
+    	dc.drawText(71, 25, fnt10, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(79, 21, fnt10, "0", Graphics.TEXT_JUSTIFY_CENTER);    	
     	
     	// 09
     	var fnt09 = WatchUi.loadResource(Rez.Fonts.fntSd09);
-    	dc.drawText(46, 43, fnt09, "0", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(53, 37, fnt09, "9", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(48, 44, fnt09, "0", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(56, 37, fnt09, "9", Graphics.TEXT_JUSTIFY_CENTER);
     	
     	// 08
     	var fnt08 = WatchUi.loadResource(Rez.Fonts.fntSd08);
-    	dc.drawText(29, 67, fnt08, "0", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(34, 59, fnt08, "8", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(32, 67, fnt08, "0", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(37, 58, fnt08, "8", Graphics.TEXT_JUSTIFY_CENTER);
     	
     	// 07
     	var fnt07 = WatchUi.loadResource(Rez.Fonts.fntSd07);
-    	dc.drawText(20, 95, fnt07, "0", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(23, 86, fnt07, "7", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(23, 95, fnt07, "0", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(25, 84, fnt07, "7", Graphics.TEXT_JUSTIFY_CENTER);
+    	
+    	// 13
+    	var fnt13 = WatchUi.loadResource(Rez.Fonts.fntSd13);
+    	dc.drawText(154, 11, fnt13, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(163, 14, fnt13, "3", Graphics.TEXT_JUSTIFY_CENTER);
+    	
+    	// 14
+    	var fnt14 = WatchUi.loadResource(Rez.Fonts.fntSd14);
+    	dc.drawText(181, 20, fnt14, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    	dc.drawText(190, 27, fnt14, "4", Graphics.TEXT_JUSTIFY_CENTER);   
     }
     
     // Draw sunset or sunrice image 
@@ -366,7 +365,7 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.fillCircle(posX+12, posY-14, 3); // right top
     	
     	var info = ActivityMonitor.getInfo();
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
     	dc.drawText(posX + 22, posY - 16, Graphics.FONT_XTINY, info.steps.toString(), Graphics.TEXT_JUSTIFY_LEFT);
     }
     
@@ -505,14 +504,14 @@ class SundanceView extends WatchUi.WatchFace {
  		
  		// x="180" y="164"
  		var batText = System.getSystemStats().battery.toNumber().toString() + "%";
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
  		dc.drawText(batStartX + 29, batteryStartY - 4, Graphics.FONT_XTINY, batText, Graphics.TEXT_JUSTIFY_LEFT);		
 	}
 	
 	function  drawAltitude(dc) {        
         var xPos = (dc.getWidth() / 13) * 7; // "140" 
         var yPos = ((dc.getHeight() / 4).toNumber() * 3) - 6;  // "189"
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
         dc.drawText(xPos, yPos, Graphics.FONT_XTINY, getAltitude(), Graphics.TEXT_JUSTIFY_CENTER);
         
         // coordinates correction
