@@ -20,11 +20,19 @@ class SundanceView extends WatchUi.WatchFace {
 	// Sunset / sunrise vars
 	hidden var location = null;
 	hidden var gLocationLat = null;
-    hidden var gLocationLng = null ;
+    hidden var gLocationLng = null;
+    
+    hidden var fnt11 = null;
+    hidden var fnt10 = null;
+    hidden var fnt13 = null;
     
     function initialize() {    
         WatchFace.initialize();
         app = Application.getApp();
+        
+        fnt10 = WatchUi.loadResource(Rez.Fonts.fntSd10);
+        fnt11 = WatchUi.loadResource(Rez.Fonts.fntSd11);
+        fnt13 = WatchUi.loadResource(Rez.Fonts.fntSd13);
     }
 
     // Load your resources here
@@ -280,12 +288,50 @@ class SundanceView extends WatchUi.WatchFace {
     
     // Draw numbers in the dial
     function drawNrDial(dc) {
-    	var halfWidth = dc.getWidth() / 2;
-    	var haldHeight = dc.getHeight() / 2;
-    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
+    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);   	
+    	
+       	var angleDeg = 0;
+    	var pointX = 0;
+    	var pointY = 0;
+    	var halfScreen = dc.getWidth() / 2;
+    	var hoursCircle = halfScreen - 15;
+    	var angleToNrCorrection = -6;
+    	for(var nr = 1; nr < 24; nr+=1) {
+	      	if ((nr != 6) && (nr != 12) && (nr != 18)) {
+	      		angleDeg = ((nr * 15) * Math.PI) / 180;
+	      		pointX = ((hoursCircle * Math.cos(angleDeg)) + halfScreen);
+	      		pointY = ((hoursCircle * Math.sin(angleDeg)) + halfScreen);
+	      		
+	      		switch (nr + angleToNrCorrection) {
+	      			case 10:
+	      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 4, fnt10, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 8, fnt10, "0", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      		
+	      			case 11:
+	      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 4, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 6, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case 13:
+	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 7, fnt13, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 4, fnt13, "3", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      		}
+		
+				/*if (nr < 12) {
+					dc.drawText(pointX.toNumber() - correctionForNumber, pointY.toNumber() - correctionForNumber, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    				dc.drawText(pointX.toNumber() + correctionForNumber, pointY.toNumber() + correctionForNumber, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+				} else {
+					dc.drawText(pointX.toNumber() - correctionForNumber, pointY.toNumber() - correctionForNumber, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+    				dc.drawText(pointX.toNumber() + correctionForNumber, pointY.toNumber() - correctionForNumber, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+				} */
+    			
+      		}
+      	}
     	
     	// 11
-    	var fnt11 = WatchUi.loadResource(Rez.Fonts.fntSd11);
+    	/* var fnt11 = WatchUi.loadResource(Rez.Fonts.fntSd11);
     	dc.drawText(97, 13, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
     	dc.drawText(105, 11, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
     	
@@ -333,6 +379,9 @@ class SundanceView extends WatchUi.WatchFace {
     	var fnt17 = WatchUi.loadResource(Rez.Fonts.fntSd17);
     	dc.drawText(235, 85, fnt17, "1", Graphics.TEXT_JUSTIFY_CENTER);
     	dc.drawText(237, 95, fnt17, "7", Graphics.TEXT_JUSTIFY_CENTER); 
+    	 */
+    	 
+    	
     }
     
     // Draw sunset or sunrice image 
