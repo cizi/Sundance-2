@@ -22,17 +22,31 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var gLocationLat = null;
     hidden var gLocationLng = null;
     
+    hidden var fnt07 = null;
+    hidden var fnt08 = null;
+    hidden var fnt09 = null;
     hidden var fnt11 = null;
     hidden var fnt10 = null;
     hidden var fnt13 = null;
+    hidden var fnt14 = null;
+    hidden var fnt15 = null;
+    hidden var fnt16 = null;
+    hidden var fnt17 = null;
     
     function initialize() {    
         WatchFace.initialize();
         app = Application.getApp();
         
+		fnt07 = WatchUi.loadResource(Rez.Fonts.fntSd07);
+		fnt08 = WatchUi.loadResource(Rez.Fonts.fntSd08);
+		fnt09 = WatchUi.loadResource(Rez.Fonts.fntSd09);
         fnt10 = WatchUi.loadResource(Rez.Fonts.fntSd10);
         fnt11 = WatchUi.loadResource(Rez.Fonts.fntSd11);
         fnt13 = WatchUi.loadResource(Rez.Fonts.fntSd13);
+        fnt14 = WatchUi.loadResource(Rez.Fonts.fntSd14);
+        fnt15 = WatchUi.loadResource(Rez.Fonts.fntSd15);
+        fnt16 = WatchUi.loadResource(Rez.Fonts.fntSd16);
+        fnt17 = WatchUi.loadResource(Rez.Fonts.fntSd17);
     }
 
     // Load your resources here
@@ -303,20 +317,57 @@ class SundanceView extends WatchUi.WatchFace {
 	      		pointY = ((hoursCircle * Math.sin(angleDeg)) + halfScreen);
 	      		
 	      		switch (nr + angleToNrCorrection) {
+	      			case 7:
+	      				dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 6, fnt07, "0", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 16, fnt07, "7", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case 8:
+	      				dc.drawText(pointX.toNumber() + 2, pointY.toNumber() - 6, fnt08, "0", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 14, fnt08, "8", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case 9:
+	      				dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 5, fnt09, "0", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 8, pointY.toNumber() - 12, fnt09, "9", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
 	      			case 10:
-	      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 4, fnt10, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 8, fnt10, "0", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 5, fnt10, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 9, fnt10, "0", Graphics.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      		
 	      			case 11:
-	      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 4, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 6, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 5, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 7, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 13:
-	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 7, fnt13, "1", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 7, fnt13, "1", Graphics.TEXT_JUSTIFY_CENTER);
 						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 4, fnt13, "3", Graphics.TEXT_JUSTIFY_CENTER);
 	      			break;
+	      			
+	      			case 14:
+	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 10, fnt14, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 2, pointY.toNumber() - 4, fnt14, "4", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      				
+	      			case 15:
+	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 11, fnt15, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber(), pointY.toNumber() - 5, fnt15, "5", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case 16:
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 13, fnt16, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 5, fnt16, "6", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case 17:
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 15, fnt17, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 6, fnt17, "7", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			
 	      		}
 		
 				/*if (nr < 12) {
