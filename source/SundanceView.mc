@@ -22,6 +22,11 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var gLocationLat = null;
     hidden var gLocationLng = null;
     
+    hidden var fnt01 = null;
+    hidden var fnt02 = null;
+    hidden var fnt03 = null;
+    hidden var fnt04 = null;
+    hidden var fnt05 = null;
     hidden var fnt07 = null;
     hidden var fnt08 = null;
     hidden var fnt09 = null;
@@ -32,11 +37,21 @@ class SundanceView extends WatchUi.WatchFace {
     hidden var fnt15 = null;
     hidden var fnt16 = null;
     hidden var fnt17 = null;
+    hidden var fnt19 = null;
+    hidden var fnt20 = null;
+    hidden var fnt21 = null;
+    hidden var fnt22 = null;
+    hidden var fnt23 = null;
     
     function initialize() {    
         WatchFace.initialize();
         app = Application.getApp();
         
+        fnt01 = WatchUi.loadResource(Rez.Fonts.fntSd01);
+        fnt02 = WatchUi.loadResource(Rez.Fonts.fntSd02);
+        fnt03 = WatchUi.loadResource(Rez.Fonts.fntSd03);
+        fnt04 = WatchUi.loadResource(Rez.Fonts.fntSd04);
+       	fnt05 = WatchUi.loadResource(Rez.Fonts.fntSd05);       
 		fnt07 = WatchUi.loadResource(Rez.Fonts.fntSd07);
 		fnt08 = WatchUi.loadResource(Rez.Fonts.fntSd08);
 		fnt09 = WatchUi.loadResource(Rez.Fonts.fntSd09);
@@ -47,6 +62,11 @@ class SundanceView extends WatchUi.WatchFace {
         fnt15 = WatchUi.loadResource(Rez.Fonts.fntSd15);
         fnt16 = WatchUi.loadResource(Rez.Fonts.fntSd16);
         fnt17 = WatchUi.loadResource(Rez.Fonts.fntSd17);
+        fnt19 = WatchUi.loadResource(Rez.Fonts.fntSd19);
+        fnt20 = WatchUi.loadResource(Rez.Fonts.fntSd20);
+        fnt21 = WatchUi.loadResource(Rez.Fonts.fntSd21);
+        fnt22 = WatchUi.loadResource(Rez.Fonts.fntSd22);
+        fnt23 = WatchUi.loadResource(Rez.Fonts.fntSd23);
     }
 
     // Load your resources here
@@ -315,8 +335,33 @@ class SundanceView extends WatchUi.WatchFace {
 	      		angleDeg = ((nr * 15) * Math.PI) / 180;
 	      		pointX = ((hoursCircle * Math.cos(angleDeg)) + halfScreen);
 	      		pointY = ((hoursCircle * Math.sin(angleDeg)) + halfScreen);
-	      		
+	      			      		
 	      		switch (nr + angleToNrCorrection) {
+	      			case 1:
+	      				dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 18, fnt01, "0", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 15, fnt01, "1", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case 2:
+	      				dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 18, fnt02, "0", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 13, fnt02, "2", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case 3:
+	      				dc.drawText(pointX.toNumber(), pointY.toNumber() - 18, fnt03, "0", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 12, fnt03, "3", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case 4:
+	      				dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 17, fnt04, "0", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 9, fnt04, "4", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case 5:
+	      				dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 18, fnt05, "0", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 10, fnt05, "5", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      		
 	      			case 7:
 	      				dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 6, fnt07, "0", Graphics.TEXT_JUSTIFY_CENTER);
 						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 16, fnt07, "7", Graphics.TEXT_JUSTIFY_CENTER);
@@ -367,6 +412,15 @@ class SundanceView extends WatchUi.WatchFace {
 						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 6, fnt17, "7", Graphics.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
+	      			case -1:	// 23
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 15, fnt23, "2", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 6, fnt23, "3", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case -2:	// 22
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 15, fnt22, "2", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 6, fnt22, "2", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
 	      			
 	      		}
 		
