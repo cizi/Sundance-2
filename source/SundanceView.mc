@@ -13,7 +13,7 @@ using Toybox.Application;
 
 class SundanceView extends WatchUi.WatchFace {
 	
-		// others
+	// others
 	hidden var settings;
 	hidden var app;
 	
@@ -71,24 +71,7 @@ class SundanceView extends WatchUi.WatchFace {
 
     // Load your resources here
     function onLayout(dc) {
-        setLayout(Rez.Layouts.WatchFace(dc));     
-        
-    	// if (Application.getApp().getProperty("BackgroundColor") == 0x000000) {
-        /* imgBg = new WatchUi.Bitmap({
-            :rezId=>Rez.Drawables.Bg,
-            :locX=>0,
-            :locY=>0
-        });  */    
-        
-        //} else {
-        	/* imgBg = new WatchUi.Bitmap({
-	            :rezId=>Rez.Drawables.BgInvert,
-	            :locX=>0,
-	            :locY=>0
-	        }); 
-        } */
-        
-        
+        setLayout(Rez.Layouts.WatchFace(dc));            
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -152,7 +135,11 @@ class SundanceView extends WatchUi.WatchFace {
             }
         }
         var timeString = Lang.format(timeFormat, [hours, today.min.format("%02d")]);
-        dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) -  50, Graphics.FONT_SYSTEM_NUMBER_HOT, timeString, Graphics.TEXT_JUSTIFY_CENTER);
+        if (dc.getHeight() == 280) {	// FENIX 6X
+        	dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - 55, Graphics.FONT_SYSTEM_NUMBER_HOT, timeString, Graphics.TEXT_JUSTIFY_CENTER);
+        } else if (dc.getHeight() == 260) {						// FENIX 6
+        	dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - 50, Graphics.FONT_SYSTEM_NUMBER_HOT, timeString, Graphics.TEXT_JUSTIFY_CENTER);
+        }       
         
         if (Application.getApp().getProperty("DateFormat") != 5) {
 	        var dateString = getFormatedDate();
@@ -413,80 +400,32 @@ class SundanceView extends WatchUi.WatchFace {
 	      			break;
 	      			
 	      			case -1:	// 23
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 15, fnt23, "2", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 6, fnt23, "3", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 15, fnt23, "2", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 17, fnt23, "3", Graphics.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case -2:	// 22
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 15, fnt22, "2", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 6, fnt22, "2", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 12, fnt22, "2", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 17, fnt22, "2", Graphics.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
+	      			case -3:	// 21
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt21, "2", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 18, fnt21, "1", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case -4:	// 20
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt20, "2", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber(), pointY.toNumber() - 19, fnt20, "0", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
+	      			
+	      			case -5:	// 19
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt19, "1", Graphics.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 18, fnt19, "9", Graphics.TEXT_JUSTIFY_CENTER);
+	      			break;
 	      		}
-		
-				/*if (nr < 12) {
-					dc.drawText(pointX.toNumber() - correctionForNumber, pointY.toNumber() - correctionForNumber, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    				dc.drawText(pointX.toNumber() + correctionForNumber, pointY.toNumber() + correctionForNumber, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
-				} else {
-					dc.drawText(pointX.toNumber() - correctionForNumber, pointY.toNumber() - correctionForNumber, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    				dc.drawText(pointX.toNumber() + correctionForNumber, pointY.toNumber() - correctionForNumber, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
-				} */
-    			
       		}
       	}
-    	
-    	// 11
-    	/* var fnt11 = WatchUi.loadResource(Rez.Fonts.fntSd11);
-    	dc.drawText(97, 13, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(105, 11, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	
-    	// 10
-    	var fnt10 = WatchUi.loadResource(Rez.Fonts.fntSd10);
-    	dc.drawText(71, 25, fnt10, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(79, 21, fnt10, "0", Graphics.TEXT_JUSTIFY_CENTER);    	
-    	
-    	// 09
-    	var fnt09 = WatchUi.loadResource(Rez.Fonts.fntSd09);
-    	dc.drawText(48, 44, fnt09, "0", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(56, 37, fnt09, "9", Graphics.TEXT_JUSTIFY_CENTER);
-    	
-    	// 08
-    	var fnt08 = WatchUi.loadResource(Rez.Fonts.fntSd08);
-    	dc.drawText(32, 67, fnt08, "0", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(37, 58, fnt08, "8", Graphics.TEXT_JUSTIFY_CENTER);
-    	
-    	// 07
-    	var fnt07 = WatchUi.loadResource(Rez.Fonts.fntSd07);
-    	dc.drawText(23, 95, fnt07, "0", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(25, 84, fnt07, "7", Graphics.TEXT_JUSTIFY_CENTER);
-    	
-    	// 13
-    	var fnt13 = WatchUi.loadResource(Rez.Fonts.fntSd13);
-    	dc.drawText(154, 11, fnt13, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(163, 14, fnt13, "3", Graphics.TEXT_JUSTIFY_CENTER);
-    	
-    	// 14
-    	var fnt14 = WatchUi.loadResource(Rez.Fonts.fntSd14);
-    	dc.drawText(181, 20, fnt14, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(190, 27, fnt14, "4", Graphics.TEXT_JUSTIFY_CENTER);   
-    	
-    	// 15
-    	var fnt15 = WatchUi.loadResource(Rez.Fonts.fntSd15);
-    	dc.drawText(205, 36, fnt15, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(211, 42, fnt15, "5", Graphics.TEXT_JUSTIFY_CENTER);  
-    	
-    	// 16
-    	var fnt16 = WatchUi.loadResource(Rez.Fonts.fntSd16);
-    	dc.drawText(223, 58, fnt16, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(228, 66, fnt16, "6", Graphics.TEXT_JUSTIFY_CENTER); 
-    	
-    	// 17
-    	var fnt17 = WatchUi.loadResource(Rez.Fonts.fntSd17);
-    	dc.drawText(235, 85, fnt17, "1", Graphics.TEXT_JUSTIFY_CENTER);
-    	dc.drawText(237, 95, fnt17, "7", Graphics.TEXT_JUSTIFY_CENTER); 
-    	 */
-    	 
-    	
     }
     
     // Draw sunset or sunrice image 
