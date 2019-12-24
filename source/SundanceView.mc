@@ -1,5 +1,5 @@
 using Toybox.WatchUi;
-using Toybox.Graphics;
+using Toybox.Graphics as Gfx;
 using Toybox.System;
 using Toybox.Lang;
 using Toybox.Application;
@@ -16,6 +16,7 @@ class SundanceView extends WatchUi.WatchFace {
 	// others
 	hidden var settings;
 	hidden var app;
+	hidden var is240dev;
 	
 	// Sunset / sunrise vars
 	hidden var location = null;
@@ -71,7 +72,8 @@ class SundanceView extends WatchUi.WatchFace {
 
     // Load your resources here
     function onLayout(dc) {
-        setLayout(Rez.Layouts.WatchFace(dc));            
+        setLayout(Rez.Layouts.WatchFace(dc));   
+        is240dev = (dc.getWidth() == 240);         
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -117,7 +119,7 @@ class SundanceView extends WatchUi.WatchFace {
       	}
       	
         // Get the current time and format it correctly
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
         var timeFormat = "$1$:$2$";
         var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
         var hours = today.hour;
@@ -127,23 +129,19 @@ class SundanceView extends WatchUi.WatchFace {
                 hours = hours - 12;
                 ampm = "PM";
             }          
-            dc.drawText(58, 82, Graphics.FONT_XTINY, ampm, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(58, 82, Gfx.FONT_XTINY, ampm, Gfx.TEXT_JUSTIFY_CENTER);
         } else {
             if (Application.getApp().getProperty("UseMilitaryFormat")) {
                 timeFormat = "$1$$2$";
                 hours = hours.format("%02d");
             }
         }
-        var timeString = Lang.format(timeFormat, [hours, today.min.format("%02d")]);
-        if (dc.getHeight() == 280) {	// FENIX 6X
-        	dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - 55, Graphics.FONT_SYSTEM_NUMBER_HOT, timeString, Graphics.TEXT_JUSTIFY_CENTER);
-        } else if (dc.getHeight() == 260) {						// FENIX 6
-        	dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - 50, Graphics.FONT_SYSTEM_NUMBER_HOT, timeString, Graphics.TEXT_JUSTIFY_CENTER);
-        }       
+        var timeString = Lang.format(timeFormat, [hours, today.min.format("%02d")]);       
+		dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - (Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2), Gfx.FONT_SYSTEM_NUMBER_HOT, timeString, Gfx.TEXT_JUSTIFY_CENTER);
         
         if (Application.getApp().getProperty("DateFormat") != 5) {
 	        var dateString = getFormatedDate();
-	        dc.drawText((dc.getWidth() / 2), 65, Graphics.FONT_TINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);    
+	        dc.drawText((dc.getWidth() / 2), 65, Gfx.FONT_TINY, dateString, Gfx.TEXT_JUSTIFY_CENTER);    
         }
         
         // Moon phase is requireds 
@@ -178,7 +176,8 @@ class SundanceView extends WatchUi.WatchFace {
         	var sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ false);
         	// System.println(sunTimes[0]);
         	
-			if ((sunTimes[0] != null) && (sunTimes[1] != null)) {      	
+			if ((sunTimes[0] != null) && (sunTimes[1] != null)) {   
+				var halfWidth = dc.getWidth() / 2;   	
 	        	if (Application.getApp().getProperty("Opt1") == 1) {	// sunset / sunrise is wanted by setting
 	        		var nextSunEvent = 0;
 
@@ -189,40 +188,39 @@ class SundanceView extends WatchUi.WatchFace {
 	        		// Before sunrise today: today's sunrise is next.
 					if (now < sunTimes[0]) {
 						nextSunEvent = sunTimes[0];
-						drawSun(105, 60, dc, false);
+						drawSun(halfWidth - 25, 60, dc, false);
 					// After sunrise today, before sunset today: today's sunset is next.
 					} else if (now < sunTimes[1]) {
 						nextSunEvent = sunTimes[1];
-						drawSun(105, 60, dc, true);
+						drawSun(halfWidth - 25, 60, dc, true);
 					// After sunset today: tomorrow's sunrise (if any) is next.
 					} else {
 						sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ true);
 						nextSunEvent = sunTimes[0];
-						drawSun(105, 60, dc, false);
+						drawSun(halfWidth - 25, 60, dc, false);
 					}        		
 	      		      	
 			      	var hour = Math.floor(nextSunEvent).toLong() % 24;
 					var min = Math.floor((nextSunEvent - Math.floor(nextSunEvent)) * 60);
 					var value = getFormattedTime(hour, min); // App.getApp().getFormattedTime(hour, min);
 					value = value[:hour] + ":" + value[:min] + value[:amPm]; 			      	
-			        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
-			        dc.drawText(130, 45, Graphics.FONT_XTINY, value, Graphics.TEXT_JUSTIFY_LEFT);
+			        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+			        dc.drawText(halfWidth - 5, 45, Gfx.FONT_XTINY, value, Gfx.TEXT_JUSTIFY_LEFT);
 	        	}
 			
 				dc.setPenWidth(Application.getApp().getProperty("DaylightProgessWidth"));
-				var halfWidth=dc.getWidth() / 2;
 				var rLocal=halfWidth - 2;
 				var lineStart = 270 - (sunTimes[0] * 15);
 				var lineEnd = 270 - (sunTimes[1] * 15);
 				dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
-				dc.drawArc(halfWidth, halfWidth, rLocal, Graphics.ARC_CLOCKWISE, lineStart, lineEnd);
+				dc.drawArc(halfWidth, halfWidth, rLocal, Gfx.ARC_CLOCKWISE, lineStart, lineEnd);
 			
 				dc.setPenWidth(15);
 				var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
 				var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
 				var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder 
 				dc.setColor(Application.getApp().getProperty("CurrentTimePointer"), Application.getApp().getProperty("BackgroundColor"));
-				dc.drawArc(halfWidth, halfWidth, rLocal - 3, Graphics.ARC_CLOCKWISE, currTimeStart, currTimeEnd);			
+				dc.drawArc(halfWidth, halfWidth, rLocal - 3, Gfx.ARC_CLOCKWISE, currTimeStart, currTimeEnd);			
         	}
     	}
     }
@@ -288,12 +286,12 @@ class SundanceView extends WatchUi.WatchFace {
       	// hide the middle of the net to shows just pieces on the edge of the screen
       	dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));     	
       	dc.drawCircle(halfScreen, halfScreen, halfScreen - 1);
-      	dc.fillCircle(halfScreen, halfScreen, halfScreen - 8);
+      	dc.fillCircle(halfScreen, halfScreen, halfScreen - Application.getApp().getProperty("SmallHoursIndicatorSize"));
       	
       	// draw the master pieces in 24, 12, 6, 18 hours point
       	var masterPointLen = 12;
       	var masterPointWid = 4; 
-      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
+      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
       	dc.setPenWidth(masterPointWid);
       	dc.drawLine(halfScreen, 0, halfScreen, masterPointLen);
       	dc.drawLine(halfScreen, dc.getWidth(), halfScreen, dc.getWidth() - masterPointLen); 
@@ -301,15 +299,15 @@ class SundanceView extends WatchUi.WatchFace {
       	dc.drawLine(dc.getWidth(), halfScreen - (masterPointWid / 2), dc.getWidth() - masterPointLen, halfScreen - (masterPointWid / 2)); 
     
     	// numbers
-    	dc.drawText(halfScreen, 8, Graphics.FONT_TINY, "12", Graphics.TEXT_JUSTIFY_CENTER);	// 12
-    	dc.drawText(dc.getWidth() - 16, halfScreen - 18, Graphics.FONT_TINY, "18", Graphics.TEXT_JUSTIFY_RIGHT);	// 18
-    	dc.drawText(halfScreen, dc.getHeight() - 40, Graphics.FONT_TINY, "24", Graphics.TEXT_JUSTIFY_CENTER);	// 24
-    	dc.drawText(16, halfScreen - 18, Graphics.FONT_TINY, "06", Graphics.TEXT_JUSTIFY_LEFT);	// 06
+    	dc.drawText(halfScreen, masterPointLen - 3, Gfx.FONT_TINY, "12", Gfx.TEXT_JUSTIFY_CENTER);	// 12
+    	dc.drawText(halfScreen, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - 11, Gfx.FONT_TINY, "24", Gfx.TEXT_JUSTIFY_CENTER);	// 24   	
+    	dc.drawText(dc.getWidth() - 15, halfScreen - (Gfx.getFontHeight(Gfx.FONT_TINY) / 2) - 3, Gfx.FONT_TINY, "18", Gfx.TEXT_JUSTIFY_RIGHT);	// 18
+    	dc.drawText(15, halfScreen - (Gfx.getFontHeight(Gfx.FONT_TINY) / 2) - 3, Gfx.FONT_TINY, "06", Gfx.TEXT_JUSTIFY_LEFT);	// 06
     }
     
     // Draw numbers in the dial
     function drawNrDial(dc) {
-    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);   	
+    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);   	
     	
        	var angleDeg = 0;
     	var pointX = 0;
@@ -325,103 +323,103 @@ class SundanceView extends WatchUi.WatchFace {
 	      			      		
 	      		switch (nr + angleToNrCorrection) {
 	      			case 1:
-	      				dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 18, fnt01, "0", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 15, fnt01, "1", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 18, fnt01, "0", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 15, fnt01, "1", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 2:
-	      				dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 18, fnt02, "0", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 13, fnt02, "2", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 18, fnt02, "0", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 13, fnt02, "2", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 3:
-	      				dc.drawText(pointX.toNumber(), pointY.toNumber() - 18, fnt03, "0", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 12, fnt03, "3", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber(), pointY.toNumber() - 18, fnt03, "0", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 12, fnt03, "3", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 4:
-	      				dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 17, fnt04, "0", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 9, fnt04, "4", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 17, fnt04, "0", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 9, fnt04, "4", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 5:
-	      				dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 18, fnt05, "0", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 10, fnt05, "5", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 18, fnt05, "0", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 10, fnt05, "5", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      		
 	      			case 7:
-	      				dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 6, fnt07, "0", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 16, fnt07, "7", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 6, fnt07, "0", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 16, fnt07, "7", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 8:
-	      				dc.drawText(pointX.toNumber() + 2, pointY.toNumber() - 6, fnt08, "0", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 14, fnt08, "8", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() + 2, pointY.toNumber() - 6, fnt08, "0", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 14, fnt08, "8", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 9:
-	      				dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 5, fnt09, "0", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 8, pointY.toNumber() - 12, fnt09, "9", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 5, fnt09, "0", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 8, pointY.toNumber() - 12, fnt09, "9", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 10:
-	      				dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 5, fnt10, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 9, fnt10, "0", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 5, fnt10, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 9, fnt10, "0", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      		
 	      			case 11:
-	      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 5, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 7, fnt11, "1", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 5, fnt11, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 7, fnt11, "1", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 13:
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 7, fnt13, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 4, fnt13, "3", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 7, fnt13, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 4, fnt13, "3", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 14:
-	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 10, fnt14, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 2, pointY.toNumber() - 4, fnt14, "4", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 10, fnt14, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 2, pointY.toNumber() - 4, fnt14, "4", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      				
 	      			case 15:
-	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 11, fnt15, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber(), pointY.toNumber() - 5, fnt15, "5", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 11, fnt15, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber(), pointY.toNumber() - 5, fnt15, "5", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 16:
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 13, fnt16, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 5, fnt16, "6", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 13, fnt16, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 5, fnt16, "6", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 17:
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 15, fnt17, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 6, fnt17, "7", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 15, fnt17, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 6, fnt17, "7", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case -1:	// 23
-	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 15, fnt23, "2", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 17, fnt23, "3", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 15, fnt23, "2", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 17, fnt23, "3", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case -2:	// 22
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 12, fnt22, "2", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 17, fnt22, "2", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 12, fnt22, "2", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 17, fnt22, "2", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case -3:	// 21
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt21, "2", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 18, fnt21, "1", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt21, "2", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 18, fnt21, "1", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case -4:	// 20
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt20, "2", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber(), pointY.toNumber() - 19, fnt20, "0", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt20, "2", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber(), pointY.toNumber() - 19, fnt20, "0", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case -5:	// 19
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt19, "1", Graphics.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 18, fnt19, "9", Graphics.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt19, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 18, fnt19, "9", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      		}
       		}
@@ -462,6 +460,10 @@ class SundanceView extends WatchUi.WatchFace {
     function drawSteps(posX, posY, dc) {
     	if (dc.getWidth() == 280) {	// FENIX 6X correction
       		posX -= 10;
+      		posY += 2;
+      	}
+      	if (is240dev) {	// 240x240 device correction
+      		posY += 5;
       	}
     	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
     	dc.fillCircle(posX, posY, 2);	// left bottom
@@ -472,24 +474,30 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.fillCircle(posX+12, posY-12, 3); // right middle
     	dc.fillCircle(posX+12, posY-14, 3); // right top
     	
+    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
     	var info = ActivityMonitor.getInfo();
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
-    	dc.drawText(posX + 22, posY - 16, Graphics.FONT_XTINY, info.steps.toString(), Graphics.TEXT_JUSTIFY_LEFT);
+    	var stepsCount = info.steps;
+    	if (is240dev && (stepsCount > 999)){
+    		stepsCount = (info.steps / 1000.0).format("%.1f").toString() + "k";
+    	}
+		dc.drawText(posX + 22, posY - 16, Gfx.FONT_XTINY, stepsCount.toString(), Gfx.TEXT_JUSTIFY_LEFT);
     }
     
     // Draw BT connection status
     function drawBtConnection(dc) {
     	if ((settings has : phoneConnected) && (settings.phoneConnected)) {
-    		dc.setColor(Graphics.COLOR_BLUE, Application.getApp().getProperty("BackgroundColor"));
-       		dc.fillCircle((dc.getWidth() / 2) - 9, dc.getHeight() - 43, 5);	
+    		var radius = 5;
+    		dc.setColor(Gfx.COLOR_BLUE, Application.getApp().getProperty("BackgroundColor"));
+       		dc.fillCircle((dc.getWidth() / 2) - 9, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) -(radius * 3), radius);	
    		}
     }
     
     // Draw notification alarm
     function drawNotification(dc) {
     	if ((settings has : notificationCount) && (settings.notificationCount)) {
-    		dc.setColor(Graphics.COLOR_RED, Application.getApp().getProperty("BackgroundColor"));
-       		dc.fillCircle((dc.getWidth() / 2) + 6, dc.getHeight() - 43, 5);	
+    		var radius = 5;
+    		dc.setColor(Gfx.COLOR_RED, Application.getApp().getProperty("BackgroundColor"));
+       		dc.fillCircle((dc.getWidth() / 2) + 6, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - (radius * 3), radius);	
    		} 
     }
     
@@ -568,11 +576,11 @@ class SundanceView extends WatchUi.WatchFace {
 			} else if (phase == 3) {
 				dc.setPenWidth(8);
 				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
-				dc.drawArc(xPos + 5, yPos, radius + 5, Graphics.ARC_CLOCKWISE, 270, 90);
+				dc.drawArc(xPos + 5, yPos, radius + 5, Gfx.ARC_CLOCKWISE, 270, 90);
 			} else if (phase == 5) {
 				dc.setPenWidth(8);
 				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
-				dc.drawArc(xPos - 5, yPos, radius + 5, Graphics.ARC_CLOCKWISE, 90, 270);				
+				dc.drawArc(xPos - 5, yPos, radius + 5, Gfx.ARC_CLOCKWISE, 90, 270);				
 			} else if (phase == 6) {
 				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
         		dc.fillRectangle(xPos + (radius / 2) - 3, yPos - radius, radius, (radius * 2) + 2);
@@ -587,7 +595,7 @@ class SundanceView extends WatchUi.WatchFace {
 	function drawBattery(dc) {
 		dc.setPenWidth(1);
 		if (System.getSystemStats().battery <= 10) {
-	      	dc.setColor(Graphics.COLOR_RED, Application.getApp().getProperty("BackgroundColor"));
+	      	dc.setColor(Gfx.COLOR_RED, Application.getApp().getProperty("BackgroundColor"));
 		} else {
 	      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
 		}
@@ -599,11 +607,11 @@ class SundanceView extends WatchUi.WatchFace {
       	var batteryWidth = 23;
       	dc.drawRectangle(batStartX, batteryStartY, batteryWidth, 13);	// battery
  		dc.drawRectangle(batStartX + batteryWidth, batteryStartY + 4, 2, 5);	// battery top
- 		var batteryColor = Graphics.COLOR_GREEN;
+ 		var batteryColor = Gfx.COLOR_GREEN;
  		if (System.getSystemStats().battery <= 10) {
- 			batteryColor = Graphics.COLOR_RED;
+ 			batteryColor = Gfx.COLOR_RED;
  		} else if (System.getSystemStats().battery <= 35) {
- 			batteryColor = Graphics.COLOR_ORANGE;
+ 			batteryColor = Gfx.COLOR_ORANGE;
  		}
  		
  		dc.setColor(batteryColor, Application.getApp().getProperty("BackgroundColor"));
@@ -612,15 +620,15 @@ class SundanceView extends WatchUi.WatchFace {
  		
  		// x="180" y="164"
  		var batText = System.getSystemStats().battery.toNumber().toString() + "%";
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
- 		dc.drawText(batStartX + 29, batteryStartY - 4, Graphics.FONT_XTINY, batText, Graphics.TEXT_JUSTIFY_LEFT);		
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+ 		dc.drawText(batStartX + 29, batteryStartY - 4, Gfx.FONT_XTINY, batText, Gfx.TEXT_JUSTIFY_LEFT);		
 	}
 	
 	function  drawAltitude(dc) {        
         var xPos = (dc.getWidth() / 13) * 7; // "140" 
         var yPos = ((dc.getHeight() / 4).toNumber() * 3) - 6;  // "189"
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(xPos, yPos, Graphics.FONT_XTINY, getAltitude(), Graphics.TEXT_JUSTIFY_CENTER);
+        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+        dc.drawText(xPos, yPos, Gfx.FONT_XTINY, getAltitude(), Gfx.TEXT_JUSTIFY_CENTER);
         
         // coordinates correction
         xPos = xPos - 46;

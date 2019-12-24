@@ -35,6 +35,9 @@
     <string id="ColorDarkBlue">Dark Blue</string>        
     <string id="ColorPink">Pink</string>    
     
+    <string id="width2">2</string> 
+    <string id="width4">4</string> 
+
     <string id="width6">6</string> 
     <string id="width8">8</string> 
     <string id="width10">10</string> 
@@ -50,5 +53,7 @@
     <string id="ShowAltitudeTitle">Show altitude</string>     
     <string id="ShowNotificationAndConnectionTitle">Show connection and notification indicator</string>   
     <string id="OptionDisabled">Disabled</string> 
+      
+    <string id="SmallHoursIndicatorSizeTitle">Small hour indicators size</string>    
        
 </strings>
