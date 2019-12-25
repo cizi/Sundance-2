@@ -4,6 +4,9 @@
     <property id="ForegroundColor" type="number">0xFFFFFF</property> 
     
     <property id="Opt1" type="number">1</property> 
+    <property id="Opt2" type="number">4</property> 
+    <property id="Opt3" type="number">6</property> 
+    <property id="Opt4" type="number">7</property> 
     <property id="DaylightProgess" type="number">0xFFFF00</property>
     <property id="DaylightProgessWidth" type="number">6</property>
     <property id="CurrentTimePointerWidth" type="number">16</property>

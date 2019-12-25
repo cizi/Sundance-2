@@ -2,7 +2,7 @@ using Toybox.WatchUi;
 using Toybox.Graphics as Gfx;
 using Toybox.System;
 using Toybox.Lang;
-using Toybox.Application;
+using Toybox.Application as App;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.Math;
@@ -12,11 +12,21 @@ using Toybox.SensorHistory;
 using Toybox.Application;
 
 class SundanceView extends WatchUi.WatchFace {
+
+	// const for settings 
+	const MOON_PHASE = 0;
+	const SUNSET_SUNSRISE = 1;
+	const STEPS = 4;
+	const HR = 5;
+	const BATTERY = 6;
+	const ALTITUDE = 7;
+	const DISABLED = 100;
 	
 	// others
 	hidden var settings;
 	hidden var app;
 	hidden var is240dev;
+	hidden var is280dev;
 	
 	// Sunset / sunrise vars
 	hidden var location = null;
@@ -43,10 +53,17 @@ class SundanceView extends WatchUi.WatchFace {
     hidden var fnt21 = null;
     hidden var fnt22 = null;
     hidden var fnt23 = null;
+    hidden var fntIcons = null;
+    
+    hidden var halfWidth = null;
+    hidden var field1 = null;
+    hidden var field2 = null;
+    hidden var field3 = null;
+    hidden var field4 = null;
     
     function initialize() {    
         WatchFace.initialize();
-        app = Application.getApp();
+        app = App.getApp();
         
         fnt01 = WatchUi.loadResource(Rez.Fonts.fntSd01);
         fnt02 = WatchUi.loadResource(Rez.Fonts.fntSd02);
@@ -68,12 +85,20 @@ class SundanceView extends WatchUi.WatchFace {
         fnt21 = WatchUi.loadResource(Rez.Fonts.fntSd21);
         fnt22 = WatchUi.loadResource(Rez.Fonts.fntSd22);
         fnt23 = WatchUi.loadResource(Rez.Fonts.fntSd23);
+        fntIcons = WatchUi.loadResource(Rez.Fonts.fntIcons);
     }
 
     // Load your resources here
     function onLayout(dc) {
         setLayout(Rez.Layouts.WatchFace(dc));   
-        is240dev = (dc.getWidth() == 240);         
+        is240dev = (dc.getWidth() == 240); 
+        is280dev = (dc.getWidth() == 280); 
+
+        halfWidth = dc.getWidth() / 2;
+        field1 = [halfWidth - 23, 60];
+        field2 = [(dc.getWidth() / 5) + 2, (dc.getHeight() / 13) * 9];		// on F6 [54, 180]
+        field3 = [halfWidth + 56, ((dc.getHeight() / 6).toNumber() * 4) - 9];		
+        field4 = [(dc.getWidth() / 13) * 7, ((dc.getHeight() / 4).toNumber() * 3) - 6];		// on F6 [140, 189]          
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -88,50 +113,48 @@ class SundanceView extends WatchUi.WatchFace {
         View.onUpdate(dc);
         settings = System.getDeviceSettings();
       
-      	//imgBg.draw(dc);
       	drawDial(dc);												// main dial  	
-    	if (Application.getApp().getProperty("ShowFullDial")) {		// subdial small numbers
+    	if (App.getApp().getProperty("ShowFullDial")) {		// subdial small numbers
 	    	drawNrDial(dc);
     	}
+    	var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+    	
+        drawSunsetSunriseLine(field1[0], field1[1], dc, today);		// SUNSET / SUNRICE line
       	    	
-      	if (Application.getApp().getProperty("ShowAltitude")) {
-	     	drawAltitude(dc);
+      	if (App.getApp().getProperty("ShowAltitude")) {
+	     	drawAltitude(field4[0], field4[1], dc);
       	}
       	
-      	if (Application.getApp().getProperty("ShowBattery")) {
-	      	drawBattery(dc);
+      	if (App.getApp().getProperty("ShowBattery")) {
+	      	drawBattery(field3[0], field3[1], dc, 3);
       	}
      	
-      	if (Application.getApp().getProperty("AlarmIndicator")) {
+      	if (App.getApp().getProperty("AlarmIndicator")) {
 	      	drawBell(dc);
       	}
       	
-      	if (Application.getApp().getProperty("ShowNotificationAndConnection")) {
+      	if (App.getApp().getProperty("ShowNotificationAndConnection")) {
 	      	drawBtConnection(dc);
 	      	drawNotification(dc);      	
       	}
       	
-      	var xPos = (dc.getWidth() / 5) + 2; // 54
-      	var yPos = (dc.getHeight() / 13) * 9; // 180
-      	
-      	if (Application.getApp().getProperty("ShowSteps")) {
-	      	drawSteps(xPos, yPos, dc);
+      	if (App.getApp().getProperty("ShowSteps")) {
+	      	drawSteps(field2[0], field2[1], dc);
       	}
       	
         // Get the current time and format it correctly
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+        dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
         var timeFormat = "$1$:$2$";
-        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
         var hours = today.hour;
         if (!System.getDeviceSettings().is24Hour) {
         	var ampm = "AM";
             if (hours > 12) {
                 hours = hours - 12;
                 ampm = "PM";
-            }          
-            dc.drawText(58, 82, Gfx.FONT_XTINY, ampm, Gfx.TEXT_JUSTIFY_CENTER);
+            }      
+            dc.drawText(54, ((dc.getHeight() / 2) - Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2) + 2, Gfx.FONT_XTINY, ampm, Gfx.TEXT_JUSTIFY_CENTER);
         } else {
-            if (Application.getApp().getProperty("UseMilitaryFormat")) {
+            if (App.getApp().getProperty("UseMilitaryFormat")) {
                 timeFormat = "$1$$2$";
                 hours = hours.format("%02d");
             }
@@ -139,18 +162,61 @@ class SundanceView extends WatchUi.WatchFace {
         var timeString = Lang.format(timeFormat, [hours, today.min.format("%02d")]);       
 		dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - (Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2), Gfx.FONT_SYSTEM_NUMBER_HOT, timeString, Gfx.TEXT_JUSTIFY_CENTER);
         
-        if (Application.getApp().getProperty("DateFormat") != 5) {
+        if (App.getApp().getProperty("DateFormat") != 5) {
 	        var dateString = getFormatedDate();
 	        dc.drawText((dc.getWidth() / 2), 65, Gfx.FONT_TINY, dateString, Gfx.TEXT_JUSTIFY_CENTER);    
         }
         
-        // Moon phase is requireds 
-        if (Application.getApp().getProperty("Opt1") == 0) {	
-        	today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-        	drawMoonPhase(dc, getMoonPhase(today.year, today.month, today.day));
-        }        
+        // FIELD 1
+        switch (App.getApp().getProperty("Opt1")) {
+        	case MOON_PHASE:
+        		today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+        		drawMoonPhase(dc, getMoonPhase(today.year, today.month, today.day));
+        	break;
+        	
+        	case SUNSET_SUNSRISE:
+        		drawSunsetSunriseTime(field1[0], field1[1], dc, today);
+        	break;
+        }      
         
-        // Get today's sunrise/sunset times in current time zone.
+        
+        // FIELD 4
+        switch (App.getApp().getProperty("Opt4")) {
+        	case HR:
+        	drawHr(field4[0], field4[1], dc);
+        	break;
+        	
+        	case BATTERY:
+	        drawBattery(field4[0], field4[1], dc, 4);
+        	break;
+        }
+    }
+
+    // Called when this View is removed from the screen. Save the
+    // state of this View here. This includes freeing resources from
+    // memory.
+    function onHide() {
+    }
+
+    // The user has just looked at their watch. Timers and animations may be started here.
+    function onExitSleep() {
+    }
+
+    // Terminate any active timers and prepare for slow updates.
+    function onEnterSleep() {
+    }
+    
+    // Draw current HR
+    function drawHr(xPos, yPos, dc) {
+     	dc.setColor(App.getApp().getProperty("DaylightProgess"), Gfx.COLOR_TRANSPARENT);
+    	dc.drawText(xPos - 49, yPos - 2, fntIcons, "3", Gfx.TEXT_JUSTIFY_LEFT);
+    	
+    	dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+        dc.drawText(xPos - 19, yPos, Gfx.FONT_XTINY, "110", Gfx.TEXT_JUSTIFY_LEFT);
+    }
+    
+    function drawSunsetSunriseLine(xPos, yPos, dc, today) {
+    	// Get today's sunrise/sunset times in current time zone.
         var location = Activity.getActivityInfo().currentLocation;
         // System.println(location);
         if (location) {
@@ -170,73 +236,62 @@ class SundanceView extends WatchUi.WatchFace {
 			if (lng != null) {
 				gLocationLng = lng;
 			}			
-        }
-        
+        }        
         if (gLocationLat != null) {
         	var sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ false);
         	// System.println(sunTimes[0]);
         	
-			if ((sunTimes[0] != null) && (sunTimes[1] != null)) {   
-				var halfWidth = dc.getWidth() / 2;   	
-	        	if (Application.getApp().getProperty("Opt1") == 1) {	// sunset / sunrise is wanted by setting
-	        		var nextSunEvent = 0;
-
-					// Convert to same format as sunTimes, for easier comparison. Add a minute, so that e.g. if sun rises at
-					// 07:38:17, then 07:38 is already consided daytime (seconds not shown to user).
-					var now = today.hour + ((today.min + 1) / 60.0);
-	        	
-	        		// Before sunrise today: today's sunrise is next.
-					if (now < sunTimes[0]) {
-						nextSunEvent = sunTimes[0];
-						drawSun(halfWidth - 25, 60, dc, false);
-					// After sunrise today, before sunset today: today's sunset is next.
-					} else if (now < sunTimes[1]) {
-						nextSunEvent = sunTimes[1];
-						drawSun(halfWidth - 25, 60, dc, true);
-					// After sunset today: tomorrow's sunrise (if any) is next.
-					} else {
-						sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ true);
-						nextSunEvent = sunTimes[0];
-						drawSun(halfWidth - 25, 60, dc, false);
-					}        		
-	      		      	
-			      	var hour = Math.floor(nextSunEvent).toLong() % 24;
-					var min = Math.floor((nextSunEvent - Math.floor(nextSunEvent)) * 60);
-					var value = getFormattedTime(hour, min); // App.getApp().getFormattedTime(hour, min);
-					value = value[:hour] + ":" + value[:min] + value[:amPm]; 			      	
-			        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
-			        dc.drawText(halfWidth - 5, 45, Gfx.FONT_XTINY, value, Gfx.TEXT_JUSTIFY_LEFT);
-	        	}
-			
-				dc.setPenWidth(Application.getApp().getProperty("DaylightProgessWidth"));
-				var rLocal=halfWidth - 2;
+			if ((sunTimes[0] != null) && (sunTimes[1] != null)) {     	        	
+				dc.setPenWidth(App.getApp().getProperty("DaylightProgessWidth"));
+				var rLocal = halfWidth - 2;
 				var lineStart = 270 - (sunTimes[0] * 15);
 				var lineEnd = 270 - (sunTimes[1] * 15);
-				dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
+				dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));
 				dc.drawArc(halfWidth, halfWidth, rLocal, Gfx.ARC_CLOCKWISE, lineStart, lineEnd);
 			
 				dc.setPenWidth(15);
 				var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
 				var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
 				var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder 
-				dc.setColor(Application.getApp().getProperty("CurrentTimePointer"), Application.getApp().getProperty("BackgroundColor"));
+				dc.setColor(App.getApp().getProperty("CurrentTimePointer"), App.getApp().getProperty("BackgroundColor"));
 				dc.drawArc(halfWidth, halfWidth, rLocal - 3, Gfx.ARC_CLOCKWISE, currTimeStart, currTimeEnd);			
         	}
-    	}
+    	}  
     }
-
-    // Called when this View is removed from the screen. Save the
-    // state of this View here. This includes freeing resources from
-    // memory.
-    function onHide() {
-    }
-
-    // The user has just looked at their watch. Timers and animations may be started here.
-    function onExitSleep() {
-    }
-
-    // Terminate any active timers and prepare for slow updates.
-    function onEnterSleep() {
+    
+   	// draw next sun event 
+    function drawSunsetSunriseTime(xPos, yPos, dc, today) {   
+	    if (gLocationLat != null) { 
+	    	var sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ false);	
+	    	if ((sunTimes[0] != null) && (sunTimes[1] != null)) {
+				var nextSunEvent = 0;
+				// Convert to same format as sunTimes, for easier comparison. Add a minute, so that e.g. if sun rises at
+				// 07:38:17, then 07:38 is already consided daytime (seconds not shown to user).
+				var now = today.hour + ((today.min + 1) / 60.0);
+			
+				// Before sunrise today: today's sunrise is next.
+				if (now < sunTimes[0]) {
+					nextSunEvent = sunTimes[0];
+					drawSun(xPos, yPos, dc, false);
+				// After sunrise today, before sunset today: today's sunset is next.
+				} else if (now < sunTimes[1]) {
+					nextSunEvent = sunTimes[1];
+					drawSun(xPos, yPos, dc, true);
+				// After sunset today: tomorrow's sunrise (if any) is next.
+				} else {
+					sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ true);
+					nextSunEvent = sunTimes[0];
+					drawSun(xPos, yPos, dc, false);
+				}        		
+		  		      	
+		      	var hour = Math.floor(nextSunEvent).toLong() % 24;
+				var min = Math.floor((nextSunEvent - Math.floor(nextSunEvent)) * 60);
+				var value = getFormattedTime(hour, min); // App.getApp().getFormattedTime(hour, min);
+				value = value[:hour] + ":" + value[:min] + value[:amPm]; 			      	
+		        dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+		        dc.drawText(halfWidth - 2, yPos - 15, Gfx.FONT_XTINY, value, Gfx.TEXT_JUSTIFY_LEFT);
+	        }
+        }
     }
     
     // Will draw bell if is alarm set
@@ -244,7 +299,7 @@ class SundanceView extends WatchUi.WatchFace {
     	if (settings.alarmCount > 0) {
     		var xPos = dc.getWidth() / 2;
     		var yPos = ((dc.getHeight() / 6).toNumber() * 4) + 2;
-    		dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+    		dc.setColor(App.getApp().getProperty("ForegroundColor"), App.getApp().getProperty("BackgroundColor"));
     		dc.fillCircle(xPos, yPos, 7);
     	
     		// stands
@@ -256,11 +311,11 @@ class SundanceView extends WatchUi.WatchFace {
     		dc.drawLine(xPos - 5, yPos - 7, xPos - 9, yPos - 3);
     		dc.drawLine(xPos + 6, yPos - 7, xPos + 10, yPos - 3);
     		
-    		dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+    		dc.setColor(App.getApp().getProperty("BackgroundColor"), App.getApp().getProperty("ForegroundColor"));
     		dc.fillCircle(xPos, yPos, 5);
     		
     		// hands
-    		dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+    		dc.setColor(App.getApp().getProperty("ForegroundColor"), App.getApp().getProperty("BackgroundColor"));
     		dc.drawLine(xPos, yPos, xPos, yPos - 5);
     		dc.drawLine(xPos, yPos, xPos - 2, yPos + 4);
       	}
@@ -269,7 +324,7 @@ class SundanceView extends WatchUi.WatchFace {
     // Draw the master dial 
     function drawDial(dc) {
     	// this part is draw the net over all display
-    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+    	dc.setColor(App.getApp().getProperty("ForegroundColor"), App.getApp().getProperty("BackgroundColor"));
       	dc.setPenWidth(2);
       	var halfScreen = dc.getWidth() / 2;
       	var pointX = 0;
@@ -284,14 +339,14 @@ class SundanceView extends WatchUi.WatchFace {
       		}
       	}
       	// hide the middle of the net to shows just pieces on the edge of the screen
-      	dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));     	
+      	dc.setColor(App.getApp().getProperty("BackgroundColor"), App.getApp().getProperty("ForegroundColor"));     	
       	dc.drawCircle(halfScreen, halfScreen, halfScreen - 1);
-      	dc.fillCircle(halfScreen, halfScreen, halfScreen - Application.getApp().getProperty("SmallHoursIndicatorSize"));
+      	dc.fillCircle(halfScreen, halfScreen, halfScreen - App.getApp().getProperty("SmallHoursIndicatorSize"));
       	
       	// draw the master pieces in 24, 12, 6, 18 hours point
       	var masterPointLen = 12;
       	var masterPointWid = 4; 
-      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+      	dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
       	dc.setPenWidth(masterPointWid);
       	dc.drawLine(halfScreen, 0, halfScreen, masterPointLen);
       	dc.drawLine(halfScreen, dc.getWidth(), halfScreen, dc.getWidth() - masterPointLen); 
@@ -307,7 +362,7 @@ class SundanceView extends WatchUi.WatchFace {
     
     // Draw numbers in the dial
     function drawNrDial(dc) {
-    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);   	
+    	dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);   	
     	
        	var angleDeg = 0;
     	var pointX = 0;
@@ -323,58 +378,50 @@ class SundanceView extends WatchUi.WatchFace {
 	      			      		
 	      		switch (nr + angleToNrCorrection) {
 	      			case 1:
-	      				dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 18, fnt01, "0", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 15, fnt01, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber(), pointY.toNumber() - 15, fnt01, "1", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 2:
-	      				dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 18, fnt02, "0", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 13, fnt02, "2", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 14, fnt02, "2", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 3:
-	      				dc.drawText(pointX.toNumber(), pointY.toNumber() - 18, fnt03, "0", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 12, fnt03, "3", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 15, fnt03, "3", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 4:
-	      				dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 17, fnt04, "0", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 9, fnt04, "4", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 12, fnt04, "4", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 5:
-	      				dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 18, fnt05, "0", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 10, fnt05, "5", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 14, fnt05, "5", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      		
 	      			case 7:
-	      				dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 6, fnt07, "0", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 16, fnt07, "7", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 12, fnt07, "7", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 8:
-	      				dc.drawText(pointX.toNumber() + 2, pointY.toNumber() - 6, fnt08, "0", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 14, fnt08, "8", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 10, fnt08, "8", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 9:
-	      				dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 5, fnt09, "0", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 8, pointY.toNumber() - 12, fnt09, "9", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 8, fnt09, "9", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 10:
-	      				dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 5, fnt10, "1", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 7, pointY.toNumber() - 9, fnt10, "0", Gfx.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber(), pointY.toNumber() - 7, fnt10, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 10, fnt10, "0", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      		
 	      			case 11:
-	      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 5, fnt11, "1", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 7, fnt11, "1", Gfx.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 6, fnt11, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 8, fnt11, "1", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 13:
-	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 7, fnt13, "1", Gfx.TEXT_JUSTIFY_CENTER);
-						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 4, fnt13, "3", Gfx.TEXT_JUSTIFY_CENTER);
+	      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 8, fnt13, "1", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 5, fnt13, "3", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 14:
@@ -431,7 +478,7 @@ class SundanceView extends WatchUi.WatchFace {
     	var radius = 8;
     	var penWidth = 2;
     	dc.setPenWidth(penWidth);
-    	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
+    	dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));
     	dc.fillCircle(posX, posY, radius);
     	dc.drawLine(posX - 12, posY + 1 , posX + 14, posY + 1);
     	
@@ -452,7 +499,7 @@ class SundanceView extends WatchUi.WatchFace {
 		dc.drawLine(posX + 10, posY - radius + 4, posX + radius + 5, posY - radius + 2);
     	
     	// hide second half of sun
-    	dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+    	dc.setColor(App.getApp().getProperty("BackgroundColor"), App.getApp().getProperty("ForegroundColor"));
     	dc.fillRectangle(posX - radius - 1, posY + penWidth, (radius * 2) + (penWidth * 2), radius);
     }
     
@@ -465,7 +512,8 @@ class SundanceView extends WatchUi.WatchFace {
       	if (is240dev) {	// 240x240 device correction
       		posY += 5;
       	}
-    	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
+    	dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));
+    	/*
     	dc.fillCircle(posX, posY, 2);	// left bottom
     	dc.fillCircle(posX, posY-8, 3); // left middle
     	dc.fillCircle(posX, posY-10, 3); // left top
@@ -473,8 +521,11 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.fillCircle(posX+12, posY-4, 2);	// right bottom
     	dc.fillCircle(posX+12, posY-12, 3); // right middle
     	dc.fillCircle(posX+12, posY-14, 3); // right top
+    	*/
     	
-    	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+    	dc.drawText(posX - 5, posY - 19, fntIcons, "0", Gfx.TEXT_JUSTIFY_LEFT);
+    	
+    	dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
     	var info = ActivityMonitor.getInfo();
     	var stepsCount = info.steps;
     	if (is240dev && (stepsCount > 999)){
@@ -487,7 +538,7 @@ class SundanceView extends WatchUi.WatchFace {
     function drawBtConnection(dc) {
     	if ((settings has : phoneConnected) && (settings.phoneConnected)) {
     		var radius = 5;
-    		dc.setColor(Gfx.COLOR_BLUE, Application.getApp().getProperty("BackgroundColor"));
+    		dc.setColor(Gfx.COLOR_BLUE, App.getApp().getProperty("BackgroundColor"));
        		dc.fillCircle((dc.getWidth() / 2) - 9, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) -(radius * 3), radius);	
    		}
     }
@@ -496,7 +547,7 @@ class SundanceView extends WatchUi.WatchFace {
     function drawNotification(dc) {
     	if ((settings has : notificationCount) && (settings.notificationCount)) {
     		var radius = 5;
-    		dc.setColor(Gfx.COLOR_RED, Application.getApp().getProperty("BackgroundColor"));
+    		dc.setColor(Gfx.COLOR_RED, App.getApp().getProperty("BackgroundColor"));
        		dc.fillCircle((dc.getWidth() / 2) + 6, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - (radius * 3), radius);	
    		} 
     }
@@ -504,11 +555,11 @@ class SundanceView extends WatchUi.WatchFace {
     // Returns formated date by settings
     function getFormatedDate() {
     	var ret = "";
-    	if (Application.getApp().getProperty("DateFormat") <= 3) {
+    	if (App.getApp().getProperty("DateFormat") <= 3) {
     		var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-    		if (Application.getApp().getProperty("DateFormat") == 1) {
+    		if (App.getApp().getProperty("DateFormat") == 1) {
     			ret = Lang.format("$1$ $2$ $3$", [today.day_of_week, today.day, today.month]);
-    		} else if (Application.getApp().getProperty("DateFormat") == 2) {
+    		} else if (App.getApp().getProperty("DateFormat") == 2) {
     			ret = Lang.format("$1$ $2$ $3$", [today.day_of_week, today.month, today.day]);
     		} else {
     			ret = Lang.format("$1$ $2$", [today.day_of_week, today.day]);
@@ -561,52 +612,56 @@ class SundanceView extends WatchUi.WatchFace {
 		var xPos = (dc.getWidth() / 2);
         var yPos = (dc.getHeight() / 5).toNumber(); //43;
         var radius = 9;
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+        dc.setColor(App.getApp().getProperty("ForegroundColor"), App.getApp().getProperty("BackgroundColor"));
         if (phase == 0) {
 	        dc.setPenWidth(2);
         	dc.drawCircle(xPos, yPos, radius);
         } else {
         	dc.fillCircle(xPos, yPos, radius);
         	if (phase == 1) {
-        		dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+        		dc.setColor(App.getApp().getProperty("BackgroundColor"), App.getApp().getProperty("ForegroundColor"));
         		dc.fillCircle(xPos - 5, yPos, radius);			
 			} else if (phase == 2) {
-				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+				dc.setColor(App.getApp().getProperty("BackgroundColor"), App.getApp().getProperty("ForegroundColor"));
         		dc.fillRectangle(xPos - radius, yPos - radius, radius, (radius * 2) + 2);		
 			} else if (phase == 3) {
 				dc.setPenWidth(8);
-				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+				dc.setColor(App.getApp().getProperty("BackgroundColor"), App.getApp().getProperty("ForegroundColor"));
 				dc.drawArc(xPos + 5, yPos, radius + 5, Gfx.ARC_CLOCKWISE, 270, 90);
 			} else if (phase == 5) {
 				dc.setPenWidth(8);
-				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+				dc.setColor(App.getApp().getProperty("BackgroundColor"), App.getApp().getProperty("ForegroundColor"));
 				dc.drawArc(xPos - 5, yPos, radius + 5, Gfx.ARC_CLOCKWISE, 90, 270);				
 			} else if (phase == 6) {
-				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+				dc.setColor(App.getApp().getProperty("BackgroundColor"), App.getApp().getProperty("ForegroundColor"));
         		dc.fillRectangle(xPos + (radius / 2) - 3, yPos - radius, radius, (radius * 2) + 2);
 			} else if (phase == 7) {
-				dc.setColor(Application.getApp().getProperty("BackgroundColor"), Application.getApp().getProperty("ForegroundColor"));
+				dc.setColor(App.getApp().getProperty("BackgroundColor"), App.getApp().getProperty("ForegroundColor"));
         		dc.fillCircle(xPos + 5, yPos, radius);	
 			}      	
         }
 	}
 	
 	// Draw battery witch % state
-	function drawBattery(dc) {
+	function drawBattery(xPos, yPos, dc, position) {
+		if (is240dev && (position == 3)) {
+			xPos -= 6;
+		}
+		if (is280dev && (position == 4)) {
+			xPos -= 8;
+		}
 		dc.setPenWidth(1);
 		if (System.getSystemStats().battery <= 10) {
-	      	dc.setColor(Gfx.COLOR_RED, Application.getApp().getProperty("BackgroundColor"));
+	      	dc.setColor(Gfx.COLOR_RED, App.getApp().getProperty("BackgroundColor"));
 		} else {
-	      	dc.setColor(Application.getApp().getProperty("ForegroundColor"), Application.getApp().getProperty("BackgroundColor"));
+	      	dc.setColor(App.getApp().getProperty("ForegroundColor"), App.getApp().getProperty("BackgroundColor"));
 		}
-      	var batStartX = (dc.getWidth() / 2) + 21; //151;
-      	var batteryStartY = ((dc.getHeight() / 6).toNumber() * 4) - 5;// 168;
       	if (dc.getWidth() == 280) {	// FENIX 6X correction
-      		batStartX += 10;
+      		xPos += 10;
       	}
       	var batteryWidth = 23;
-      	dc.drawRectangle(batStartX, batteryStartY, batteryWidth, 13);	// battery
- 		dc.drawRectangle(batStartX + batteryWidth, batteryStartY + 4, 2, 5);	// battery top
+      	dc.drawRectangle(xPos - 34, yPos + 4, batteryWidth, 13);	// battery
+ 		dc.drawRectangle(xPos + batteryWidth - 34, yPos + 8, 2, 5);	// battery top
  		var batteryColor = Gfx.COLOR_GREEN;
  		if (System.getSystemStats().battery <= 10) {
  			batteryColor = Gfx.COLOR_RED;
@@ -614,27 +669,25 @@ class SundanceView extends WatchUi.WatchFace {
  			batteryColor = Gfx.COLOR_ORANGE;
  		}
  		
- 		dc.setColor(batteryColor, Application.getApp().getProperty("BackgroundColor"));
+ 		dc.setColor(batteryColor, App.getApp().getProperty("BackgroundColor"));
  		var batteryState = ((System.getSystemStats().battery / 10) * 2).toNumber();
- 		dc.fillRectangle(batStartX + 1, batteryStartY + 1, batteryState + 1, 11);
+ 		dc.fillRectangle(xPos + 1 - 34, yPos + 5, batteryState + 1, 11);
  		
  		// x="180" y="164"
  		var batText = System.getSystemStats().battery.toNumber().toString() + "%";
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
- 		dc.drawText(batStartX + 29, batteryStartY - 4, Gfx.FONT_XTINY, batText, Gfx.TEXT_JUSTIFY_LEFT);		
+        dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+ 		dc.drawText(xPos + 29 - 34, yPos, Gfx.FONT_XTINY, batText, Gfx.TEXT_JUSTIFY_LEFT);		
 	}
 	
-	function  drawAltitude(dc) {        
-        var xPos = (dc.getWidth() / 13) * 7; // "140" 
-        var yPos = ((dc.getHeight() / 4).toNumber() * 3) - 6;  // "189"
-        dc.setColor(Application.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+	function  drawAltitude(xPos, yPos, dc) {        
+        dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
         dc.drawText(xPos, yPos, Gfx.FONT_XTINY, getAltitude(), Gfx.TEXT_JUSTIFY_CENTER);
         
-        // coordinates correction
+        // coordinates correction text to mountain picture
         xPos = xPos - 46;
         yPos = yPos + 2;
         dc.setPenWidth(2);
-    	dc.setColor(Application.getApp().getProperty("DaylightProgess"), Application.getApp().getProperty("BackgroundColor"));
+    	dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));
     	dc.drawLine(xPos + 1, yPos + 14, xPos + 5, yPos + 7);
     	dc.drawLine(xPos + 5, yPos + 7, xPos + 7, yPos + 10);
     	dc.drawLine(xPos + 7, yPos + 10, xPos + 11, yPos + 2);
