@@ -21,6 +21,7 @@ class SundanceView extends WatchUi.WatchFace {
 	const BATTERY = 6;
 	const ALTITUDE = 7;
 	const DISABLED = 100;
+	const PRESSURE_GRAPH_BORDER = 5;	// pressure border to change the graph in hPa
 	
 	// others
 	hidden var settings;
@@ -95,9 +96,10 @@ class SundanceView extends WatchUi.WatchFace {
         is280dev = (dc.getWidth() == 280); 
 
         halfWidth = dc.getWidth() / 2;
+        var yPosFor23 = ((dc.getHeight() / 6).toNumber() * 4) - 9;
         field1 = [halfWidth - 23, 60];
-        field2 = [(dc.getWidth() / 5) + 2, (dc.getHeight() / 13) * 9];		// on F6 [54, 180]
-        field3 = [halfWidth + 56, ((dc.getHeight() / 6).toNumber() * 4) - 9];		
+        field2 = [(dc.getWidth() / 5) + 2, yPosFor23];		
+        field3 = [halfWidth + 56, yPosFor23];		
         field4 = [(dc.getWidth() / 13) * 7, ((dc.getHeight() / 4).toNumber() * 3) - 6];		// on F6 [140, 189]          
     }
 
@@ -120,29 +122,15 @@ class SundanceView extends WatchUi.WatchFace {
     	var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
     	
         drawSunsetSunriseLine(field1[0], field1[1], dc, today);		// SUNSET / SUNRICE line
-      	    	
-      	if (App.getApp().getProperty("ShowAltitude")) {
-	     	drawAltitude(field4[0], field4[1], dc);
-      	}
-      	
-      	if (App.getApp().getProperty("ShowBattery")) {
-	      	drawBattery(field3[0], field3[1], dc, 3);
-      	}
-     	
-      	if (App.getApp().getProperty("AlarmIndicator")) {
+       	if (App.getApp().getProperty("AlarmIndicator")) {
 	      	drawBell(dc);
       	}
-      	
-      	if (App.getApp().getProperty("ShowNotificationAndConnection")) {
+       	if (App.getApp().getProperty("ShowNotificationAndConnection")) {
 	      	drawBtConnection(dc);
 	      	drawNotification(dc);      	
       	}
-      	
-      	if (App.getApp().getProperty("ShowSteps")) {
-	      	drawSteps(field2[0], field2[1], dc);
-      	}
-      	
-        // Get the current time and format it correctly
+      	    	
+        // TIME
         dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
         var timeFormat = "$1$:$2$";
         var hours = today.hour;
@@ -162,7 +150,8 @@ class SundanceView extends WatchUi.WatchFace {
         var timeString = Lang.format(timeFormat, [hours, today.min.format("%02d")]);       
 		dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - (Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2), Gfx.FONT_SYSTEM_NUMBER_HOT, timeString, Gfx.TEXT_JUSTIFY_CENTER);
         
-        if (App.getApp().getProperty("DateFormat") != 5) {
+        // DATE
+        if (App.getApp().getProperty("DateFormat") != DISABLED) {
 	        var dateString = getFormatedDate();
 	        dc.drawText((dc.getWidth() / 2), 65, Gfx.FONT_TINY, dateString, Gfx.TEXT_JUSTIFY_CENTER);    
         }
@@ -179,17 +168,47 @@ class SundanceView extends WatchUi.WatchFace {
         	break;
         }      
         
+        // FIELD 2
+        switch (App.getApp().getProperty("Opt2")) {
+        	case STEPS:
+    		drawSteps(field2[0], field2[1], dc);
+    		break;
+    		
+    		case HR:
+    		drawHr(field2[0], field2[1], dc, 2);
+    		break;      	
+        }      
+        
+        // FIELD 3
+        switch (App.getApp().getProperty("Opt3")) {        	
+        	case BATTERY:
+	        drawBattery(field3[0], field3[1], dc, 3);
+        	break;
+        	
+        	case HR:
+	        drawHr(field3[0], field3[1], dc, 3);
+			break;        	
+        }
         
         // FIELD 4
         switch (App.getApp().getProperty("Opt4")) {
-        	case HR:
-        	drawHr(field4[0], field4[1], dc);
+        	case ALTITUDE:
+        	drawAltitude(field4[0], field4[1], dc);
         	break;
         	
         	case BATTERY:
 	        drawBattery(field4[0], field4[1], dc, 4);
         	break;
+        	
+        	case HR:
+        	drawHr(field4[0], field4[1], dc, 4);
+        	break;
         }
+        var pressure = getPressure();
+        if (today.min == 0) {
+	        hadnlePressureHistorty(pressure);
+        }
+        System.println(getPressure().toString());
     }
 
     // Called when this View is removed from the screen. Save the
@@ -207,12 +226,22 @@ class SundanceView extends WatchUi.WatchFace {
     }
     
     // Draw current HR
-    function drawHr(xPos, yPos, dc) {
+    function drawHr(xPos, yPos, dc, position) {
+    	if (position == 2) {
+    		xPos += 32;
+    	}
+    	if (position == 3) {
+    		xPos += 14;
+    	}
      	dc.setColor(App.getApp().getProperty("DaylightProgess"), Gfx.COLOR_TRANSPARENT);
-    	dc.drawText(xPos - 49, yPos - 2, fntIcons, "3", Gfx.TEXT_JUSTIFY_LEFT);
+    	dc.drawText(xPos - 44, yPos - 3, fntIcons, "3", Gfx.TEXT_JUSTIFY_LEFT);
     	
     	dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
-        dc.drawText(xPos - 19, yPos, Gfx.FONT_XTINY, "110", Gfx.TEXT_JUSTIFY_LEFT);
+    	var hr = "--";
+    	if (Activity.getActivityInfo().currentHeartRate != null) {
+    		hr = Activity.getActivityInfo().currentHeartRate.toString();
+    	}   	
+        dc.drawText(xPos - 19, yPos, Gfx.FONT_XTINY, hr, Gfx.TEXT_JUSTIFY_LEFT);
     }
     
     function drawSunsetSunriseLine(xPos, yPos, dc, today) {
@@ -512,18 +541,8 @@ class SundanceView extends WatchUi.WatchFace {
       	if (is240dev) {	// 240x240 device correction
       		posY += 5;
       	}
-    	dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));
-    	/*
-    	dc.fillCircle(posX, posY, 2);	// left bottom
-    	dc.fillCircle(posX, posY-8, 3); // left middle
-    	dc.fillCircle(posX, posY-10, 3); // left top
-    	
-    	dc.fillCircle(posX+12, posY-4, 2);	// right bottom
-    	dc.fillCircle(posX+12, posY-12, 3); // right middle
-    	dc.fillCircle(posX+12, posY-14, 3); // right top
-    	*/
-    	
-    	dc.drawText(posX - 5, posY - 19, fntIcons, "0", Gfx.TEXT_JUSTIFY_LEFT);
+    	dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));    	
+    	dc.drawText(posX - 4, posY - 4, fntIcons, "0", Gfx.TEXT_JUSTIFY_LEFT);
     	
     	dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
     	var info = ActivityMonitor.getInfo();
@@ -531,7 +550,7 @@ class SundanceView extends WatchUi.WatchFace {
     	if (is240dev && (stepsCount > 999)){
     		stepsCount = (info.steps / 1000.0).format("%.1f").toString() + "k";
     	}
-		dc.drawText(posX + 22, posY - 16, Gfx.FONT_XTINY, stepsCount.toString(), Gfx.TEXT_JUSTIFY_LEFT);
+		dc.drawText(posX + 22, posY, Gfx.FONT_XTINY, stepsCount.toString(), Gfx.TEXT_JUSTIFY_LEFT);
     }
     
     // Draw BT connection status
@@ -679,7 +698,7 @@ class SundanceView extends WatchUi.WatchFace {
  		dc.drawText(xPos + 29 - 34, yPos, Gfx.FONT_XTINY, batText, Gfx.TEXT_JUSTIFY_LEFT);		
 	}
 	
-	function  drawAltitude(xPos, yPos, dc) {        
+	function drawAltitude(xPos, yPos, dc) {        
         dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
         dc.drawText(xPos, yPos, Gfx.FONT_XTINY, getAltitude(), Gfx.TEXT_JUSTIFY_CENTER);
         
@@ -692,6 +711,42 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.drawLine(xPos + 5, yPos + 7, xPos + 7, yPos + 10);
     	dc.drawLine(xPos + 7, yPos + 10, xPos + 11, yPos + 2);
     	dc.drawLine(xPos + 11, yPos + 2, xPos + 20, yPos + 15);
+	}
+	
+	// Draw the pressure state and current pressure
+	function drawPressure(xPos, yPos, dc, pressure, today) {
+		if (today.min == 0) {	// grap is redrawning only whole hour 
+			// TODO redraw graph
+			var pressure8 = app.getProperty("pressure8");
+			var pressure4 =  app.getProperty("pressure4");
+			var pressure1 = app.getProperty("pressure1");
+			if (pressure1 != null) {	// always should have at least pressure1 but test for sure
+				if (pressure4 == null) {	// if still dont have historical data, use the current data
+					pressure4 = pressure1;
+				}
+				if (pressure8 == null) {
+					pressure8 = pressure1;
+				}
+				
+				drawPressureGraph(xPos, yPos, figure);
+			}		
+		}	
+		dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
+		dc.drawText(xPos, yPos, Gfx.FONT_XTINY, pressure.toString(), Gfx.TEXT_JUSTIFY_LEFT);
+	}
+	
+	// Draw small pressure graph based on figure
+	// 0 - no change during last 8 hours - chnage don`t hit the PRESSURE_GRAPH_BORDER --
+	// 1 - the same first 4 hours, then down -\
+	// 2 - the same first 4 hours, then up -/
+	// 3 - still down \
+	// 4 - going down first 4 hours, then the same \_
+	// 5 - going down first 4 house, then up \/
+	// 6 - going up for first 4 hours, then down /\
+	// 7 - going up for first 4 hours, then the same /-
+	// 8 - stil going up /
+	function drawPressureGraph(xPos, yPos, figure) {
+		dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));
 	}
 	
 	// Returns altitude info with units
@@ -725,6 +780,61 @@ class SundanceView extends WatchUi.WatchFace {
 		
 		return value;
 	}
+	
+	// Returns pressure in hPa
+ 	function getPressure() {
+ 		var pressure = null;
+ 		var value = null;
+ 		// Avoid using ActivityInfo.ambientPressure, as this bypasses any manual pressure calibration e.g. on Fenix
+		// 5. Pressure is unlikely to change frequently, so there isn't the same concern with getting a "live" value,
+		// compared with HR. Use SensorHistory only.
+		if ((Toybox has :SensorHistory) && (Toybox.SensorHistory has :getPressureHistory)) {
+			var sample = SensorHistory.getPressureHistory(null).next();
+			if ((sample != null) && (sample.data != null)) {
+				pressure = sample.data;
+			}
+		}
+
+		if (pressure != null) {
+			pressure = pressure / 100; // Pa --> hPa;
+			value = pressure.format("%.0f"); // + "hPa";			
+		}
+		
+		return value;
+ 	}
+ 	
+ 	// Each hour is the pressure saved (durring last 8 hours) for creation a simple graph
+ 	// storing 8 variables but working just with 4 right now (8,4.1)
+ 	function hadnlePressureHistorty(pressure) {
+ 		if (app.getProperty("pressure7") != null) {
+ 			app.setProperty("pressure8", app.getProperty("pressure7"));
+ 		}
+ 		
+ 		if (app.getProperty("pressure6") != null) {
+ 			app.setProperty("pressure7", app.getProperty("pressure6"));
+ 		}
+ 		
+ 		if (app.getProperty("pressure5") != null) {
+ 			app.setProperty("pressure6", app.getProperty("pressure5"));
+ 		}
+ 		
+ 		if (app.getProperty("pressure4") != null) {
+ 			app.setProperty("pressure5", app.getProperty("pressure4"));
+ 		}
+ 	
+ 		if (app.getProperty("pressure3") != null) {
+ 			app.setProperty("pressure4", app.getProperty("pressure3"));
+ 		}
+ 	
+ 		if (app.getProperty("pressure2") != null) {
+ 			app.setProperty("pressure3", app.getProperty("pressure2"));
+ 		}
+ 	
+ 		if (app.getProperty("pressure1") != null) {
+ 			app.setProperty("pressure2", app.getProperty("pressure1"));
+ 		}	
+ 		app.setProperty("pressure1", pressure);
+ 	}
 	
 	/**
 	* With thanks to ruiokada. Adapted, then translated to Monkey C, from:
