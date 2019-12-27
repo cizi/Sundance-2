@@ -20,6 +20,7 @@ class SundanceView extends WatchUi.WatchFace {
 	const HR = 5;
 	const BATTERY = 6;
 	const ALTITUDE = 7;
+	const PRESSURE = 8;
 	const DISABLED = 100;
 	const PRESSURE_GRAPH_BORDER = 5;	// pressure border to change the graph in hPa
 	
@@ -33,6 +34,7 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var location = null;
 	hidden var gLocationLat = null;
     hidden var gLocationLng = null;
+    hidden var baroFigure = 0;
     
     hidden var fnt01 = null;
     hidden var fnt02 = null;
@@ -176,7 +178,11 @@ class SundanceView extends WatchUi.WatchFace {
     		
     		case HR:
     		drawHr(field2[0], field2[1], dc, 2);
-    		break;      	
+    		break;   
+    		
+    		case PRESSURE:      
+        	drawPressure(field2[0], field2[1], dc, getPressure(), today, 2);
+    		break;   	
         }      
         
         // FIELD 3
@@ -203,12 +209,16 @@ class SundanceView extends WatchUi.WatchFace {
         	case HR:
         	drawHr(field4[0], field4[1], dc, 4);
         	break;
+        	
+        	case PRESSURE:      
+        	drawPressure(field4[0], field4[1], dc, getPressure(), today, 4);
+        	break;
         }
-        var pressure = getPressure();
+        
+        // Logging pressure history all the time
         if (today.min == 0) {
-	        hadnlePressureHistorty(pressure);
+	        hadnlePressureHistorty(getPressure());
         }
-        System.println(getPressure().toString());
     }
 
     // Called when this View is removed from the screen. Save the
@@ -227,11 +237,15 @@ class SundanceView extends WatchUi.WatchFace {
     
     // Draw current HR
     function drawHr(xPos, yPos, dc, position) {
-    	if (position == 2) {
-    		xPos += 32;
+    	if ((position == 2) && is240dev) {
+    		xPos += 42;
+    	} else if ((position == 2) && is280dev) {
+    		xPos += 47;
+    	} else if (position == 2) {
+    		xPos += 37;
     	}
-    	if (position == 3) {
-    		xPos += 14;
+    	if ((position == 3) || (position == 4)) {
+    		xPos += 11;
     	}
      	dc.setColor(App.getApp().getProperty("DaylightProgess"), Gfx.COLOR_TRANSPARENT);
     	dc.drawText(xPos - 44, yPos - 3, fntIcons, "3", Gfx.TEXT_JUSTIFY_LEFT);
@@ -538,9 +552,6 @@ class SundanceView extends WatchUi.WatchFace {
       		posX -= 10;
       		posY += 2;
       	}
-      	if (is240dev) {	// 240x240 device correction
-      		posY += 5;
-      	}
     	dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));    	
     	dc.drawText(posX - 4, posY - 4, fntIcons, "0", Gfx.TEXT_JUSTIFY_LEFT);
     	
@@ -714,28 +725,52 @@ class SundanceView extends WatchUi.WatchFace {
 	}
 	
 	// Draw the pressure state and current pressure
-	function drawPressure(xPos, yPos, dc, pressure, today) {
-		if (today.min == 0) {	// grap is redrawning only whole hour 
-			// TODO redraw graph
+	function drawPressure(xPos, yPos, dc, pressure, today, position) {
+		if (today.min == 0) {	// grap is redrawning only whole hour
+			if (position == 2) {
+				xPos += 30;
+			}
 			var pressure8 = app.getProperty("pressure8");
-			var pressure4 =  app.getProperty("pressure4");
+			var pressure4 = app.getProperty("pressure4");
 			var pressure1 = app.getProperty("pressure1");
-			if (pressure1 != null) {	// always should have at least pressure1 but test for sure
-				if (pressure4 == null) {	// if still dont have historical data, use the current data
-					pressure4 = pressure1;
+			if (pressure1 != null) {	// always should have at least pressure1 but test it for sure
+				pressure1 = pressure1.toNumber();
+				pressure4 = (pressure4 == null ? pressure1 : pressure4.toNumber());	// if still dont have historical data, use the current data
+				pressure8 = (pressure8 == null ? pressure1 : pressure8.toNumber());
+				if ((pressure8 - pressure4).abs() < PRESSURE_GRAPH_BORDER) {	// baroFigure 1 OR 2
+					if ((pressure4 > pressure1) && ((pressure4 - pressure1) >= PRESSURE_GRAPH_BORDER)) { 	// baroFigure 1
+						baroFigure = 1;
+					}
+					if ((pressure1 > pressure4) && ((pressure1 - pressure4) >= PRESSURE_GRAPH_BORDER)) { 	// baroFigure 2
+						baroFigure = 2;
+					}
 				}
-				if (pressure8 == null) {
-					pressure8 = pressure1;
+				if ((pressure8 > pressure4) && ((pressure8 - pressure4) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 3, 4, 5
+					baroFigure = 4;
+					if ((pressure4 > pressure1) && ((pressure4 - pressure1) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 3
+						baroFigure = 3;
+					}
+					if ((pressure1 > pressure4) && ((pressure1 - pressure4) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 5
+						baroFigure = 5;
+					}
 				}
-				
-				drawPressureGraph(xPos, yPos, figure);
+				if ((pressure4 > pressure8) && ((pressure4 - pressure8) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 6, 7, 8
+					baroFigure = 7;
+					if ((pressure4 > pressure1) && ((pressure4 - pressure1) >= PRESSURE_GRAPH_BORDER)) {	// FIGIRE 6
+						baroFigure = 6;
+					}
+					if ((pressure1 > pressure4) && ((pressure1 - pressure4) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 8
+						baroFigure = 8;
+					}
+				}
 			}		
 		}	
+		drawPressureGraph(xPos - 34, yPos + 10, dc, baroFigure);
 		dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
-		dc.drawText(xPos, yPos, Gfx.FONT_XTINY, pressure.toString(), Gfx.TEXT_JUSTIFY_LEFT);
+		dc.drawText(xPos - 6, yPos, Gfx.FONT_XTINY, pressure.toString(), Gfx.TEXT_JUSTIFY_LEFT);
 	}
 	
-	// Draw small pressure graph based on figure
+	// Draw small pressure graph based on baroFigure
 	// 0 - no change during last 8 hours - chnage don`t hit the PRESSURE_GRAPH_BORDER --
 	// 1 - the same first 4 hours, then down -\
 	// 2 - the same first 4 hours, then up -/
@@ -745,8 +780,52 @@ class SundanceView extends WatchUi.WatchFace {
 	// 6 - going up for first 4 hours, then down /\
 	// 7 - going up for first 4 hours, then the same /-
 	// 8 - stil going up /
-	function drawPressureGraph(xPos, yPos, figure) {
+	function drawPressureGraph(xPos, yPos, dc, figure) {
+		dc.setPenWidth(2);
 		dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));
+		switch (figure) {
+			case 0:
+				dc.drawLine(xPos, yPos, xPos + 22, yPos);
+			break;
+				
+			case 1:
+				dc.drawLine(xPos, yPos, xPos + 11, yPos);
+				dc.drawLine(xPos + 11, yPos, xPos + 22, yPos + 9);
+			break;
+				
+			case 2:
+				dc.drawLine(xPos, yPos, xPos + 11, yPos);
+				dc.drawLine(xPos + 11, yPos, xPos + 22, yPos - 9);
+			break;
+			
+			case 3:
+				dc.drawLine(xPos, yPos - 9, xPos + 22, yPos + 9);
+			break;
+			
+			case 4: 
+				dc.drawLine(xPos, yPos - 9, xPos + 11, yPos);
+				dc.drawLine(xPos + 11, yPos, xPos + 22, yPos);
+			break;
+			
+			case 5:
+				dc.drawLine(xPos, yPos - 9, xPos + 11, yPos);
+				dc.drawLine(xPos + 11, yPos, xPos + 22, yPos - 9);
+			break;
+			
+			case 6:
+				dc.drawLine(xPos, yPos + 9, xPos + 11, yPos);
+				dc.drawLine(xPos + 11, yPos, xPos + 22, yPos + 9);
+			break;
+			
+			case 7:
+				dc.drawLine(xPos, yPos + 9, xPos + 11, yPos);
+				dc.drawLine(xPos + 11, yPos, xPos + 22, yPos);
+			break;
+			
+			case 8:
+				dc.drawLine(xPos, yPos + 9, xPos + 22, yPos - 9);
+			break;
+		}
 	}
 	
 	// Returns altitude info with units

@@ -20,6 +20,7 @@
     <string id="HR">HR</string>  
     <string id="Battery">Battery</string>  
     <string id="Altitude">Altitude</string>   
+    <string id="Pressure">Pressure</string>  
     
     <string id="MilitaryFormatTitle">Military Format for 24 Hour Time</string>
     <string id="DateFormatTitle">Date Format</string>
