@@ -134,23 +134,9 @@ class SundanceView extends WatchUi.WatchFace {
       	    	
         // TIME
         dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
-        var timeFormat = "$1$:$2$";
-        var hours = today.hour;
-        if (!System.getDeviceSettings().is24Hour) {
-        	var ampm = "AM";
-            if (hours > 12) {
-                hours = hours - 12;
-                ampm = "PM";
-            }      
-            dc.drawText(54, ((dc.getHeight() / 2) - Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2) + 2, Gfx.FONT_XTINY, ampm, Gfx.TEXT_JUSTIFY_CENTER);
-        } else {
-            if (App.getApp().getProperty("UseMilitaryFormat")) {
-                timeFormat = "$1$$2$";
-                hours = hours.format("%02d");
-            }
-        }
-        var timeString = Lang.format(timeFormat, [hours, today.min.format("%02d")]);       
-		dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - (Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2), Gfx.FONT_SYSTEM_NUMBER_HOT, timeString, Gfx.TEXT_JUSTIFY_CENTER);
+        var timeString = getFormattedTime(today.hour, today.min);        		
+		dc.drawText(54, ((dc.getHeight() / 2) - Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2) + 2, Gfx.FONT_XTINY, timeString[:amPmFull], Gfx.TEXT_JUSTIFY_CENTER);
+		dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - (Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2), Gfx.FONT_SYSTEM_NUMBER_HOT, timeString[:formatted], Gfx.TEXT_JUSTIFY_CENTER);
         
         // DATE
         if (App.getApp().getProperty("DateFormat") != DISABLED) {
@@ -330,7 +316,7 @@ class SundanceView extends WatchUi.WatchFace {
 		      	var hour = Math.floor(nextSunEvent).toLong() % 24;
 				var min = Math.floor((nextSunEvent - Math.floor(nextSunEvent)) * 60);
 				var value = getFormattedTime(hour, min); // App.getApp().getFormattedTime(hour, min);
-				value = value[:hour] + ":" + value[:min] + value[:amPm]; 			      	
+				value = value[:formatted] + value[:amPm]; 			      	
 		        dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
 		        dc.drawText(halfWidth - 2, yPos - 15, Gfx.FONT_XTINY, value, Gfx.TEXT_JUSTIFY_LEFT);
 	        }
@@ -433,7 +419,7 @@ class SundanceView extends WatchUi.WatchFace {
 	      			break;
 	      			
 	      			case 4:
-						dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 12, fnt04, "4", Gfx.TEXT_JUSTIFY_CENTER);
+						dc.drawText(pointX.toNumber() + 5, pointY.toNumber() - 13, fnt04, "4", Gfx.TEXT_JUSTIFY_CENTER);
 	      			break;
 	      			
 	      			case 5:
@@ -1033,7 +1019,10 @@ class SundanceView extends WatchUi.WatchFace {
 	// - min:  0-59.
 	function getFormattedTime(hour, min) {
 		var amPm = "";
-
+		var amPmFull = "";
+		var isMilitary = false;		
+		var timeFormat = "$1$:$2$";
+		
 		if (!System.getDeviceSettings().is24Hour) {
 			// #6 Ensure noon is shown as PM.
 			var isPm = (hour >= 12);
@@ -1043,19 +1032,30 @@ class SundanceView extends WatchUi.WatchFace {
 					hour = hour - 12;
 				}
 				amPm = "p";
+				amPmFull = "PM";
 			} else {				
 				// #27 Ensure midnight is shown as 12, not 00.
 				if (hour == 0) {
 					hour = 12;
 				}
 				amPm = "a";
+				amPmFull = "AM";
 			}
-		}
+		} else {
+            if (App.getApp().getProperty("UseMilitaryFormat")) {
+            	isMilitary = true;
+                timeFormat = "$1$$2$";
+                hour = hour.format("%02d");
+            }
+        }
 
 		return {
 			:hour => hour,
 			:min => min.format("%02d"),
-			:amPm => amPm
+			:amPm => amPm,
+			:amPmFull => amPmFull,
+			:isMilitary => isMilitary,
+			:formatted => Lang.format(timeFormat, [hour, min.format("%02d")])
 		};
 	}
 }
