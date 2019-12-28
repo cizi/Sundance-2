@@ -712,10 +712,10 @@ class SundanceView extends WatchUi.WatchFace {
 	
 	// Draw the pressure state and current pressure
 	function drawPressure(xPos, yPos, dc, pressure, today, position) {
-		if (today.min == 0) {	// grap is redrawning only whole hour
-			if (position == 2) {
+		if (position == 2) {
 				xPos += 30;
-			}
+		}
+		if (today.min == 0) {	// grap is redrawning only whole hour
 			var pressure8 = app.getProperty("pressure8");
 			var pressure4 = app.getProperty("pressure4");
 			var pressure1 = app.getProperty("pressure1");
