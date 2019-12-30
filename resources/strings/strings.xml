@@ -6,45 +6,66 @@
     <string id="ForegroundColorTitle">Text Color</string>
     <string id="DaylightProgessTitle">Daylight Progress Line Color (theme color)</string>
     <string id="DaylightProgessWidthTitle">Daylight Progress Line Width</string>
-    
+
     <string id="CurrentTimePointerTitle">Current Time pointer Color</string>
     <string id="CurrentTimePointerWidthTitle">Current Time pointer Width</string>
-    
+
     <string id="Opt1Title">Field 1</string>
+    <string id="Opt2Title">Field 2</string>
+    <string id="Opt3Title">Field 3</string>
+    <string id="Opt4Title">Field 4</string>
     <string id="MoonPhase">Moon Phase</string>
-    <string id="SunsetSunrise">Sunset / Sunrise</string>  
-    
+    <string id="SunsetSunrise">Sunset / Sunrise</string>
+    <string id="Steps">Today's steps</string>
+    <string id="HR">HR</string>
+    <string id="Battery">Battery</string>
+    <string id="Altitude">Altitude</string>
+    <string id="Pressure">Pressure</string>
+
     <string id="MilitaryFormatTitle">Military Format for 24 Hour Time</string>
     <string id="DateFormatTitle">Date Format</string>
-    
+
     <string id="DateFormat1">Day Date Month</string>
     <string id="DateFormat2">Day Month Date </string>
     <string id="DateFormat3">Day Date</string>
-    <string id="DateFormat4">Month / Date</string>    
-    
+    <string id="DateFormat4">Month / Date</string>
+
     <string id="ColorBlack">Black</string>
     <string id="ColorDarkGrey">Dark Gray</string>
     <string id="ColorWhite">White</string>
     <string id="ColorBlue">Blue</string>
     <string id="ColorRed">Red</string>
     <string id="ColorYellow">Yellow</string>
-    <string id="ColorLightGrey">Light Grey</string>          
-    <string id="ColorOrange">Orange</string>      
-    <string id="ColorGreen">Green</string>              
-    <string id="ColorDarkGreen">Dark Green</string>                
-    <string id="ColorDarkBlue">Dark Blue</string>        
-    <string id="ColorPink">Pink</string>    
-    
-    <string id="width6">6</string> 
-    <string id="width8">8</string> 
-    <string id="width10">10</string> 
-    <string id="width12">12</string> 
-    <string id="width14">14</string> 
-    <string id="width16">16</string> 
+    <string id="ColorLightGrey">Light Grey</string>
+    <string id="ColorOrange">Orange</string>
+    <string id="ColorGreen">Green</string>
+    <string id="ColorDarkGreen">Dark Green</string>
+    <string id="ColorDarkBlue">Dark Blue</string>
+    <string id="ColorPink">Pink</string>
+
+    <string id="width2">2</string>
+    <string id="width4">4</string>
+
+    <string id="width6">6</string>
+    <string id="width8">8</string>
+    <string id="width10">10</string>
+    <string id="width12">12</string>
+    <string id="width14">14</string>
+    <string id="width16">16</string>
     <string id="width18">18</string>
-  
-    
-    <string id="ShowNotificationAndConnectionTitle">Show connection and mobile event notification</string>   
-    <string id="OptionDisabled">Disabled</string> 
-       
+
+    <string id="ShowFullDiaTitle">Show full dial (included small hours indicators)</string>
+    <string id="ShowStepsTitle">Show today's step counter</string>
+    <string id="ShowAlarmIndicatorTitle">Show alarm indicator</string>
+    <string id="ShowBatteryTitle">Show battery state</string>
+    <string id="ShowAltitudeTitle">Show altitude</string>
+    <string id="ShowNotificationAndConnectionTitle">Show connection and notification indicator</string>
+    <string id="OptionDisabled">Disabled</string>
+
+    <string id="SmallHoursIndicatorSizeTitle">Small hour indicators size</string>
+    <string id="ShowGoldenBlueHoursTitle">Show 'Golden' and 'Blue' hours on dial</string>
+
+    <string id="GoldenHourColorTitle">Golden hours color</string>
+    <string id="BlueHourColorTitle">Blue hours color</string>
+
 </strings>

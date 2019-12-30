@@ -2,14 +2,4 @@
     <bitmap id="LauncherIcon" filename="launcher_icon.png" />
     <bitmap id="Bg" filename="images/bg.png" />
     <!-- <bitmap id="BgInvert" filename="images/bg_invert.png" /> -->
-   
-  <!-- Moon Phases -->
-  	  <bitmap id="MP0" filename="images/moonPhases/mp0.png" />
-  	  <bitmap id="MP1" filename="images/moonPhases/mp1.png" />
-  	  <bitmap id="MP2" filename="images/moonPhases/mp2.png" />
-  	  <bitmap id="MP3" filename="images/moonPhases/mp3.png" />
-  	  <bitmap id="MP4" filename="images/moonPhases/mp4.png" />
-  	  <bitmap id="MP5" filename="images/moonPhases/mp5.png" />
-      <bitmap id="MP6" filename="images/moonPhases/mp6.png" />
-      <bitmap id="MP7" filename="images/moonPhases/mp7.png" /> 
 </drawables>
