@@ -31,9 +31,8 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var is280dev;
 	
 	// Sunset / sunrise vars
+	hidden var sc;
 	hidden var location = null;
-	hidden var gLocationLat = null;
-    hidden var gLocationLng = null;
     hidden var baroFigure = 0;
     
     hidden var fnt01 = null;
@@ -67,6 +66,7 @@ class SundanceView extends WatchUi.WatchFace {
     function initialize() {    
         WatchFace.initialize();
         app = App.getApp();
+        sc = new SunCalc();
         
         fnt01 = WatchUi.loadResource(Rez.Fonts.fntSd01);
         fnt02 = WatchUi.loadResource(Rez.Fonts.fntSd02);
@@ -152,7 +152,7 @@ class SundanceView extends WatchUi.WatchFace {
         	break;
         	
         	case SUNSET_SUNSRISE:
-        		drawSunsetSunriseTime(field1[0], field1[1], dc, today);
+        		drawSunsetSunriseTime(field1[0], field1[1], dc);
         	break;
         }      
         
@@ -246,76 +246,133 @@ class SundanceView extends WatchUi.WatchFace {
     
     function drawSunsetSunriseLine(xPos, yPos, dc, today) {
     	// Get today's sunrise/sunset times in current time zone.
-        var location = Activity.getActivityInfo().currentLocation;
-        // System.println(location);
+        location = Activity.getActivityInfo().currentLocation;
         if (location) {
-	        location = location.toDegrees(); // Array of Doubles.
-        	gLocationLat = location[0].toFloat();
-			gLocationLng = location[1].toFloat();
-			
-			app.setProperty("LastLocationLat", gLocationLat);
-			app.setProperty("LastLocationLng", gLocationLng);						
+        	location = Activity.getActivityInfo().currentLocation.toRadians();
+			app.setProperty("location", location);					
 		} else {
-			var lat = app.getProperty("LastLocationLat");
-			if (lat != null) {
-				gLocationLat = lat;
-			}
-
-			var lng = app.getProperty("LastLocationLng");
-			if (lng != null) {
-				gLocationLng = lng;
-			}			
-        }        
-        if (gLocationLat != null) {
-        	var sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ false);
-        	// System.println(sunTimes[0]);
+			location =  app.getProperty("location");			
+        }   
+             
+        if (location != null) {
+        	var now = new Time.Moment(Time.now().value());
+	       	var sunrise = sc.calculate(now, location, SUNRISE);     	
+        	var sunset = sc.calculate(now, location, SUNSET); 
         	
-			if ((sunTimes[0] != null) && (sunTimes[1] != null)) {     	        	
+			if ((sunrise != null) && (sunset != null)) {     	        	
 				dc.setPenWidth(App.getApp().getProperty("DaylightProgessWidth"));
 				var rLocal = halfWidth - 2;
-				var lineStart = 270 - (sunTimes[0] * 15);
-				var lineEnd = 270 - (sunTimes[1] * 15);
-				dc.setColor(App.getApp().getProperty("DaylightProgess"), App.getApp().getProperty("BackgroundColor"));
-				dc.drawArc(halfWidth, halfWidth, rLocal, Gfx.ARC_CLOCKWISE, lineStart, lineEnd);
 			
-				dc.setPenWidth(15);
+				// BLUE & GOLDEN HOUR
+				if (App.getApp().getProperty("ShowGoldenBlueHours")) {
+					var blueAm = sc.calculate(now, location, BLUE_HOUR_AM);
+					var bluePm = sc.calculate(now, location, BLUE_HOUR_PM); 
+					drawDialLine(
+						halfWidth, 
+						halfWidth, 
+						rLocal, 
+						sc.momentToInfo(blueAm), 
+						sc.momentToInfo(bluePm), 
+						App.getApp().getProperty("DaylightProgessWidth"), 
+						App.getApp().getProperty("BlueHourColor"), 
+						dc
+					);
+					
+					// NORMAL SUN = GOLDEN COLOR
+					drawDialLine(
+						halfWidth, 
+						halfWidth, 
+						rLocal, 
+						sc.momentToInfo(sunrise), 
+						sc.momentToInfo(sunset), 
+						App.getApp().getProperty("DaylightProgessWidth"), 
+						App.getApp().getProperty("GoldenHourColor"), 
+						dc
+					);
+					
+					// GOLDEN = NORMAL COLOR
+					var goldenAm = sc.calculate(now, location, GOLDEN_HOUR_AM);
+					var goldenPm = sc.calculate(now, location, GOLDEN_HOUR_PM);					
+					drawDialLine(
+						halfWidth, 
+						halfWidth, 
+						rLocal, 
+						sc.momentToInfo(goldenAm), 
+						sc.momentToInfo(goldenPm), 
+						App.getApp().getProperty("DaylightProgessWidth"), 
+						App.getApp().getProperty("DaylightProgess"), 
+						dc
+					);					
+				} else { // JUST NORMAL SUN					
+					drawDialLine(
+						halfWidth, 
+						halfWidth, 
+						rLocal, 
+						sc.momentToInfo(sunrise), 
+						sc.momentToInfo(sunset), 
+						App.getApp().getProperty("DaylightProgessWidth"), 
+						App.getApp().getProperty("DaylightProgess"), 
+						dc
+					);
+				}
+			
+				// CURRENT TIME
+				dc.setPenWidth(App.getApp().getProperty("CurrentTimePointerWidth"));
 				var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
 				var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
 				var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder 
 				dc.setColor(App.getApp().getProperty("CurrentTimePointer"), App.getApp().getProperty("BackgroundColor"));
-				dc.drawArc(halfWidth, halfWidth, rLocal - 3, Gfx.ARC_CLOCKWISE, currTimeStart, currTimeEnd);			
+				dc.drawArc(halfWidth, halfWidth, rLocal - 3, Gfx.ARC_CLOCKWISE, currTimeStart, currTimeEnd);		
         	}
     	}  
     }
     
+    
+    // draw the line by the parametrs
+    function drawDialLine(arcX, arcY, radius, momentStart, momentEnd, penWidth, color, dc) {    
+    	var angleCoef = 15;
+    	dc.setPenWidth(penWidth);
+    	dc.setColor(color, App.getApp().getProperty("BackgroundColor"));
+    	
+    	var startDecimal = momentStart.hour + (momentStart.min.toDouble() / 60);				
+		var lineStart = 270 - (startDecimal * angleCoef);
+		
+		var endDecimal = momentEnd.hour + (momentEnd.min.toDouble() / 60);
+		var lineEnd = 270 - (endDecimal * angleCoef);
+    	
+		dc.drawArc(arcX, arcY, radius, Gfx.ARC_CLOCKWISE, lineStart, lineEnd);	
+    }
+    
+    
    	// draw next sun event 
-    function drawSunsetSunriseTime(xPos, yPos, dc, today) {   
-	    if (gLocationLat != null) { 
-	    	var sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ false);	
-	    	if ((sunTimes[0] != null) && (sunTimes[1] != null)) {
+    function drawSunsetSunriseTime(xPos, yPos, dc) {   
+	    if (location != null) {
+	   		var now = new Time.Moment(Time.now().value());
+	   		var sunrise = sc.calculate(now, location, SUNRISE);  
+	   		var sunset = sc.calculate(now, location, SUNSET);
+	    	if ((sunrise != null) && (sunset != null)) {
 				var nextSunEvent = 0;
 				// Convert to same format as sunTimes, for easier comparison. Add a minute, so that e.g. if sun rises at
-				// 07:38:17, then 07:38 is already consided daytime (seconds not shown to user).
-				var now = today.hour + ((today.min + 1) / 60.0);
-			
+				// 07:38:17, then 07:38 is already consided daytime (seconds not shown to user).				
+				now = now.add(new Time.Duration(60));
+				
 				// Before sunrise today: today's sunrise is next.
-				if (now < sunTimes[0]) {
-					nextSunEvent = sunTimes[0];
+				if (sunrise.compare(now) > 0) {		// now < sc.momentToInfo(sunrise)
+					nextSunEvent = sc.momentToInfo(sunrise);
 					drawSun(xPos, yPos, dc, false);
 				// After sunrise today, before sunset today: today's sunset is next.
-				} else if (now < sunTimes[1]) {
-					nextSunEvent = sunTimes[1];
+				} else if (sunset.compare(now) > 0) {	// now < sc.momentToInfo(sunset)
+					nextSunEvent = sc.momentToInfo(sunset);
 					drawSun(xPos, yPos, dc, true);
 				// After sunset today: tomorrow's sunrise (if any) is next.
 				} else {
-					sunTimes = getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ true);
-					nextSunEvent = sunTimes[0];
+					now = now.add(new Time.Duration(Gregorian.SECONDS_PER_DAY));
+					sunrise = sc.calculate(now, location, SUNRISE);  // getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ true);
+					nextSunEvent = sc.momentToInfo(sunrise);
 					drawSun(xPos, yPos, dc, false);
-				}        		
-		  		      	
-		      	var hour = Math.floor(nextSunEvent).toLong() % 24;
-				var min = Math.floor((nextSunEvent - Math.floor(nextSunEvent)) * 60);
-				var value = getFormattedTime(hour, min); // App.getApp().getFormattedTime(hour, min);
+				}    
+
+				var value = getFormattedTime(nextSunEvent.hour, nextSunEvent.min); // App.getApp().getFormattedTime(hour, min);
 				value = value[:formatted] + value[:amPm]; 			      	
 		        dc.setColor(App.getApp().getProperty("ForegroundColor"), Gfx.COLOR_TRANSPARENT);
 		        dc.drawText(halfWidth - 2, yPos - 15, Gfx.FONT_XTINY, value, Gfx.TEXT_JUSTIFY_LEFT);
@@ -388,6 +445,7 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.drawText(dc.getWidth() - 15, halfScreen - (Gfx.getFontHeight(Gfx.FONT_TINY) / 2) - 3, Gfx.FONT_TINY, "18", Gfx.TEXT_JUSTIFY_RIGHT);	// 18
     	dc.drawText(15, halfScreen - (Gfx.getFontHeight(Gfx.FONT_TINY) / 2) - 3, Gfx.FONT_TINY, "06", Gfx.TEXT_JUSTIFY_LEFT);	// 06
     }
+    
     
     // Draw numbers in the dial
     function drawNrDial(dc) {
@@ -502,6 +560,7 @@ class SundanceView extends WatchUi.WatchFace {
       	}
     }
     
+    
     // Draw sunset or sunrice image 
     function drawSun(posX, posY, dc, up) {
     	var radius = 8;
@@ -532,6 +591,7 @@ class SundanceView extends WatchUi.WatchFace {
     	dc.fillRectangle(posX - radius - 1, posY + penWidth, (radius * 2) + (penWidth * 2), radius);
     }
     
+    
     // Draw steps image
     function drawSteps(posX, posY, dc) {
     	if (dc.getWidth() == 280) {	// FENIX 6X correction
@@ -550,6 +610,7 @@ class SundanceView extends WatchUi.WatchFace {
 		dc.drawText(posX + 22, posY, Gfx.FONT_XTINY, stepsCount.toString(), Gfx.TEXT_JUSTIFY_LEFT);
     }
     
+    
     // Draw BT connection status
     function drawBtConnection(dc) {
     	if ((settings has : phoneConnected) && (settings.phoneConnected)) {
@@ -559,6 +620,7 @@ class SundanceView extends WatchUi.WatchFace {
    		}
     }
     
+    
     // Draw notification alarm
     function drawNotification(dc) {
     	if ((settings has : notificationCount) && (settings.notificationCount)) {
@@ -567,6 +629,7 @@ class SundanceView extends WatchUi.WatchFace {
        		dc.fillCircle((dc.getWidth() / 2) + 6, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - (radius * 3), radius);	
    		} 
     }
+   
     
     // Returns formated date by settings
     function getFormatedDate() {
@@ -588,41 +651,7 @@ class SundanceView extends WatchUi.WatchFace {
     	return ret;
     }
     
-    // Return one of 8 moon phase by date 
-    // 0 => New Moon
-    // 1 => Waxing Crescent Moon
-    // 2 => Quarter Moon
-    // 3 => Waning Gibbous Moon
-    // 4 => Full Moon
-    // 5 => Waxing Gibbous Moon
-    // 6 => Last Quarter Moon
-    // 7 => Waning Crescent Moon
-    function getMoonPhase(year, month, day) {
-	    var c = 0;
-	    var e = 0;
-	    var jd = 0;
-	    var b = 0;
-	
-	    if (month < 3) {
-	        year--;
-	        month += 12;
-	    }
-	
-	    ++month;
-	    c = 365.25 * year;  
-	    e = 30.6 * month;
-	    jd = c + e + day - 694039.09; //jd is total days elapsed
-	    jd /= 29.5305882; //divide by the moon cycle	
-	    b = jd.toNumber(); //int(jd) -> b, take integer part of jd
-	    jd -= b; //subtract integer part to leave fractional part of original jd
-	    b = Math.round(jd * 8).abs(); //scale fraction from 0-8 and round
-	    if (b >= 8 ) {
-	        b = 0; //0 and 8 are the same so turn 8 into 0
-	    }
-	    
-	    return b;
-	}
-	
+ 	
 	// Draw a moon by phase
 	function drawMoonPhase(dc, phase) {
 		var xPos = (dc.getWidth() / 2);
@@ -657,6 +686,7 @@ class SundanceView extends WatchUi.WatchFace {
 			}      	
         }
 	}
+	
 	
 	// Draw battery witch % state
 	function drawBattery(xPos, yPos, dc, position) {
@@ -716,9 +746,9 @@ class SundanceView extends WatchUi.WatchFace {
 				xPos += 30;
 		}
 		if (today.min == 0) {	// grap is redrawning only whole hour
-			var pressure8 = app.getProperty("pressure8");
-			var pressure4 = app.getProperty("pressure4");
-			var pressure1 = app.getProperty("pressure1");
+			var pressure8 = App.getProperty("pressure8");
+			var pressure4 = App.getProperty("pressure4");
+			var pressure1 = App.getProperty("pressure1");
 			if (pressure1 != null) {	// always should have at least pressure1 but test it for sure
 				pressure1 = pressure1.toNumber();
 				pressure4 = (pressure4 == null ? pressure1 : pressure4.toNumber());	// if still dont have historical data, use the current data
@@ -814,6 +844,86 @@ class SundanceView extends WatchUi.WatchFace {
 		}
 	}
 	
+	// Return a formatted time dictionary that respects is24Hour settings.
+	// - hour: 0-23.
+	// - min:  0-59.
+	function getFormattedTime(hour, min) {
+		var amPm = "";
+		var amPmFull = "";
+		var isMilitary = false;		
+		var timeFormat = "$1$:$2$";
+		
+		if (!System.getDeviceSettings().is24Hour) {
+			// #6 Ensure noon is shown as PM.
+			var isPm = (hour >= 12);
+			if (isPm) {				
+				// But ensure noon is shown as 12, not 00.
+				if (hour > 12) {
+					hour = hour - 12;
+				}
+				amPm = "p";
+				amPmFull = "PM";
+			} else {				
+				// #27 Ensure midnight is shown as 12, not 00.
+				if (hour == 0) {
+					hour = 12;
+				}
+				amPm = "a";
+				amPmFull = "AM";
+			}
+		} else {
+            if (App.getApp().getProperty("UseMilitaryFormat")) {
+            	isMilitary = true;
+                timeFormat = "$1$$2$";
+                hour = hour.format("%02d");
+            }
+        }
+
+		return {
+			:hour => hour,
+			:min => min.format("%02d"),
+			:amPm => amPm,
+			:amPmFull => amPmFull,
+			:isMilitary => isMilitary,
+			:formatted => Lang.format(timeFormat, [hour, min.format("%02d")])
+		};
+	}
+	
+	// Return one of 8 moon phase by date 
+    // 0 => New Moon
+    // 1 => Waxing Crescent Moon
+    // 2 => Quarter Moon
+    // 3 => Waning Gibbous Moon
+    // 4 => Full Moon
+    // 5 => Waxing Gibbous Moon
+    // 6 => Last Quarter Moon
+    // 7 => Waning Crescent Moon
+    function getMoonPhase(year, month, day) {
+	    var c = 0;
+	    var e = 0;
+	    var jd = 0;
+	    var b = 0;
+	
+	    if (month < 3) {
+	        year--;
+	        month += 12;
+	    }
+	
+	    ++month;
+	    c = 365.25 * year;  
+	    e = 30.6 * month;
+	    jd = c + e + day - 694039.09; //jd is total days elapsed
+	    jd /= 29.5305882; //divide by the moon cycle	
+	    b = jd.toNumber(); //int(jd) -> b, take integer part of jd
+	    jd -= b; //subtract integer part to leave fractional part of original jd
+	    b = Math.round(jd * 8).abs(); //scale fraction from 0-8 and round
+	    if (b >= 8 ) {
+	        b = 0; //0 and 8 are the same so turn 8 into 0
+	    }
+	    
+	    return b;
+	}
+	
 	// Returns altitude info with units
 	function getAltitude() {
 		// Note that Activity::Info.altitude is supported by CIQ 1.x, but elevation history only on select CIQ 2.x
@@ -899,163 +1009,5 @@ class SundanceView extends WatchUi.WatchFace {
  			app.setProperty("pressure2", app.getProperty("pressure1"));
  		}	
  		app.setProperty("pressure1", pressure);
- 	}
-	
-	/**
-	* With thanks to ruiokada. Adapted, then translated to Monkey C, from:
-	* https://gist.github.com/ruiokada/b28076d4911820ddcbbc
-	*
-	* Calculates sunrise and sunset in local time given latitude, longitude, and tz.
-	*
-	* Equations taken from:
-	* https://en.wikipedia.org/wiki/Julian_day#Converting_Julian_or_Gregorian_calendar_date_to_Julian_Day_Number
-	* https://en.wikipedia.org/wiki/Sunrise_equation#Complete_calculation_on_Earth
-	*
-	* @method getSunTimes
-	* @param {Float} lat Latitude of location (South is negative)
-	* @param {Float} lng Longitude of location (West is negative)
-	* @param {Integer || null} tz Timezone hour offset. e.g. Pacific/Los Angeles is -8 (Specify null for system timezone)
-	* @param {Boolean} tomorrow Calculate tomorrow's sunrise and sunset, instead of today's.
-	* @return {Array} Returns array of length 2 with sunrise and sunset as floats.
-	*                 Returns array with [null, -1] if the sun never rises, and [-1, null] if the sun never sets.
-	*/
-	private function getSunTimes(lat, lng, tz, tomorrow) {
-
-		// Use double precision where possible, as floating point errors can affect result by minutes.
-		lat = lat.toDouble();
-		lng = lng.toDouble();
-
-		var now = Time.now();
-		if (tomorrow) {
-			now = now.add(new Time.Duration(24 * 60 * 60));
-		}
-		var d = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-		var rad = Math.PI / 180.0d;
-		var deg = 180.0d / Math.PI;
-		
-		// Calculate Julian date from Gregorian.
-		var a = Math.floor((14 - d.month) / 12);
-		var y = d.year + 4800 - a;
-		var m = d.month + (12 * a) - 3;
-		var jDate = d.day
-			+ Math.floor(((153 * m) + 2) / 5)
-			+ (365 * y)
-			+ Math.floor(y / 4)
-			- Math.floor(y / 100)
-			+ Math.floor(y / 400)
-			- 32045;
-
-		// Number of days since Jan 1st, 2000 12:00.
-		var n = jDate - 2451545.0d + 0.0008d;
-		//Sys.println("n " + n);
-
-		// Mean solar noon.
-		var jStar = n - (lng / 360.0d);
-		//Sys.println("jStar " + jStar);
-
-		// Solar mean anomaly.
-		var M = 357.5291d + (0.98560028d * jStar);
-		var MFloor = Math.floor(M);
-		var MFrac = M - MFloor;
-		M = MFloor.toLong() % 360;
-		M += MFrac;
-		//Sys.println("M " + M);
-
-		// Equation of the centre.
-		var C = 1.9148d * Math.sin(M * rad)
-			+ 0.02d * Math.sin(2 * M * rad)
-			+ 0.0003d * Math.sin(3 * M * rad);
-		//Sys.println("C " + C);
-
-		// Ecliptic longitude.
-		var lambda = (M + C + 180 + 102.9372d);
-		var lambdaFloor = Math.floor(lambda);
-		var lambdaFrac = lambda - lambdaFloor;
-		lambda = lambdaFloor.toLong() % 360;
-		lambda += lambdaFrac;
-		//Sys.println("lambda " + lambda);
-
-		// Solar transit.
-		var jTransit = 2451545.5d + jStar
-			+ 0.0053d * Math.sin(M * rad)
-			- 0.0069d * Math.sin(2 * lambda * rad);
-		//Sys.println("jTransit " + jTransit);
-
-		// Declination of the sun.
-		var delta = Math.asin(Math.sin(lambda * rad) * Math.sin(23.44d * rad));
-		//Sys.println("delta " + delta);
-
-		// Hour angle.
-		var cosOmega = (Math.sin(-0.83d * rad) - Math.sin(lat * rad) * Math.sin(delta))
-			/ (Math.cos(lat * rad) * Math.cos(delta));
-		//Sys.println("cosOmega " + cosOmega);
-
-		// Sun never rises.
-		if (cosOmega > 1) {
-			return [null, -1];
-		}
-		
-		// Sun never sets.
-		if (cosOmega < -1) {
-			return [-1, null];
-		}
-		
-		// Calculate times from omega.
-		var omega = Math.acos(cosOmega) * deg;
-		var jSet = jTransit + (omega / 360.0);
-		var jRise = jTransit - (omega / 360.0);
-		var deltaJSet = jSet - jDate;
-		var deltaJRise = jRise - jDate;
-
-		var tzOffset = (tz == null) ? (System.getClockTime().timeZoneOffset / 3600) : tz;
-		return [
-			/* localRise */ (deltaJRise * 24) + tzOffset,
-			/* localSet */ (deltaJSet * 24) + tzOffset
-		];
-	}
-	
-	// Return a formatted time dictionary that respects is24Hour settings.
-	// - hour: 0-23.
-	// - min:  0-59.
-	function getFormattedTime(hour, min) {
-		var amPm = "";
-		var amPmFull = "";
-		var isMilitary = false;		
-		var timeFormat = "$1$:$2$";
-		
-		if (!System.getDeviceSettings().is24Hour) {
-			// #6 Ensure noon is shown as PM.
-			var isPm = (hour >= 12);
-			if (isPm) {				
-				// But ensure noon is shown as 12, not 00.
-				if (hour > 12) {
-					hour = hour - 12;
-				}
-				amPm = "p";
-				amPmFull = "PM";
-			} else {				
-				// #27 Ensure midnight is shown as 12, not 00.
-				if (hour == 0) {
-					hour = 12;
-				}
-				amPm = "a";
-				amPmFull = "AM";
-			}
-		} else {
-            if (App.getApp().getProperty("UseMilitaryFormat")) {
-            	isMilitary = true;
-                timeFormat = "$1$$2$";
-                hour = hour.format("%02d");
-            }
-        }
-
-		return {
-			:hour => hour,
-			:min => min.format("%02d"),
-			:amPm => amPm,
-			:amPmFull => amPmFull,
-			:isMilitary => isMilitary,
-			:formatted => Lang.format(timeFormat, [hour, min.format("%02d")])
-		};
-	}
+ 	}	
 }

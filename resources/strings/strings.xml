@@ -62,6 +62,10 @@
     <string id="ShowNotificationAndConnectionTitle">Show connection and notification indicator</string>   
     <string id="OptionDisabled">Disabled</string> 
       
-    <string id="SmallHoursIndicatorSizeTitle">Small hour indicators size</string>    
+    <string id="SmallHoursIndicatorSizeTitle">Small hour indicators size</string>   
+    <string id="ShowGoldenBlueHoursTitle">Show 'Golden' and 'Blue' hours on dial</string>
+    
+    <string id="GoldenHourColorTitle">Golden hours color</string>
+    <string id="BlueHourColorTitle">Blue hours color</string> 
        
 </strings>
