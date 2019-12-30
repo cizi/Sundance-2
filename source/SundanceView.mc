@@ -29,6 +29,10 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var app;
 	hidden var is240dev;
 	hidden var is280dev;
+	hidden var secPosX;
+	hidden var secPosY;
+	hidden var secFontWidth;
+	hidden var secFontHeight;
 
 	// Sunset / sunrise vars
 	hidden var sc;
@@ -98,6 +102,11 @@ class SundanceView extends WatchUi.WatchFace {
         is280dev = (dc.getWidth() == 280);
 
         halfWidth = dc.getWidth() / 2;
+        secFontHeight = Gfx.getFontHeight(Gfx.FONT_TINY);
+        secFontWidth = 22;
+        secPosX = dc.getWidth() - 15;
+        secPosY = halfWidth - (secFontHeight / 2) - 3;
+        
         var yPosFor23 = ((dc.getHeight() / 6).toNumber() * 4) - 9;
         field1 = [halfWidth - 23, 60];
         field2 = [(dc.getWidth() / 5) + 2, yPosFor23];
@@ -116,12 +125,12 @@ class SundanceView extends WatchUi.WatchFace {
     	// Call the parent onUpdate function to redraw the layout
         View.onUpdate(dc);
         settings = System.getDeviceSettings();
+    	var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
 
-      	drawDial(dc);												// main dial
+      	drawDial(dc, today);									// main dial
     	if (App.getApp().getProperty("ShowFullDial")) {		// subdial small numbers
 	    	drawNrDial(dc);
     	}
-    	var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
 
         drawSunsetSunriseLine(field1[0], field1[1], dc, today);		// SUNSET / SUNRICE line
        	if (App.getApp().getProperty("AlarmIndicator")) {
@@ -206,6 +215,18 @@ class SundanceView extends WatchUi.WatchFace {
 	        hadnlePressureHistorty(getPressure());
         }
     }
+    
+    
+    function onPartialUpdate(dc) {
+    	if (App.getApp().getProperty("ShowSeconds")) {
+    		dc.setClip(secPosX - secFontWidth, secPosY - 2, secFontWidth, secFontHeight);		
+			dc.setColor(App.getApp().getProperty("ForegroundColor"), App.getApp().getProperty("BackgroundColor"));	
+			dc.clear();	
+    		var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);   	
+    		dc.drawText(secPosX, secPosY, Gfx.FONT_TINY, today.sec.format("%02d"), Gfx.TEXT_JUSTIFY_RIGHT);	// seconds
+    	}
+    }
+
 
     // Called when this View is removed from the screen. Save the
     // state of this View here. This includes freeing resources from
@@ -408,7 +429,7 @@ class SundanceView extends WatchUi.WatchFace {
     }
 
     // Draw the master dial
-    function drawDial(dc) {
+    function drawDial(dc, today) {
     	// this part is draw the net over all display
     	dc.setColor(App.getApp().getProperty("ForegroundColor"), App.getApp().getProperty("BackgroundColor"));
       	dc.setPenWidth(2);
@@ -442,8 +463,13 @@ class SundanceView extends WatchUi.WatchFace {
     	// numbers
     	dc.drawText(halfScreen, masterPointLen - 3, Gfx.FONT_TINY, "12", Gfx.TEXT_JUSTIFY_CENTER);	// 12
     	dc.drawText(halfScreen, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - 11, Gfx.FONT_TINY, "24", Gfx.TEXT_JUSTIFY_CENTER);	// 24
-    	dc.drawText(dc.getWidth() - 15, halfScreen - (Gfx.getFontHeight(Gfx.FONT_TINY) / 2) - 3, Gfx.FONT_TINY, "18", Gfx.TEXT_JUSTIFY_RIGHT);	// 18
-    	dc.drawText(15, halfScreen - (Gfx.getFontHeight(Gfx.FONT_TINY) / 2) - 3, Gfx.FONT_TINY, "06", Gfx.TEXT_JUSTIFY_LEFT);	// 06
+    	dc.drawText(15, secPosY, Gfx.FONT_TINY, "06", Gfx.TEXT_JUSTIFY_LEFT);	// 06
+    	
+    	if (App.getApp().getProperty("ShowSeconds")) {
+    		dc.drawText(secPosX, secPosY, Gfx.FONT_TINY, today.sec.format("%02d"), Gfx.TEXT_JUSTIFY_RIGHT);	// seconds
+    	} else {
+    		dc.drawText(secPosX, secPosY, Gfx.FONT_TINY, "18", Gfx.TEXT_JUSTIFY_RIGHT);	// 18    	   	
+    	}
     }
 
 
@@ -746,9 +772,9 @@ class SundanceView extends WatchUi.WatchFace {
 				xPos += 30;
 		}
 		if (today.min == 0) {	// grap is redrawning only whole hour
-			var pressure8 = App.getProperty("pressure8");
-			var pressure4 = App.getProperty("pressure4");
-			var pressure1 = App.getProperty("pressure1");
+			var pressure8 = app.getProperty("pressure8");
+			var pressure4 = app.getProperty("pressure4");
+			var pressure1 = app.getProperty("pressure1");
 			if (pressure1 != null) {	// always should have at least pressure1 but test it for sure
 				pressure1 = pressure1.toNumber();
 				pressure4 = (pressure4 == null ? pressure1 : pressure4.toNumber());	// if still dont have historical data, use the current data

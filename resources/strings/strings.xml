@@ -67,5 +67,7 @@
 
     <string id="GoldenHourColorTitle">Golden hours color</string>
     <string id="BlueHourColorTitle">Blue hours color</string>
+    
+    <string id="ShowSecondsTitle">Show seconds (cause more battery drain)</string>
 
 </strings>

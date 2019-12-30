@@ -27,5 +27,7 @@
 
     <property id="BlueHourColor" type="number">0x0000FF</property>
     <property id="GoldenHourColor" type="number">0xFF5500</property>
-
+    
+    <property id="ShowSeconds" type="boolean">true</property>
+    
 </properties>

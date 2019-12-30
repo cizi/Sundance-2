@@ -23,6 +23,10 @@
             <listEntry value="5">@Strings.OptionDisabled</listEntry>
         </settingConfig>
     </setting>
+    
+    <setting propertyKey="@Properties.ShowSeconds" title="@Strings.ShowSecondsTitle">
+        <settingConfig type="boolean" />
+    </setting>
 
     <setting propertyKey="@Properties.Opt1" title="@Strings.Opt1Title">
         <settingConfig type="list">
