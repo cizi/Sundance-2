@@ -21,6 +21,7 @@
     <string id="Battery">Battery</string>
     <string id="Altitude">Altitude</string>
     <string id="Pressure">Pressure</string>
+    <string id="Floors">Floors</string>
 
     <string id="MilitaryFormatTitle">Military Format for 24 Hour Time</string>
     <string id="DateFormatTitle">Date Format</string>
@@ -53,6 +54,7 @@
     <string id="width14">14</string>
     <string id="width16">16</string>
     <string id="width18">18</string>
+	<string id="width20">20</string>
 
     <string id="ShowFullDiaTitle">Show full dial (included small hours indicators)</string>
     <string id="ShowStepsTitle">Show today's step counter</string>
@@ -68,6 +70,7 @@
     <string id="GoldenHourColorTitle">Golden hours color</string>
     <string id="BlueHourColorTitle">Blue hours color</string>
     
-    <string id="ShowSecondsTitle">Show seconds (cause more battery drain)</string>
+    <string id="ShowSecondsTitle">Show seconds (causes more battery drain)</string>
+    <string id="NightModeTitle">Night mode (better readability after sunset)</string>
 
 </strings>

@@ -27,6 +27,10 @@
     <setting propertyKey="@Properties.ShowSeconds" title="@Strings.ShowSecondsTitle">
         <settingConfig type="boolean" />
     </setting>
+    
+    <setting propertyKey="@Properties.NightMode" title="@Strings.NightModeTitle">
+        <settingConfig type="boolean" />
+    </setting>
 
     <setting propertyKey="@Properties.Opt1" title="@Strings.Opt1Title">
         <settingConfig type="list">
@@ -38,6 +42,7 @@
 
     <setting propertyKey="@Properties.Opt2" title="@Strings.Opt2Title">
         <settingConfig type="list">
+        	<listEntry value="2">@Strings.Floors</listEntry>
             <listEntry value="4">@Strings.Steps</listEntry>
             <listEntry value="5">@Strings.HR</listEntry>
             <listEntry value="8">@Strings.Pressure</listEntry>
@@ -47,6 +52,8 @@
 
     <setting propertyKey="@Properties.Opt3" title="@Strings.Opt3Title">
         <settingConfig type="list">
+        	<listEntry value="2">@Strings.Floors</listEntry>
+        	<listEntry value="4">@Strings.Steps</listEntry>
             <listEntry value="5">@Strings.HR</listEntry>
             <listEntry value="6">@Strings.Battery</listEntry>
             <listEntry value="100">@Strings.OptionDisabled</listEntry>
@@ -55,6 +62,8 @@
 
     <setting propertyKey="@Properties.Opt4" title="@Strings.Opt4Title">
         <settingConfig type="list">
+        	<listEntry value="2">@Strings.Floors</listEntry>
+        	<listEntry value="4">@Strings.Steps</listEntry>
             <listEntry value="5">@Strings.HR</listEntry>
             <listEntry value="6">@Strings.Battery</listEntry>
             <listEntry value="7">@Strings.Altitude</listEntry>
@@ -146,10 +155,14 @@
 
     <setting propertyKey="@Properties.CurrentTimePointerWidth" title="@Strings.CurrentTimePointerWidthTitle">
         <settingConfig type="list">
+        	<listEntry value="4">@Strings.width4</listEntry>
+            <listEntry value="8">@Strings.width8</listEntry>
+            <listEntry value="10">@Strings.width10</listEntry>
             <listEntry value="12">@Strings.width12</listEntry>
             <listEntry value="14">@Strings.width14</listEntry>
             <listEntry value="16">@Strings.width16</listEntry>
             <listEntry value="18">@Strings.width18</listEntry>
+            <listEntry value="20">@Strings.width20</listEntry>
         </settingConfig>
     </setting>
 
