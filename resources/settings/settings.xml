@@ -38,7 +38,10 @@
             <listEntry value="1">@Strings.SunsetSunrise</listEntry>
             <listEntry value="2">@Strings.Floors</listEntry>
             <listEntry value="4">@Strings.Steps</listEntry>
+            <listEntry value="5">@Strings.HR</listEntry>
             <listEntry value="6">@Strings.Battery</listEntry>
+            <listEntry value="7">@Strings.Altitude</listEntry>
+            <listEntry value="8">@Strings.Pressure</listEntry>
             <listEntry value="100">@Strings.OptionDisabled</listEntry>
         </settingConfig>
     </setting>

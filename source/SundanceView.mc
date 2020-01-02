@@ -187,9 +187,21 @@ class SundanceView extends WatchUi.WatchFace {
 	        drawBattery(field1[0], field1[1], dc, 1);
         	break;
         	
+        	case HR:
+    		drawHr(field1[0], field1[1], dc, 1);
+    		break;
+        	
+        	case PRESSURE:
+        	drawPressure(field1[0], field1[1], dc, getPressure(), today, 1);
+    		break;
+        	
         	case STEPS:
     		drawSteps(field1[0], field1[1], dc, 1);
     		break;
+    		
+    		case ALTITUDE:
+        	drawAltitude(field1[0], field1[1], dc, 1);
+        	break;
     		
     		case FLOORS:
         	drawFloors(field1[0], field1[1], dc, 1);
@@ -311,6 +323,10 @@ class SundanceView extends WatchUi.WatchFace {
 
     // Draw current HR
     function drawHr(xPos, yPos, dc, position) {
+    	if (position == 1) {
+    		xPos += 44;
+    		yPos = (is240dev ? yPos - 18 : yPos - 16);
+    	}
     	if ((position == 2) && is240dev) {
     		xPos += 42;
     	} else if ((position == 2) && is280dev) {
@@ -496,9 +512,7 @@ class SundanceView extends WatchUi.WatchFace {
 			} else {
 				isNight = true;
 			}
-		} else {
-			isNight = false;
-		}
+		} 
 		
 		return isNight;
     }
@@ -893,6 +907,10 @@ class SundanceView extends WatchUi.WatchFace {
 
 	// draw altitude
 	function drawAltitude(xPos, yPos, dc, position) {
+		if (position == 1) {
+    		xPos = (is240dev ? xPos + 32 : xPos + 34);
+    		yPos = (is240dev ? yPos - 18 : yPos - 16);
+    	}
 		if (position == 2) {
 			xPos = ((is240dev || is280dev) ? xPos + 42 : xPos + 40);
 		}
@@ -922,6 +940,10 @@ class SundanceView extends WatchUi.WatchFace {
 
 	// Draw the pressure state and current pressure
 	function drawPressure(xPos, yPos, dc, pressure, today, position) {
+		if (position == 1) {
+    		xPos += 30;
+    		yPos = (is240dev ? yPos - 18 : yPos - 16);
+    	}
 		if (position == 2) {
 			xPos += 30;
 		}
