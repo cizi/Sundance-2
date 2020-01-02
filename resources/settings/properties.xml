@@ -18,10 +18,7 @@
     <property id="DateFormat" type="number">1</property>
 
     <property id="ShowFullDial" type="boolean">true</property>
-    <property id="ShowSteps" type="boolean">true</property>
     <property id="AlarmIndicator" type="boolean">true</property>
-    <property id="ShowBattery" type="boolean">true</property>
-    <property id="ShowAltitude" type="boolean">true</property>
     <property id="ShowNotificationAndConnection" type="boolean">true</property>
     <property id="UseMilitaryFormat" type="boolean">false</property>
 
