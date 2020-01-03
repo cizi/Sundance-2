@@ -17,6 +17,7 @@
     <string id="MoonPhase">Moon Phase</string>
     <string id="SunsetSunrise">Sunset / Sunrise</string>
     <string id="Steps">Today's steps</string>
+    <string id="Calories">Today's calories (kCal)</string>
     <string id="HR">HR</string>
     <string id="Battery">Battery</string>
     <string id="Altitude">Altitude</string>

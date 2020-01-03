@@ -16,7 +16,7 @@ class SunCalc {
         -18 * RAD,    // ASTRO_DAWN
         -12 * RAD,    // NAUTIC_DAWN
         -6 * RAD,     // DAWN
-        -4 * RAD,     // BLUE_HOUR
+        -5 * RAD,     // BLUE_HOUR (-4 original)
         -0.833 * RAD, // SUNRISE
         -0.3 * RAD,   // SUNRISE_END
         6 * RAD,      // GOLDEN_HOUR_AM
@@ -24,7 +24,7 @@ class SunCalc {
         6 * RAD,
         -0.3 * RAD,
         -0.833 * RAD,
-        -4 * RAD,
+        -5 * RAD,		// eddited -4 oroginal
         -6 * RAD,
         -12 * RAD,
         -18 * RAD

@@ -17,6 +17,7 @@ class SundanceView extends WatchUi.WatchFace {
 	const MOON_PHASE = 0;
 	const SUNSET_SUNSRISE = 1;
 	const FLOORS = 2;
+	const CALORIES = 3;
 	const STEPS = 4;
 	const HR = 5;
 	const BATTERY = 6;
@@ -152,13 +153,6 @@ class SundanceView extends WatchUi.WatchFace {
     	}
 
         drawSunsetSunriseLine(field1[0], field1[1], dc, today, suntimes[:sunrise], suntimes[:sunset]);		// SUNSET / SUNRICE line
-       	if (App.getApp().getProperty("AlarmIndicator")) {
-	      	drawBell(dc);
-      	}
-       	if (App.getApp().getProperty("ShowNotificationAndConnection")) {
-	      	drawBtConnection(dc);
-	      	drawNotification(dc);
-      	}
 
         // TIME
         dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
@@ -176,11 +170,11 @@ class SundanceView extends WatchUi.WatchFace {
         switch (App.getApp().getProperty("Opt1")) {
         	case MOON_PHASE:
     		today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-    		drawMoonPhase(dc, getMoonPhase(today.year, today.month, today.day));
+    		drawMoonPhase(halfWidth, (dc.getHeight() / 5).toNumber(), dc, getMoonPhase(today.year, today.month, today.day), 1);
         	break;
 
         	case SUNSET_SUNSRISE:
-    		drawSunsetSunriseTime(field1[0], field1[1], dc);
+    		drawSunsetSunriseTime(field1[0], field1[1], dc, 1);
         	break;
         	
         	case BATTERY:
@@ -206,13 +200,26 @@ class SundanceView extends WatchUi.WatchFace {
     		case FLOORS:
         	drawFloors(field1[0], field1[1], dc, 1);
         	break;
+        	
+        	case CALORIES:
+    		drawCalories(field1[0], field1[1], dc, 1);
+    		break;
         }
 
         // FIELD 2
         switch (App.getApp().getProperty("Opt2")) {
+        	case MOON_PHASE:
+    		today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+    		drawMoonPhase(field2[0], field2[1], dc, getMoonPhase(today.year, today.month, today.day), 2);
+        	break;
+        	
         	case FLOORS:
         	drawFloors(field2[0], field2[1], dc, 2);
         	break;
+        	
+        	case CALORIES:
+    		drawCalories(field2[0], field2[1], dc, 2);
+    		break;
         
         	case STEPS:
     		drawSteps(field2[0], field2[1], dc, 2);
@@ -237,9 +244,18 @@ class SundanceView extends WatchUi.WatchFace {
 
         // FIELD 3
         switch (App.getApp().getProperty("Opt3")) {
+        	case MOON_PHASE:
+    		today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+    		drawMoonPhase(field3[0], field3[1], dc, getMoonPhase(today.year, today.month, today.day), 3);
+        	break;
+        
         	case FLOORS:
         	drawFloors(field3[0], field3[1], dc, 3);
         	break;
+        	
+        	case CALORIES:
+    		drawCalories(field3[0], field3[1], dc, 3);
+    		break;
         	
         	case STEPS:
     		drawSteps(field3[0], field3[1], dc, 3);
@@ -264,9 +280,22 @@ class SundanceView extends WatchUi.WatchFace {
 
         // FIELD 4
         switch (App.getApp().getProperty("Opt4")) {
+        	case MOON_PHASE:
+    		today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+    		drawMoonPhase(halfWidth, field4[1], dc, getMoonPhase(today.year, today.month, today.day), 4);
+        	break;
+        	
+        	case SUNSET_SUNSRISE:
+    		drawSunsetSunriseTime(field4[0], field4[1], dc, 4);
+        	break;
+        
         	case FLOORS:
         	drawFloors(field4[0], field4[1], dc, 4);
         	break; 
+        	
+        	case CALORIES:
+    		drawCalories(field4[0], field4[1], dc, 4);
+    		break;
         	
         	case STEPS:
     		drawSteps(field4[0], field4[1], dc, 4);
@@ -288,6 +317,14 @@ class SundanceView extends WatchUi.WatchFace {
         	drawPressure(field4[0], field4[1], dc, getPressure(), today, 4);
         	break;
         }
+        
+        if (App.getApp().getProperty("ShowNotificationAndConnection")) {
+	      	drawBtConnection(dc);
+	      	drawNotification(dc);
+      	}
+      	if (App.getApp().getProperty("AlarmIndicator")) {
+	      	drawBell(dc);
+      	}
 
         // Logging pressure history all the time
         if (today.min == 0) {
@@ -461,8 +498,13 @@ class SundanceView extends WatchUi.WatchFace {
 
 
    	// draw next sun event
-    function drawSunsetSunriseTime(xPos, yPos, dc) {
+    function drawSunsetSunriseTime(xPos, yPos, dc, position) {
 	    if (location != null) {
+	    	if (position == 4) {
+	    		xPos -= 30;
+	    		yPos += 14;
+	    	}
+	    
 	   		var now = new Time.Moment(Time.now().value());
 	   		var sunrise = sc.calculate(now, location, SUNRISE);
 	   		var sunset = sc.calculate(now, location, SUNSET);
@@ -491,7 +533,7 @@ class SundanceView extends WatchUi.WatchFace {
 				var value = getFormattedTime(nextSunEvent.hour, nextSunEvent.min); // App.getApp().getFormattedTime(hour, min);
 				value = value[:formatted] + value[:amPm];
 		        dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
-		        dc.drawText(halfWidth - 2, yPos - 15, Gfx.FONT_XTINY, value, Gfx.TEXT_JUSTIFY_LEFT);
+		        dc.drawText(xPos + 20, yPos - 15, Gfx.FONT_XTINY, value, Gfx.TEXT_JUSTIFY_LEFT);
 	        }
         }
     }
@@ -524,6 +566,7 @@ class SundanceView extends WatchUi.WatchFace {
     		var yPos = ((dc.getHeight() / 6).toNumber() * 4) + 2;
     		dc.setColor(frColor, bgColor);
     		dc.fillCircle(xPos, yPos, 7);
+    		// dc.drawText(posX - 10, posY - 18, fntIcons, ":", Gfx.TEXT_JUSTIFY_LEFT); 
 
     		// stands
     		dc.setPenWidth(3);
@@ -710,7 +753,15 @@ class SundanceView extends WatchUi.WatchFace {
 
     // Draw sunset or sunrice image
     function drawSun(posX, posY, dc, up) {
-    	var radius = 8;
+    	dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
+    	if (up) {
+    		dc.drawText(posX - 10, posY - 18, fntIcons, "?", Gfx.TEXT_JUSTIFY_LEFT); 
+    	} else {	// down
+    		dc.drawText(posX - 10, posY - 18, fntIcons, ">", Gfx.TEXT_JUSTIFY_LEFT); 
+    	}
+    	
+    	
+    	/*var radius = 8;
     	var penWidth = 2;
     	dc.setPenWidth(penWidth);
     	dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
@@ -736,6 +787,7 @@ class SundanceView extends WatchUi.WatchFace {
     	// hide second half of sun
     	dc.setColor(bgColor, frColor);
     	dc.fillRectangle(posX - radius - 1, posY + penWidth, (radius * 2) + (penWidth * 2), radius);
+    	*/
     }
 
 
@@ -777,21 +829,44 @@ class SundanceView extends WatchUi.WatchFace {
       		posX = (is240dev ? (posX - 25) : (posX - 28));
       	}
       	
-    	dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
+    	dc.setColor(App.getApp().getProperty("DaylightProgess"), Gfx.COLOR_TRANSPARENT);
     	dc.drawText(posX - 4, posY - 4, fntIcons, "1", Gfx.TEXT_JUSTIFY_LEFT);
 
     	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
     	var info = ActivityMonitor.getInfo();
 		dc.drawText(posX + 22, posY, Gfx.FONT_XTINY, info.floorsClimbed.toString(), Gfx.TEXT_JUSTIFY_LEFT);
     }
+    
+    
+    // Draw calories per day
+    function drawCalories(posX, posY, dc, position) {   	 
+    	if (position == 1) {
+    		posX += 2;
+    		posY = (is240dev ? posY - 18 : posY - 16);
+    	}    	
+		if (position == 3) {
+			posX = (is240dev ? (posX - 38) : (posX - 32));
+      	}
+      	if (position == 4) {
+      		posX = (is240dev ? (posX - 32) : (posX - 28));
+      	}
+      	
+    	dc.setColor(App.getApp().getProperty("DaylightProgess"), Gfx.COLOR_TRANSPARENT);
+    	dc.drawText(posX - 2, posY - 4, fntIcons, "6", Gfx.TEXT_JUSTIFY_LEFT);
+
+    	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
+    	var info = ActivityMonitor.getInfo();
+		dc.drawText(posX + 20, posY, Gfx.FONT_XTINY, info.calories.toString(), Gfx.TEXT_JUSTIFY_LEFT);
+    }
 
 
     // Draw BT connection status
     function drawBtConnection(dc) {
     	if ((settings has : phoneConnected) && (settings.phoneConnected)) {
-    		var radius = 5;
-    		dc.setColor(Gfx.COLOR_BLUE, bgColor);
-       		dc.fillCircle((dc.getWidth() / 2) - 9, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) -(radius * 3), radius);
+    		// var radius = 5;
+    		dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_TRANSPARENT);
+    		dc.drawText(halfWidth - 17, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - 26, fntIcons, "8", Gfx.TEXT_JUSTIFY_LEFT); 
+       		// dc.fillCircle((dc.getWidth() / 2) - 9, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - (radius * 3), radius);
    		}
     }
 
@@ -799,9 +874,10 @@ class SundanceView extends WatchUi.WatchFace {
     // Draw notification alarm
     function drawNotification(dc) {
     	if ((settings has : notificationCount) && (settings.notificationCount)) {
-    		var radius = 5;
-    		dc.setColor(Gfx.COLOR_RED, bgColor);
-       		dc.fillCircle((dc.getWidth() / 2) + 6, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - (radius * 3), radius);
+    		// var radius = 5;
+    		dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
+    		dc.drawText(halfWidth - 1, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - 26, fntIcons, "5", Gfx.TEXT_JUSTIFY_LEFT); 
+       		// dc.fillCircle((dc.getWidth() / 2) + 6, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - (radius * 3), radius);
    		}
     }
 
@@ -828,10 +904,22 @@ class SundanceView extends WatchUi.WatchFace {
 
 
 	// Draw a moon by phase
-	function drawMoonPhase(dc, phase) {
-		var xPos = (dc.getWidth() / 2);
-        var yPos = (dc.getHeight() / 5).toNumber(); //43;
-        var radius = 9;
+	function drawMoonPhase(xPos, yPos, dc, phase, position) {
+		phase += 1;
+		var radius = 9;
+		if (position == 2) {
+			xPos = (is280dev ? xPos + 46 : xPos + 38);
+			yPos += 11;
+		}
+		if (position == 3) {
+			xPos -= 25;
+			yPos += 11;
+		}
+		if (position == 4) {
+			yPos += 8;
+			radius = (is240dev ? radius - 1 : radius);
+		}
+
         dc.setColor(frColor, bgColor);
         if (phase == 0) {
 	        dc.setPenWidth(2);
@@ -931,11 +1019,15 @@ class SundanceView extends WatchUi.WatchFace {
         xPos = xPos - 46;
         yPos = yPos + 2;
         dc.setPenWidth(2);
-    	dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
+        
+        dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
+    	dc.drawText(xPos, yPos - 4, fntIcons, ";", Gfx.TEXT_JUSTIFY_LEFT);
+    	
+    	/*dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
     	dc.drawLine(xPos + 1, yPos + 14, xPos + 5, yPos + 7);
     	dc.drawLine(xPos + 5, yPos + 7, xPos + 7, yPos + 10);
     	dc.drawLine(xPos + 7, yPos + 10, xPos + 11, yPos + 2);
-    	dc.drawLine(xPos + 11, yPos + 2, xPos + 20, yPos + 15);
+    	dc.drawLine(xPos + 11, yPos + 2, xPos + 20, yPos + 15); */
 	}
 
 	// Draw the pressure state and current pressure
@@ -1005,7 +1097,7 @@ class SundanceView extends WatchUi.WatchFace {
 	// 7 - going up for first 4 hours, then the same /-
 	// 8 - stil going up /
 	function drawPressureGraph(xPos, yPos, dc, figure) {
-		dc.setPenWidth(2);
+		dc.setPenWidth(3);
 		dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
 		switch (figure) {
 			case 0:
