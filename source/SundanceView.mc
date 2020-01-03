@@ -905,7 +905,6 @@ class SundanceView extends WatchUi.WatchFace {
 
 	// Draw a moon by phase
 	function drawMoonPhase(xPos, yPos, dc, phase, position) {
-		phase += 1;
 		var radius = 9;
 		if (position == 2) {
 			xPos = (is280dev ? xPos + 46 : xPos + 38);
@@ -1008,12 +1007,12 @@ class SundanceView extends WatchUi.WatchFace {
 	
         dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
         var alt = getAltitude();
-        if (is240dev && ((position == 2) || (position == 3))) {
-        	alt = alt[:altitude];
-        } else {
+        if (is280dev || (position == 1) || (position == 4)) {
         	alt = alt[:altitude] + alt[:unit];
+        } else {
+        	alt = alt[:altitude];
         }
-        dc.drawText(xPos - 20, yPos, Gfx.FONT_XTINY, alt, Gfx.TEXT_JUSTIFY_LEFT);
+        dc.drawText(xPos - 18, yPos, Gfx.FONT_XTINY, alt, Gfx.TEXT_JUSTIFY_LEFT);
 
         // coordinates correction text to mountain picture
         xPos = xPos - 46;
@@ -1021,7 +1020,7 @@ class SundanceView extends WatchUi.WatchFace {
         dc.setPenWidth(2);
         
         dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
-    	dc.drawText(xPos, yPos - 4, fntIcons, ";", Gfx.TEXT_JUSTIFY_LEFT);
+    	dc.drawText(xPos, yPos - 6, fntIcons, ";", Gfx.TEXT_JUSTIFY_LEFT);
     	
     	/*dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
     	dc.drawLine(xPos + 1, yPos + 14, xPos + 5, yPos + 7);
@@ -1261,7 +1260,7 @@ class SundanceView extends WatchUi.WatchFace {
 	// Returns pressure in hPa
  	function getPressure() {
  		var pressure = null;
- 		var value = null;
+ 		var value = 0;	// because of some watches not have barometric sensor
  		// Avoid using ActivityInfo.ambientPressure, as this bypasses any manual pressure calibration e.g. on Fenix
 		// 5. Pressure is unlikely to change frequently, so there isn't the same concern with getting a "live" value,
 		// compared with HR. Use SensorHistory only.
