@@ -24,4 +24,6 @@
 	<font antialias="true" id="fntSd17" filename="sd17.fnt" filter="17" />
 	
 	<font antialias="true" id="fntIcons" filename="crystal-icons.fnt" />
+	
+	<font antialias="true" id="fntDataFields" filename="nk57.fnt" /> 
 </fonts>

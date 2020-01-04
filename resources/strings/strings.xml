@@ -16,6 +16,7 @@
     <string id="Opt4Title">Field 4</string>
     <string id="MoonPhase">Moon Phase</string>
     <string id="SunsetSunrise">Sunset / Sunrise</string>
+    <string id="NextSunEvent">BH/GH/Full Sun/GH/BH</string>
     <string id="Steps">Today's steps</string>
     <string id="Calories">Today's calories (kCal)</string>
     <string id="HR">HR</string>
@@ -26,6 +27,7 @@
 
     <string id="MilitaryFormatTitle">Military Format for 24 Hour Time</string>
     <string id="DateFormatTitle">Date Format</string>
+    <string id="ShowMoonPhaseBeforeDateTitle">Show Moon Phase Before Date</string>    
 
     <string id="DateFormat1">Day Date Month</string>
     <string id="DateFormat2">Day Month Date </string>

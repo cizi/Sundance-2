@@ -16,6 +16,7 @@
 
     <property id="CurrentTimePointer" type="number">0xFF0000</property>
     <property id="DateFormat" type="number">1</property>
+    <property id="ShowMoonPhaseBeforeDate" type="boolean">false</property>
 
     <property id="ShowFullDial" type="boolean">true</property>
     <property id="AlarmIndicator" type="boolean">true</property>
