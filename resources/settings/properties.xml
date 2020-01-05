@@ -28,5 +28,9 @@
     
     <property id="ShowSeconds" type="boolean">false</property>
     <property id="NightMode" type="boolean">false</property>    
+    
+    <property id="NightModeTheme" type="boolean">false</property> 
+    <property id="NightModeThemeColor" type="number">0xFF5500</property>    
+    
 
 </properties>

@@ -37,13 +37,15 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var secFontWidth;
 	hidden var secFontHeight;
 
-	// Sunset / sunrise vars
+	// Sunset / sunrise / moon phase vars
 	hidden var sc;
 	hidden var location = null;
+	hidden var moonPhase;
 	
 	// night mode
 	hidden var frColor = null;
 	hidden var bgColor = null;
+	hidden var themeColor = null;
 
     hidden var fnt01 = null;
     hidden var fnt02 = null;
@@ -120,6 +122,8 @@ class SundanceView extends WatchUi.WatchFace {
         field2 = [(dc.getWidth() / 5) + 2, yPosFor23];
         field3 = [halfWidth + 56, yPosFor23];
         field4 = [(dc.getWidth() / 13) * 7, ((dc.getHeight() / 4).toNumber() * 3) - 6];		// on F6 [140, 189]
+    
+    	moonPhase = null;
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -145,10 +149,12 @@ class SundanceView extends WatchUi.WatchFace {
     	if (isNight) {
 			frColor = 0x000000;
     		bgColor = 0xFFFFFF;
+    		themeColor = (App.getApp().getProperty("NightModeTheme") ? App.getApp().getProperty("NightModeThemeColor") : App.getApp().getProperty("DaylightProgess"));
 		} else {
 			frColor = App.getApp().getProperty("ForegroundColor");
     		bgColor = App.getApp().getProperty("BackgroundColor");
-		}
+    		themeColor = App.getApp().getProperty("DaylightProgess");
+		}		
 
       	drawDial(dc, today);									// main dial
     	if (App.getApp().getProperty("ShowFullDial")) {		// subdial small numbers
@@ -165,7 +171,7 @@ class SundanceView extends WatchUi.WatchFace {
 	        	today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
 	        	var dateWidth = dc.getTextWidthInPixels(dateString, Gfx.FONT_TINY);
 	        	moonCentering = 14;
-    			drawMoonPhase(halfWidth - (dateWidth / 2) - 6, 78, dc, getMoonPhase(today.year, today.month, today.day), 0);
+    			drawMoonPhase(halfWidth - (dateWidth / 2) - 6, 78, dc, getMoonPhase(today), 0);
 	        }
 	        dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);	
 	        dc.drawText(halfWidth + moonCentering, 65, Gfx.FONT_TINY, dateString, Gfx.TEXT_JUSTIFY_CENTER);
@@ -175,7 +181,7 @@ class SundanceView extends WatchUi.WatchFace {
         switch (App.getApp().getProperty("Opt1")) {
         	case MOON_PHASE:
     		today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-    		drawMoonPhase(halfWidth, (dc.getHeight() / 5).toNumber(), dc, getMoonPhase(today.year, today.month, today.day), 1);
+    		drawMoonPhase(halfWidth, (dc.getHeight() / 5).toNumber(), dc, getMoonPhase(today), 1);
         	break;
 
         	case SUNSET_SUNSRISE:
@@ -219,7 +225,7 @@ class SundanceView extends WatchUi.WatchFace {
         switch (App.getApp().getProperty("Opt2")) {
         	case MOON_PHASE:
     		today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-    		drawMoonPhase(field2[0], field2[1], dc, getMoonPhase(today.year, today.month, today.day), 2);
+    		drawMoonPhase(field2[0], field2[1], dc, getMoonPhase(today), 2);
         	break;
         	
         	case FLOORS:
@@ -255,7 +261,7 @@ class SundanceView extends WatchUi.WatchFace {
         switch (App.getApp().getProperty("Opt3")) {
         	case MOON_PHASE:
     		today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-    		drawMoonPhase(field3[0], field3[1], dc, getMoonPhase(today.year, today.month, today.day), 3);
+    		drawMoonPhase(field3[0], field3[1], dc, getMoonPhase(today), 3);
         	break;
         
         	case FLOORS:
@@ -291,7 +297,7 @@ class SundanceView extends WatchUi.WatchFace {
         switch (App.getApp().getProperty("Opt4")) {
         	case MOON_PHASE:
     		today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-    		drawMoonPhase(halfWidth, field4[1], dc, getMoonPhase(today.year, today.month, today.day), 4);
+    		drawMoonPhase(halfWidth, field4[1], dc, getMoonPhase(today), 4);
         	break;
         	
         	case SUNSET_SUNSRISE:
@@ -393,7 +399,7 @@ class SundanceView extends WatchUi.WatchFace {
     	if ((position == 3) || (position == 4)) {
     		xPos += 11;
     	}
-     	dc.setColor(App.getApp().getProperty("DaylightProgess"), Gfx.COLOR_TRANSPARENT);
+     	dc.setColor(themeColor, Gfx.COLOR_TRANSPARENT);
     	dc.drawText(xPos - 44, yPos - 3, fntIcons, "3", Gfx.TEXT_JUSTIFY_LEFT);
 
     	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
@@ -472,7 +478,7 @@ class SundanceView extends WatchUi.WatchFace {
 					sc.momentToInfo(goldenAm),
 					sc.momentToInfo(goldenPm),
 					App.getApp().getProperty("DaylightProgessWidth"),
-					App.getApp().getProperty("DaylightProgess"),
+					themeColor,
 					dc
 				);
 			} else { // JUST NORMAL SUN
@@ -483,7 +489,7 @@ class SundanceView extends WatchUi.WatchFace {
 					sc.momentToInfo(sunrise),
 					sc.momentToInfo(sunset),
 					App.getApp().getProperty("DaylightProgessWidth"),
-					App.getApp().getProperty("DaylightProgess"),
+					themeColor,
 					dc
 				);
 			}
@@ -549,7 +555,7 @@ class SundanceView extends WatchUi.WatchFace {
 					drawSun(xPos, yPos, dc, false, App.getApp().getProperty("GoldenHourColor"));				
 				} else if (goldenHourAm.compare(now) > 0) {
 					nextSunEvent = sc.momentToInfo(goldenHourAm);
-					drawSun(xPos, yPos, dc, false, App.getApp().getProperty("DaylightProgess"));
+					drawSun(xPos, yPos, dc, false, themeColor);
 				} else if (goldenHourPm.compare(now) > 0) {
 					nextSunEvent = sc.momentToInfo(goldenHourPm);
 					drawSun(xPos, yPos, dc, true, App.getApp().getProperty("GoldenHourColor"));
@@ -597,17 +603,17 @@ class SundanceView extends WatchUi.WatchFace {
 				// Before sunrise today: today's sunrise is next.
 				if (sunrise.compare(now) > 0) {		// now < sc.momentToInfo(sunrise)
 					nextSunEvent = sc.momentToInfo(sunrise);
-					drawSun(xPos, yPos, dc, false, App.getApp().getProperty("DaylightProgess"));
+					drawSun(xPos, yPos, dc, false, themeColor);
 				// After sunrise today, before sunset today: today's sunset is next.
 				} else if (sunset.compare(now) > 0) {	// now < sc.momentToInfo(sunset)
 					nextSunEvent = sc.momentToInfo(sunset);
-					drawSun(xPos, yPos, dc, true, App.getApp().getProperty("DaylightProgess"));
+					drawSun(xPos, yPos, dc, true, themeColor);
 				// After sunset today: tomorrow's sunrise (if any) is next.
 				} else {
 					now = now.add(new Time.Duration(Gregorian.SECONDS_PER_DAY));
 					sunrise = sc.calculate(now, location, SUNRISE);  // getSunTimes(gLocationLat, gLocationLng, null, /* tomorrow */ true);
 					nextSunEvent = sc.momentToInfo(sunrise);
-					drawSun(xPos, yPos, dc, false, App.getApp().getProperty("DaylightProgess"));
+					drawSun(xPos, yPos, dc, false, themeColor);
 				}
 
 				var value = getFormattedTime(nextSunEvent.hour, nextSunEvent.min); // App.getApp().getFormattedTime(hour, min);
@@ -845,7 +851,7 @@ class SundanceView extends WatchUi.WatchFace {
     	/*var radius = 8;
     	var penWidth = 2;
     	dc.setPenWidth(penWidth);
-    	dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
+    	dc.setColor(themeColor, bgColor);
     	dc.fillCircle(posX, posY, radius);
     	dc.drawLine(posX - 12, posY + 1 , posX + 14, posY + 1);
 
@@ -888,7 +894,7 @@ class SundanceView extends WatchUi.WatchFace {
       		posX = (is240dev ? (posX - 40) : (posX - 41));
       	}
       	
-    	dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
+    	dc.setColor(themeColor, bgColor);
     	dc.drawText(posX - 4, posY - 4, fntIcons, "0", Gfx.TEXT_JUSTIFY_LEFT);
 
     	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
@@ -914,7 +920,7 @@ class SundanceView extends WatchUi.WatchFace {
       		posX = (is240dev ? (posX - 25) : (posX - 28));
       	}
       	
-    	dc.setColor(App.getApp().getProperty("DaylightProgess"), Gfx.COLOR_TRANSPARENT);
+    	dc.setColor(themeColor, Gfx.COLOR_TRANSPARENT);
     	dc.drawText(posX - 4, posY - 4, fntIcons, "1", Gfx.TEXT_JUSTIFY_LEFT);
 
     	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
@@ -936,7 +942,7 @@ class SundanceView extends WatchUi.WatchFace {
       		posX = (is240dev ? (posX - 32) : (posX - 32));
       	}
       	
-    	dc.setColor(App.getApp().getProperty("DaylightProgess"), Gfx.COLOR_TRANSPARENT);
+    	dc.setColor(themeColor, Gfx.COLOR_TRANSPARENT);
     	dc.drawText(posX - 2, posY - 4, fntIcons, "6", Gfx.TEXT_JUSTIFY_LEFT);
 
     	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
@@ -1112,10 +1118,10 @@ class SundanceView extends WatchUi.WatchFace {
         yPos = yPos + 2;
         dc.setPenWidth(2);
         
-        dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
+        dc.setColor(themeColor, bgColor);
     	dc.drawText(xPos, yPos - 6, fntIcons, ";", Gfx.TEXT_JUSTIFY_LEFT);
     	
-    	/*dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
+    	/*dc.setColor(themeColor, bgColor);
     	dc.drawLine(xPos + 1, yPos + 14, xPos + 5, yPos + 7);
     	dc.drawLine(xPos + 5, yPos + 7, xPos + 7, yPos + 10);
     	dc.drawLine(xPos + 7, yPos + 10, xPos + 11, yPos + 2);
@@ -1190,7 +1196,7 @@ class SundanceView extends WatchUi.WatchFace {
 	// 8 - stil going up /
 	function drawPressureGraph(xPos, yPos, dc, figure) {
 		dc.setPenWidth(3);
-		dc.setColor(App.getApp().getProperty("DaylightProgess"), bgColor);
+		dc.setColor(themeColor, bgColor);
 		switch (figure) {
 			case 0:
 				dc.drawLine(xPos, yPos, xPos + 22, yPos);
@@ -1282,6 +1288,7 @@ class SundanceView extends WatchUi.WatchFace {
 	}
 
 	// Return one of 8 moon phase by date
+	// Trying to cache for better optimalization, becase calculation is needed once per day (date)
     // 0 => New Moon
     // 1 => Waxing Crescent Moon
     // 2 => Quarter Moon
@@ -1290,30 +1297,36 @@ class SundanceView extends WatchUi.WatchFace {
     // 5 => Waxing Gibbous Moon
     // 6 => Last Quarter Moon
     // 7 => Waning Crescent Moon
-    function getMoonPhase(year, month, day) {
-	    var c = 0;
-	    var e = 0;
-	    var jd = 0;
-	    var b = 0;
-
-	    if (month < 3) {
-	        year--;
-	        month += 12;
+    function getMoonPhase(today) {
+    	if ((moonPhase == null) || ((today.hour == 0) && (today.min == 0))) {
+    		var year = today.year;
+    		var month = today.month;
+    		var day = today.day;  		  		
+		    var c = 0;
+		    var e = 0;
+		    var jd = 0;
+		    var b = 0;
+	
+		    if (month < 3) {
+		        year--;
+		        month += 12;
+		    }
+	
+		    ++month;
+		    c = 365.25 * year;
+		    e = 30.6 * month;
+		    jd = c + e + day - 694039.09; //jd is total days elapsed
+		    jd /= 29.5305882; //divide by the moon cycle
+		    b = jd.toNumber(); //int(jd) -> b, take integer part of jd
+		    jd -= b; //subtract integer part to leave fractional part of original jd
+		    b = Math.round(jd * 8).abs(); //scale fraction from 0-8 and round
+		    if (b >= 8 ) {
+		        b = 0; //0 and 8 are the same so turn 8 into 0
+		    }					
+		    moonPhase = b;
 	    }
 
-	    ++month;
-	    c = 365.25 * year;
-	    e = 30.6 * month;
-	    jd = c + e + day - 694039.09; //jd is total days elapsed
-	    jd /= 29.5305882; //divide by the moon cycle
-	    b = jd.toNumber(); //int(jd) -> b, take integer part of jd
-	    jd -= b; //subtract integer part to leave fractional part of original jd
-	    b = Math.round(jd * 8).abs(); //scale fraction from 0-8 and round
-	    if (b >= 8 ) {
-	        b = 0; //0 and 8 are the same so turn 8 into 0
-	    }
-
-	    return b;
+	    return moonPhase;
 	}
 
 	// Returns altitude info with units
@@ -1375,6 +1388,12 @@ class SundanceView extends WatchUi.WatchFace {
  	// Each hour is the pressure saved (durring last 8 hours) for creation a simple graph
  	// storing 8 variables but working just with 4 right now (8,4.1)
  	function hadnlePressureHistorty(pressure) {
+ 		/* var pressures = ["pressure8", "pressure7", "pressure6", "pressure5", "pressure4", "pressure3", "pressure2", "pressure1"];
+ 		for(var pressure = pressures.length; pressure > 0; pressure-=1) {
+ 			if (app.getProperty(pressures[pressure - 2]) != null) {
+	 			app.setProperty(pressures[pressure - 1], app.getProperty(pressures[pressure - 2]));
+	 		}
+ 		} */ // TODO
  		if (app.getProperty("pressure7") != null) {
  			app.setProperty("pressure8", app.getProperty("pressure7"));
  		}

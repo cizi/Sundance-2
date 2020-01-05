@@ -35,6 +35,27 @@
     <setting propertyKey="@Properties.NightMode" title="@Strings.NightModeTitle">
         <settingConfig type="boolean" />
     </setting>
+    
+    <setting propertyKey="@Properties.NightModeTheme" title="@Strings.NightModeThemeTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    
+    <setting propertyKey="@Properties.NightModeThemeColor" title="@Strings.NightModeThemeColorTitle">
+        <settingConfig type="list">
+            <listEntry value="0x000000">@Strings.ColorBlack</listEntry>
+            <listEntry value="0x00AAFF">@Strings.ColorBlue</listEntry>
+            <listEntry value="0xFF0000">@Strings.ColorRed</listEntry>
+            <listEntry value="0xFFFFFF">@Strings.ColorWhite</listEntry>
+            <listEntry value="0xFFFF00">@Strings.ColorYellow</listEntry>
+            <listEntry value="0xAAAAAA">@Strings.ColorLightGrey</listEntry>
+            <listEntry value="0x555555">@Strings.ColorDarkGrey</listEntry>
+            <listEntry value="0xFF5500">@Strings.ColorOrange</listEntry>
+            <listEntry value="0x00FF00">@Strings.ColorGreen</listEntry>
+            <listEntry value="0x00AA00">@Strings.ColorDarkGreen</listEntry>
+            <listEntry value="0x0000FF">@Strings.ColorDarkBlue</listEntry>
+            <listEntry value="0xFF00FF">@Strings.ColorPink</listEntry>
+        </settingConfig>
+    </setting>
 
     <setting propertyKey="@Properties.Opt1" title="@Strings.Opt1Title">
         <settingConfig type="list">

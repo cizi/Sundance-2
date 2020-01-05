@@ -72,5 +72,8 @@
     
     <string id="ShowSecondsTitle">Show seconds (causes more battery drain)</string>
     <string id="NightModeTitle">Night mode (better readability after sunset)</string>
+    
+    <string id="NightModeThemeTitle">Use different theme color during nigh mode</string>
+    <string id="NightModeThemeColorTitle">Night mode theme color</string>       
 
 </strings>
