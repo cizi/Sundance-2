@@ -157,7 +157,9 @@ class SundanceView extends WatchUi.WatchFace {
 				reloadSuntimes(now);	// calculate for current date
 			} else {	// the values are known, need to find last sun event for today and recalculated the first which will come tomorrow
 				var lastSunEventInDayMoment = (App.getApp().getProperty("ShowGoldenBlueHours") ? bluePmMoment : sunsetMoment);
-				if ((now.add(new Time.Duration(60))).compare(lastSunEventInDayMoment) > 0) {	// is time to recalculte?
+				var nowWithOneMinute = now.add(new Time.Duration(60));
+				// if sunrise moment is in past && is after last sunevent (bluePmMoment / sunsetMoment) need to recalculate
+				if ((nowWithOneMinute.compare(sunriseMoment) > 0) && (nowWithOneMinute.compare(lastSunEventInDayMoment) > 0)) {	// is time to recalculte?
 					blueAmMoment = sc.calculate(now.add(), location, BLUE_HOUR_AM);
 					sunriseMoment = sc.calculate(now.add(), location, SUNRISE);
 				}
