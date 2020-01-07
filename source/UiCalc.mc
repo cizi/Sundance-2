@@ -15,8 +15,8 @@ class UiCalc {
     for(var nr = 1; nr < 24; nr+=1) {
         if ((nr != 6) && (nr != 12) && (nr != 18)) {
           angleDeg = ((nr * 15) * Math.PI) / 180;
-          pointX = ((hoursCircle * Math.cos(angleDeg)) + halfScreen);
-          pointY = ((hoursCircle * Math.sin(angleDeg)) + halfScreen);
+          pointX = ((hoursCircle * Math.cos(angleDeg)) + halfWidth);
+          pointY = ((hoursCircle * Math.sin(angleDeg)) + halfWidth);
 
           hourValue = nr + angleToNrCorrection;
           switch (hourValue) {
@@ -115,8 +115,8 @@ class UiCalc {
     for(var angle = 0; angle < 360; angle+=15) {
       if ((angle != 0) && (angle != 90) && (angle != 180) && (angle != 270)) {
         angleDeg = (angle * Math.PI) / 180;
-        pointX = ((halfScreen * Math.cos(angleDeg)) + halfWidth);
-        pointY = ((halfScreen * Math.sin(angleDeg)) + halfWidth);
+        pointX = ((halfWidth * Math.cos(angleDeg)) + halfWidth);
+        pointY = ((halfWidth * Math.sin(angleDeg)) + halfWidth);
         linesCoords.put(angle, [pointX, pointY]);
       }
     }

@@ -36,6 +36,9 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var secPosY;
 	hidden var secFontWidth;
 	hidden var secFontHeight;
+	hidden var uc;
+	hidden var smallDialCoordsLines;
+	hidden var smallDialCoordsNums;
 
 	// Sunset / sunrise / moon phase vars
 	hidden var sc;
@@ -53,14 +56,14 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var bgColor = null;
 	hidden var themeColor = null;
 
-    hidden var fnt01 = null;
-    hidden var fnt02 = null;
-    hidden var fnt03 = null;
-    hidden var fnt04 = null;
-    hidden var fnt05 = null;
-    hidden var fnt07 = null;
-    hidden var fnt08 = null;
-    hidden var fnt09 = null;
+    hidden var fnt1 = null;
+    hidden var fnt2 = null;
+    hidden var fnt3 = null;
+    hidden var fnt4 = null;
+    hidden var fnt5 = null;
+    hidden var fnt7 = null;
+    hidden var fnt8 = null;
+    hidden var fnt9 = null;
     hidden var fnt11 = null;
     hidden var fnt10 = null;
     hidden var fnt13 = null;
@@ -86,15 +89,16 @@ class SundanceView extends WatchUi.WatchFace {
         WatchFace.initialize();
         app = App.getApp();
         sc = new SunCalc();
+				uc = new UiCalc();
 
-        fnt01 = WatchUi.loadResource(Rez.Fonts.fntSd01);
-        fnt02 = WatchUi.loadResource(Rez.Fonts.fntSd02);
-        fnt03 = WatchUi.loadResource(Rez.Fonts.fntSd03);
-        fnt04 = WatchUi.loadResource(Rez.Fonts.fntSd04);
-       	fnt05 = WatchUi.loadResource(Rez.Fonts.fntSd05);
-		fnt07 = WatchUi.loadResource(Rez.Fonts.fntSd07);
-		fnt08 = WatchUi.loadResource(Rez.Fonts.fntSd08);
-		fnt09 = WatchUi.loadResource(Rez.Fonts.fntSd09);
+        fnt1 = WatchUi.loadResource(Rez.Fonts.fntSd01);
+        fnt2 = WatchUi.loadResource(Rez.Fonts.fntSd02);
+        fnt3 = WatchUi.loadResource(Rez.Fonts.fntSd03);
+        fnt4 = WatchUi.loadResource(Rez.Fonts.fntSd04);
+       	fnt5 = WatchUi.loadResource(Rez.Fonts.fntSd05);
+		fnt7 = WatchUi.loadResource(Rez.Fonts.fntSd07);
+		fnt8 = WatchUi.loadResource(Rez.Fonts.fntSd08);
+		fnt9 = WatchUi.loadResource(Rez.Fonts.fntSd09);
         fnt10 = WatchUi.loadResource(Rez.Fonts.fntSd10);
         fnt11 = WatchUi.loadResource(Rez.Fonts.fntSd11);
         fnt13 = WatchUi.loadResource(Rez.Fonts.fntSd13);
@@ -109,6 +113,7 @@ class SundanceView extends WatchUi.WatchFace {
         fnt23 = WatchUi.loadResource(Rez.Fonts.fntSd23);
         fntIcons = WatchUi.loadResource(Rez.Fonts.fntIcons);
         fntDataFields = WatchUi.loadResource(Rez.Fonts.fntDataFields);
+
     }
 
     // Load your resources here
@@ -128,6 +133,9 @@ class SundanceView extends WatchUi.WatchFace {
         field2 = [(dc.getWidth() / 5) + 2, yPosFor23];
         field3 = [halfWidth + 56, yPosFor23];
         field4 = [(dc.getWidth() / 13) * 7, ((dc.getHeight() / 4).toNumber() * 3) - 6];		// on F6 [140, 189]
+
+		smallDialCoordsNums = uc.calculateSmallDialNums(halfWidth);
+		smallDialCoordsLines = uc.calculateSmallDialLines(halfWidth);
 
 		// sun / moon etc. init
 		sunriseMoment = null;
@@ -157,15 +165,15 @@ class SundanceView extends WatchUi.WatchFace {
 		if ((sunriseMoment == null) || (sunsetMoment == null)) {
 			reloadSuntimes(now);	// calculate for current date
 		}
-		
+
 		// the values are known, need to find last sun event for today and recalculated the first which will come tomorrow
-		if ((sunriseMoment != null) && (sunsetMoment != null) && (location != null)) {	
+		if ((sunriseMoment != null) && (sunsetMoment != null) && (location != null)) {
 			var lastSunEventInDayMoment = (App.getApp().getProperty("ShowGoldenBlueHours") ? bluePmMoment : sunsetMoment);
 			var nowWithOneMinute = now.add(new Time.Duration(60));
 			// if sunrise moment is in past && is after last sunevent (bluePmMoment / sunsetMoment) need to recalculate
-			if ((nowWithOneMinute.compare(sunriseMoment) > 0) && (nowWithOneMinute.compare(lastSunEventInDayMoment) > 0)) {	// is time to recalculte?	
+			if ((nowWithOneMinute.compare(sunriseMoment) > 0) && (nowWithOneMinute.compare(lastSunEventInDayMoment) > 0)) {	// is time to recalculte?
 				var nowWithOneDay = now.add(new Time.Duration(Gregorian.SECONDS_PER_DAY));
-				reloadSuntimes(nowWithOneDay);		
+				reloadSuntimes(nowWithOneDay);
 			}
 		}
 
@@ -472,10 +480,10 @@ class SundanceView extends WatchUi.WatchFace {
      	 if (location != null) {
 	       	sunrise = sc.calculate(now, location, SUNRISE);
 	      	sunset = sc.calculate(now, location, SUNSET);
-	
+
 			blueAm = sc.calculate(now, location, BLUE_HOUR_AM);
 			bluePm = sc.calculate(now, location, BLUE_HOUR_PM);
-	
+
 			goldenAm = sc.calculate(now, location, GOLDEN_HOUR_AM);
 			goldenPm = sc.calculate(now, location, GOLDEN_HOUR_PM);
 		}
@@ -605,7 +613,7 @@ class SundanceView extends WatchUi.WatchFace {
 					nextSunEvent = sc.momentToInfo(sunsetMoment);
 					drawSun(xPos, yPos, dc, true, App.getApp().getProperty("BlueHourColor"));
 				} else {	// This is here just for sure if some time condition won't meet the timing
-							// comparation. It menas I will force calculate the next event, the rest will be updated in 
+							// comparation. It menas I will force calculate the next event, the rest will be updated in
 							// the next program iteration - After sunset today: tomorrow's blue hour (if any) is next.
 					now = now.add(new Time.Duration(Gregorian.SECONDS_PER_DAY));
 					var blueHrAm = sc.calculate(now, location, BLUE_HOUR_AM);
@@ -650,7 +658,7 @@ class SundanceView extends WatchUi.WatchFace {
 					nextSunEvent = sc.momentToInfo(sunsetMoment);
 					drawSun(xPos, yPos, dc, true, themeColor);
 				} else {	// This is here just for sure if some time condition won't meet the timing
-							// comparation. It menas I will force calculate the next event, the rest will be updated in 
+							// comparation. It menas I will force calculate the next event, the rest will be updated in
 							// the next program iteration -  After sunset today: tomorrow's sunrise (if any) is next.
 					now = now.add(new Time.Duration(Gregorian.SECONDS_PER_DAY));
 					var sunrise = sc.calculate(now, location, SUNRISE);
@@ -678,7 +686,7 @@ class SundanceView extends WatchUi.WatchFace {
 			} else if (sunset.compare(now) > 0) {	// After sunrise today, before sunset today: today's sunset is next.
 				isNight = false;
 			} else {	// This is here just for sure if some time condition won't meet the timing
-						// comparation. It menas I will force calculate the next event, the rest will be updated in 
+						// comparation. It menas I will force calculate the next event, the rest will be updated in
 						// the next program iteration -  After sunset today: tomorrow's sunrise (if any) is next.
 				isNight = true;
 			}
@@ -717,44 +725,39 @@ class SundanceView extends WatchUi.WatchFace {
 
     // Draw the master dial
     function drawDial(dc, today) {
-    	var halfScreen = dc.getWidth() / 2;
-    	var pointX = 0;
-    	var pointY = 0;
-    	var angleDeg = 0;
+		var coorsArray = null;
 
     	dc.setColor(bgColor, Gfx.COLOR_TRANSPARENT);	// nmake background
-    	dc.fillCircle(halfScreen, halfScreen, halfScreen + 1);
+    	dc.fillCircle(halfWidth, halfWidth, halfWidth + 1);
 
     	// this part is draw the net over all display
     	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
     	dc.setPenWidth(2);
 
     	for(var angle = 0; angle < 360; angle+=15) {
-      	if ((angle != 0) && (angle != 90) && (angle != 180) && (angle != 270)) {
-      		angleDeg = (angle * Math.PI) / 180;
-      		pointX = ((halfScreen * Math.cos(angleDeg)) + halfScreen);
-      		pointY = ((halfScreen * Math.sin(angleDeg)) + halfScreen);
-      		dc.drawLine(halfScreen, halfScreen, pointX, pointY);
+	      	if ((angle != 0) && (angle != 90) && (angle != 180) && (angle != 270)) {
+					coorsArray = smallDialCoordsLines.get(angle);
+	      			dc.drawLine(halfWidth, halfWidth, coorsArray[0], coorsArray[1]);
     		}
     	}
     	// hide the middle of the net to shows just pieces on the edge of the screen
     	dc.setColor(bgColor, Gfx.COLOR_TRANSPARENT);
-    	dc.drawCircle(halfScreen, halfScreen, halfScreen - 1);
-    	dc.fillCircle(halfScreen, halfScreen, halfScreen - App.getApp().getProperty("SmallHoursIndicatorSize"));
+    	dc.drawCircle(halfWidth, halfWidth, halfWidth - 1);
+    	dc.fillCircle(halfWidth, halfWidth, halfWidth - App.getApp().getProperty("SmallHoursIndicatorSize"));
 
     	// draw the master pieces in 24, 12, 6, 18 hours point
     	var masterPointLen = 12;
     	var masterPointWid = 4;
     	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
     	dc.setPenWidth(masterPointWid);
-    	dc.drawLine(halfScreen, 0, halfScreen, masterPointLen);
-    	dc.drawLine(halfScreen, dc.getWidth(), halfScreen, dc.getWidth() - masterPointLen);
-    	dc.drawLine(0, halfScreen - (masterPointWid / 2), masterPointLen, halfScreen - (masterPointWid / 2));
-    	dc.drawLine(dc.getWidth(), halfScreen - (masterPointWid / 2), dc.getWidth() - masterPointLen, halfScreen - (masterPointWid / 2));
+    	dc.drawLine(halfWidth, 0, halfWidth, masterPointLen);
+    	dc.drawLine(halfWidth, dc.getWidth(), halfWidth, dc.getWidth() - masterPointLen);
+    	dc.drawLine(0, halfWidth - (masterPointWid / 2), masterPointLen, halfWidth - (masterPointWid / 2));
+    	dc.drawLine(dc.getWidth(), halfWidth - (masterPointWid / 2), dc.getWidth() - masterPointLen, halfWidth - (masterPointWid / 2));
 
     	// numbers
-    	dc.drawText(halfScreen, masterPointLen - 3, Gfx.FONT_TINY, "12", Gfx.TEXT_JUSTIFY_CENTER);	// 12
-    	dc.drawText(halfScreen, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - 11, Gfx.FONT_TINY, "24", Gfx.TEXT_JUSTIFY_CENTER);	// 24
+    	dc.drawText(halfWidth, masterPointLen - 3, Gfx.FONT_TINY, "12", Gfx.TEXT_JUSTIFY_CENTER);	// 12
+    	dc.drawText(halfWidth, dc.getHeight() - Gfx.getFontHeight(Gfx.FONT_TINY) - 11, Gfx.FONT_TINY, "24", Gfx.TEXT_JUSTIFY_CENTER);	// 24
     	dc.drawText(15, secPosY, Gfx.FONT_TINY, "06", Gfx.TEXT_JUSTIFY_LEFT);	// 06
 
     	if (App.getApp().getProperty("ShowSeconds")) {
@@ -764,116 +767,69 @@ class SundanceView extends WatchUi.WatchFace {
     	}
     }
 
+	// draw the by params
+	function drawDialNum(dc, coordinatesArray, value, font) {
+		var char = null;
+		for(var i = 0; i < value.length(); i+=1) {
+			char = value.substring(i, i + 1);
+			dc.drawText(coordinatesArray[i * 2], coordinatesArray[(i * 2) + 1], font, char, Gfx.TEXT_JUSTIFY_CENTER);
+		}
+	}
+
 
     // Draw numbers in the dial
     function drawNrDial(dc) {
     	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
-
-     	var angleDeg = 0;
-    	var pointX = 0;
-    	var pointY = 0;
-    	var halfScreen = dc.getWidth() / 2;
-    	var hoursCircle = halfScreen - 15;
+		var coords = null;
+		var hourValue = null;
     	var angleToNrCorrection = -6;
+		var font = null;
     	for(var nr = 1; nr < 24; nr+=1) {
 	      	if ((nr != 6) && (nr != 12) && (nr != 18)) {
-	      		angleDeg = ((nr * 15) * Math.PI) / 180;
-	      		pointX = ((hoursCircle * Math.cos(angleDeg)) + halfScreen);
-	      		pointY = ((hoursCircle * Math.sin(angleDeg)) + halfScreen);
-
-	      		switch (nr + angleToNrCorrection) {
-	      			case 1:
-					dc.drawText(pointX.toNumber(), pointY.toNumber() - 15, fnt01, "1", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 2:
-					dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 14, fnt02, "2", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 3:
-					dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 15, fnt03, "3", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 4:
-					dc.drawText(pointX.toNumber() + 5, pointY.toNumber() - 13, fnt04, "4", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 5:
-					dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 14, fnt05, "5", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 7:
-					dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 12, fnt07, "7", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 8:
-					dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 10, fnt08, "8", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 9:
-					dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 8, fnt09, "9", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 10:
-      				dc.drawText(pointX.toNumber(), pointY.toNumber() - 7, fnt10, "1", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 10, fnt10, "0", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 11:
-      				dc.drawText(pointX.toNumber() - 2, pointY.toNumber() - 6, fnt11, "1", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() + 6, pointY.toNumber() - 8, fnt11, "1", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 13:
-      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 8, fnt13, "1", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 5, fnt13, "3", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 14:
-      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 10, fnt14, "1", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() + 2, pointY.toNumber() - 4, fnt14, "4", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 15:
-      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 11, fnt15, "1", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber(), pointY.toNumber() - 5, fnt15, "5", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 16:
-      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 13, fnt16, "1", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() - 1, pointY.toNumber() - 5, fnt16, "6", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case 17:
-      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 15, fnt17, "1", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 6, fnt17, "7", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case -1:	// 23
-      				dc.drawText(pointX.toNumber() - 6, pointY.toNumber() - 15, fnt23, "2", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() + 3, pointY.toNumber() - 17, fnt23, "3", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case -2:	// 22
-      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 12, fnt22, "2", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() + 4, pointY.toNumber() - 17, fnt22, "2", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case -3:	// 21
-      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt21, "2", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() + 1, pointY.toNumber() - 18, fnt21, "1", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case -4:	// 20
-      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt20, "2", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber(), pointY.toNumber() - 19, fnt20, "0", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-
-	      			case -5:	// 19
-      				dc.drawText(pointX.toNumber() - 5, pointY.toNumber() - 10, fnt19, "1", Gfx.TEXT_JUSTIFY_CENTER);
-					dc.drawText(pointX.toNumber() - 3, pointY.toNumber() - 18, fnt19, "9", Gfx.TEXT_JUSTIFY_CENTER);
-	      			break;
-	      		}
+	      		// needs to do it for each number because thre is now fucnking indirection call like $$var or ${var}
+				hourValue = nr + angleToNrCorrection;
+				coords = smallDialCoordsNums.get(hourValue);
+				if (hourValue == -1) {	// 23
+					drawDialNum(dc, coords, "23", fnt23);
+				} else if (hourValue == -2) {	// 22
+					drawDialNum(dc, coords, "22", fnt22);
+				} else if (hourValue == -3) {	// 21
+					drawDialNum(dc, coords, "21", fnt21);
+				} else if (hourValue == -4) {	// 20
+					drawDialNum(dc, coords, "20", fnt20);
+				} else if (hourValue == -5) {	// 19
+					drawDialNum(dc, coords, "19", fnt19);
+				} else if (hourValue == 1) {	
+					drawDialNum(dc, coords, hourValue.toString(), fnt1);
+				} else if (hourValue == 2) {	
+					drawDialNum(dc, coords, hourValue.toString(), fnt2);
+				} else if (hourValue == 3) {	
+					drawDialNum(dc, coords, hourValue.toString(), fnt3);
+				} else if (hourValue == 4) {	
+					drawDialNum(dc, coords, hourValue.toString(), fnt4);
+				} else if (hourValue == 5) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt5);
+				} else if (hourValue == 7) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt7);
+				} else if (hourValue == 8) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt8);
+				} else if (hourValue == 9) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt9);
+				} else if (hourValue == 10) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt10);
+				} else if (hourValue == 11) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt11);
+				} else if (hourValue == 13) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt13);
+				} else if (hourValue == 14) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt14);
+				} else if (hourValue == 15) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt15);
+				} else if (hourValue == 16) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt16);
+				} else if (hourValue == 17) {
+					drawDialNum(dc, coords, hourValue.toString(), fnt17);
+				} 
       		}
       	}
     }
@@ -1158,7 +1114,7 @@ class SundanceView extends WatchUi.WatchFace {
 	    xPos = xPos - 46;
 	    yPos = yPos + 2;
 	    dc.setPenWidth(2);
-	
+
 	    dc.setColor(themeColor, bgColor);
 	  	dc.drawText(xPos, yPos - 6, fntIcons, ";", Gfx.TEXT_JUSTIFY_LEFT);
 
