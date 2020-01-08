@@ -201,6 +201,7 @@
     <setting propertyKey="@Properties.CurrentTimePointerWidth" title="@Strings.CurrentTimePointerWidthTitle">
         <settingConfig type="list">
         	<listEntry value="4">@Strings.width4</listEntry>
+            <listEntry value="6">@Strings.width6</listEntry>
             <listEntry value="8">@Strings.width8</listEntry>
             <listEntry value="10">@Strings.width10</listEntry>
             <listEntry value="12">@Strings.width12</listEntry>
