@@ -26,6 +26,7 @@ class SundanceView extends WatchUi.WatchFace {
 	const NEXT_SUN_EVENT = 9;
 	const DISABLED = 100;
 	const PRESSURE_GRAPH_BORDER = 3;	// pressure border to change the graph in hPa
+	const SECOND_TIME_POINTER_SIZE = 2;
 
 	// others
 	hidden var settings;
@@ -1421,4 +1422,45 @@ class SundanceView extends WatchUi.WatchFace {
  		app.setProperty("pressure1", pressure);
  	}
 
+
+	// TODO
+	function drawDualTime(dc, color, today) {
+		// var secondTime = ;
+		var rLocal = halfWidth - SECOND_TIME_POINTER_SIZE;	// line in day light
+		// SECOND TIME
+		var daylightProgess = App.getApp().getProperty("DaylightProgessWidth");
+		dc.setPenWidth(daylightProgess);
+		var secondTimeCoef = (secondTime.hour + (secondTime.min.toFloat() / 60)) * 15;
+		var secondTimeStart = 271 - secondTimeCoef;	// 270 was corrected better placing of current time holder
+		var secondTimeEnd = 269 - secondTimeCoef;	// 270 was corrected better placing of current time holder
+		dc.setColor(App.getApp().getProperty("CurrentTimePointer"), Gfx.COLOR_TRANSPARENT);
+		dc.drawArc(halfWidth, halfWidth, rLocal, Gfx.ARC_CLOCKWISE, secondTimeStart, secondTimeEnd);
+
+		// the rest of triangle
+		secondTimeStart = 271 - (secondTimeCoef * 2);
+		secondTimeEnd = 269 - (secondTimeCoef * 2);
+
+		// the top  point touching the DaylightProgessWidth
+		var trianglePointAngle = 270 - secondTimeCoef;
+		var angleDeg = (trianglePointAngle * Math.PI) / 180;
+    var trianglPointX1 = ((rLocal * Math.cos(angleDeg)) + halfWidth);
+    var trianglPointY1 = ((rLocal * Math.sin(angleDeg)) + halfWidth);
+
+		// one of the lower point of tringle
+		var secondTimeTrianleCircle = halfWidth - (SECOND_TIME_POINTER_SIZE * 2);
+		trianglePointAngle = 266 - secondTimeCoef;
+		angleDeg = (trianglePointAngle * Math.PI) / 180;
+		var trianglPointX2 = ((secondTimeTrianleCircle * Math.cos(angleDeg)) + halfWidth);
+    var trianglPointY2 = ((secondTimeTrianleCircle * Math.cos(angleDeg)) + halfWidth);
+
+		// one of the higher point of tringle
+		trianglePointAngle = 274 - secondTimeCoef;
+		angleDeg = (trianglePointAngle * Math.PI) / 180;
+		var trianglPointX3 = ((secondTimeTrianleCircle * Math.cos(angleDeg)) + halfWidth);
+    var trianglPointY3 = ((secondTimeTrianleCircle * Math.cos(angleDeg)) + halfWidth);
+
+		dc.drawLine(trianglPointX1, trianglPointY1, trianglPointX2, trianglPointY2);
+		dc.drawLine(trianglPointX2, trianglPointY2, trianglPointX3, trianglPointY3);
+		dc.drawLine(trianglPointX3, trianglPointY3, trianglPointX1, trianglPointY1);
+	}
 }
