@@ -25,8 +25,7 @@ class SundanceView extends WatchUi.WatchFace {
 	const PRESSURE = 8;
 	const NEXT_SUN_EVENT = 9;
 	const DISABLED = 100;
-	const PRESSURE_GRAPH_BORDER = 3;	// pressure border to change the graph in hPa
-	const SECOND_TIME_POINTER_SIZE = 2;
+	const PRESSURE_GRAPH_BORDER = 2;	// pressure border to change the graph in hPa
 
 	// others
 	hidden var settings;
@@ -385,15 +384,28 @@ class SundanceView extends WatchUi.WatchFace {
         dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
         var timeString = getFormattedTime(today.hour, today.min);
 		dc.drawText(46, halfWidth - (dc.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2) + 2, fntDataFields, timeString[:amPmFull], Gfx.TEXT_JUSTIFY_CENTER);
-		dc.drawText(dc.getWidth() / 2, (dc.getHeight() / 2) - (Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2), Gfx.FONT_SYSTEM_NUMBER_HOT, timeString[:formatted], Gfx.TEXT_JUSTIFY_CENTER);
+		dc.drawText(halfWidth, halfWidth - (Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2), Gfx.FONT_SYSTEM_NUMBER_HOT, timeString[:formatted], Gfx.TEXT_JUSTIFY_CENTER);
 
+		// CURRENT TIME POINTER
+		switch(App.getApp().getProperty("CurrentTimePointerType")) {			
+			case 1:
+			dc.setPenWidth(App.getApp().getProperty("CurrentTimePointerWidth"));
+			var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
+			var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
+			var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder
+			dc.setColor(App.getApp().getProperty("CurrentTimePointer"), Gfx.COLOR_TRANSPARENT);
+			dc.drawArc(halfWidth, halfWidth, halfWidth - 2, Gfx.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
+			break;
+
+			case 2:
+			drawDualTime(dc, App.getApp().getProperty("CurrentTimePointer"), today);
+			break;
+		}
+		
         // Logging pressure history all the time
         if (today.min == 0) {
 	        hadnlePressureHistorty(getPressure());
         }
-    	
-    	// TODO
-    	drawDualTime(dc, Gfx.COLOR_PINK, today);
     }
 
 
@@ -554,14 +566,6 @@ class SundanceView extends WatchUi.WatchFace {
 					dc
 				);
 			}
-
-			// CURRENT TIME
-			dc.setPenWidth(App.getApp().getProperty("CurrentTimePointerWidth"));
-			var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
-			var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
-			var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder
-			dc.setColor(App.getApp().getProperty("CurrentTimePointer"), Gfx.COLOR_TRANSPARENT);
-			dc.drawArc(halfWidth, halfWidth, rLocal, Gfx.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
     	}
     }
 
@@ -1388,64 +1392,39 @@ class SundanceView extends WatchUi.WatchFace {
  	// Each hour is the pressure saved (durring last 8 hours) for creation a simple graph
  	// storing 8 variables but working just with 4 right now (8,4.1)
  	function hadnlePressureHistorty(pressure) {
- 		/* var pressures = ["pressure8", "pressure7", "pressure6", "pressure5", "pressure4", "pressure3", "pressure2", "pressure1"];
- 		for(var pressure = pressures.length; pressure > 0; pressure-=1) {
- 			if (app.getProperty(pressures[pressure - 2]) != null) {
-	 			app.setProperty(pressures[pressure - 1], app.getProperty(pressures[pressure - 2]));
+ 		var pressures = ["pressure8", "pressure7", "pressure6", "pressure5", "pressure4", "pressure3", "pressure2", "pressure1"];
+ 		var preindex = -1;
+ 		for(var pressure = pressures.size(); pressure > 1; pressure-=1) {
+ 			preindex = pressure - 2;
+ 			if ((preindex >= 0) && (app.getProperty(pressures[preindex]) != null)) {
+	 			app.setProperty(pressures[pressure - 1], app.getProperty(pressures[preindex]));
 	 		}
- 		} */ // TODO
- 		if (app.getProperty("pressure7") != null) {
- 			app.setProperty("pressure8", app.getProperty("pressure7"));
- 		}
-
- 		if (app.getProperty("pressure6") != null) {
- 			app.setProperty("pressure7", app.getProperty("pressure6"));
- 		}
-
- 		if (app.getProperty("pressure5") != null) {
- 			app.setProperty("pressure6", app.getProperty("pressure5"));
- 		}
-
- 		if (app.getProperty("pressure4") != null) {
- 			app.setProperty("pressure5", app.getProperty("pressure4"));
- 		}
-
- 		if (app.getProperty("pressure3") != null) {
- 			app.setProperty("pressure4", app.getProperty("pressure3"));
- 		}
-
- 		if (app.getProperty("pressure2") != null) {
- 			app.setProperty("pressure3", app.getProperty("pressure2"));
- 		}
-
- 		if (app.getProperty("pressure1") != null) {
- 			app.setProperty("pressure2", app.getProperty("pressure1"));
  		}
  		app.setProperty("pressure1", pressure);
  	}
 
 
-	function drawDualTime(dc, color, today) {
-		var secondTime = today;
-		var angleToNrCorrection = 6;
+	// Draw pointer like a trinagle to dial by the settings
+	function drawDualTime(dc, color, timeInfo) {
+		var angleToNrCorrection = 5.99;
 		var daylightProgessWidth = App.getApp().getProperty("DaylightProgessWidth");
-		var rLocal = halfWidth - daylightProgessWidth;	// line in day light
-		// SECOND TIME
-		dc.setPenWidth(daylightProgessWidth);
-		var secondTimeCoef = ((secondTime.hour + (secondTime.min.toFloat() / 60)) * 15) - 1;
-		var secondTimeStart = 271 - secondTimeCoef;	// 270 was corrected better placing of current time holder
-		var secondTimeEnd = 269 - secondTimeCoef;	// 270 was corrected better placing of current time holder
+		var rLocal = halfWidth - (daylightProgessWidth) + 2;	// line in day light
 		dc.setColor(color, Gfx.COLOR_TRANSPARENT);
-		dc.drawArc(halfWidth, halfWidth, rLocal, Gfx.ARC_CLOCKWISE, secondTimeStart, secondTimeEnd);
+		
+		// SECOND TIME
+		// dc.setPenWidth(daylightProgessWidth);
+		/*var secondTimeCoef = ((secondTime.hour + (secondTime.min.toFloat() / 60)) * 15) - 1;
+		var secondTimeStart = 271 - secondTimeCoef;	// 270 was corrected better placing of second time holder
+		var secondTimeEnd = 269 - secondTimeCoef;	// 270 was corrected better placing of second time holder		
+		dc.drawArc(halfWidth, halfWidth, rLocal, Gfx.ARC_CLOCKWISE, secondTimeStart, secondTimeEnd); */
 
-		secondTimeCoef = ((secondTime.hour + (secondTime.min.toFloat() / 60) + angleToNrCorrection) * 15) - 1;
+		var secondTimeCoef = ((timeInfo.hour + (timeInfo.min.toFloat() / 60) + angleToNrCorrection) * 15);
 		// the top  point touching the DaylightProgessWidth
-		dc.setPenWidth(SECOND_TIME_POINTER_SIZE);
 		var angleDeg = (secondTimeCoef * Math.PI) / 180;
     	var trianglPointX1 = ((rLocal * Math.cos(angleDeg)) + halfWidth);
     	var trianglPointY1 = ((rLocal * Math.sin(angleDeg)) + halfWidth);
 		
-        var secondTimeTriangleCircle = halfWidth - (SECOND_TIME_POINTER_SIZE * 8);
+        var secondTimeTriangleCircle = halfWidth - (daylightProgessWidth + App.getApp().getProperty("CurrentTimePointerWidth"));
 		// one of the lower point of tringle		
 		var trianglePointAngle = secondTimeCoef - 4;
 		angleDeg = (trianglePointAngle * Math.PI) / 180;
@@ -1458,8 +1437,6 @@ class SundanceView extends WatchUi.WatchFace {
 		var trianglPointX3 = ((secondTimeTriangleCircle * Math.cos(angleDeg)) + halfWidth);
     	var trianglPointY3 = ((secondTimeTriangleCircle * Math.sin(angleDeg)) + halfWidth);
 		
-		dc.drawLine(trianglPointX1, trianglPointY1, trianglPointX2, trianglPointY2);
-		dc.drawLine(trianglPointX2, trianglPointY2, trianglPointX3, trianglPointY3);
-		dc.drawLine(trianglPointX3, trianglPointY3, trianglPointX1, trianglPointY1);
+		dc.fillPolygon([[trianglPointX1, trianglPointY1], [trianglPointX2, trianglPointY2], [trianglPointX3, trianglPointY3]]); 
 	}
 }

@@ -32,5 +32,7 @@
     <property id="NightModeTheme" type="boolean">false</property> 
     <property id="NightModeThemeColor" type="number">0xFF5500</property>    
     
+    <property id="CurrentTimePointerType" type="number">1</property>  
+    
 
 </properties>
