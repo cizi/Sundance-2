@@ -25,7 +25,7 @@ class SundanceView extends WatchUi.WatchFace {
 	const PRESSURE = 8;
 	const NEXT_SUN_EVENT = 9;
 	const DISABLED = 100;
-	const PRESSURE_GRAPH_BORDER = 2;	// pressure border to change the graph in hPa
+	const PRESSURE_GRAPH_BORDER = 3;	// pressure border to change the graph in hPa
 
 	// others
 	hidden var settings;
@@ -211,6 +211,11 @@ class SundanceView extends WatchUi.WatchFace {
 			dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
 			dc.drawText(halfWidth + moonCentering, 65, Gfx.FONT_TINY, dateString, Gfx.TEXT_JUSTIFY_CENTER);
 		}
+		
+	// Logging pressure history all the time - every 4th hour
+        if ((today.hour % 6 == 0) && (today.min == 0)) {
+	        hadnlePressureHistorty(getPressure());
+        }
 
         // FIELD 1
         switch (App.getApp().getProperty("Opt1")) {
@@ -401,11 +406,6 @@ class SundanceView extends WatchUi.WatchFace {
 			drawDualTime(dc, App.getApp().getProperty("CurrentTimePointer"), today);
 			break;
 		}
-		
-        // Logging pressure history all the time
-        if (today.min == 0) {
-	        hadnlePressureHistorty(getPressure());
-        }
     }
 
 
@@ -1144,38 +1144,38 @@ class SundanceView extends WatchUi.WatchFace {
 		if ((position == 3) && is240dev) {
 			xPos -= 4;
 		}
-		if (today.min == 0) {	// grap is redrawning only whole hour
+		if ((today.hour % 6 == 0) && (today.min == 0)) {	// grap is redrawning only in whole and only every 4th hour
 			var baroFigure = 0;
-			var pressure8 = app.getProperty("pressure8");
-			var pressure4 = app.getProperty("pressure4");
+			var pressure3 = app.getProperty("pressure3");
+			var pressure2 = app.getProperty("pressure2");
 			var pressure1 = app.getProperty("pressure1");
 			if (pressure1 != null) {	// always should have at least pressure1 but test it for sure
 				pressure1 = pressure1.toNumber();
-				pressure4 = (pressure4 == null ? pressure1 : pressure4.toNumber());	// if still dont have historical data, use the current data
-				pressure8 = (pressure8 == null ? pressure1 : pressure8.toNumber());
-				if ((pressure8 - pressure4).abs() < PRESSURE_GRAPH_BORDER) {	// baroFigure 1 OR 2
-					if ((pressure4 > pressure1) && ((pressure4 - pressure1) >= PRESSURE_GRAPH_BORDER)) { 	// baroFigure 1
+				pressure2 = (pressure2 == null ? pressure1 : pressure2.toNumber());	// if still dont have historical data, use the current data
+				pressure3 = (pressure3 == null ? pressure1 : pressure3.toNumber());
+				if ((pressure3 - pressure2).abs() < PRESSURE_GRAPH_BORDER) {	// baroFigure 1 OR 2
+					if ((pressure2 > pressure1) && ((pressure2 - pressure1) >= PRESSURE_GRAPH_BORDER)) { 	// baroFigure 1
 						baroFigure = 1;
 					}
-					if ((pressure1 > pressure4) && ((pressure1 - pressure4) >= PRESSURE_GRAPH_BORDER)) { 	// baroFigure 2
+					if ((pressure1 > pressure2) && ((pressure1 - pressure2) >= PRESSURE_GRAPH_BORDER)) { 	// baroFigure 2
 						baroFigure = 2;
 					}
 				}
-				if ((pressure8 > pressure4) && ((pressure8 - pressure4) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 3, 4, 5
+				if ((pressure3 > pressure2) && ((pressure3 - pressure2) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 3, 4, 5
 					baroFigure = 4;
-					if ((pressure4 > pressure1) && ((pressure4 - pressure1) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 3
+					if ((pressure2 > pressure1) && ((pressure2 - pressure1) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 3
 						baroFigure = 3;
 					}
-					if ((pressure1 > pressure4) && ((pressure1 - pressure4) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 5
+					if ((pressure1 > pressure2) && ((pressure1 - pressure2) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 5
 						baroFigure = 5;
 					}
 				}
-				if ((pressure4 > pressure8) && ((pressure4 - pressure8) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 6, 7, 8
+				if ((pressure2 > pressure3) && ((pressure2 - pressure3) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 6, 7, 8
 					baroFigure = 7;
-					if ((pressure4 > pressure1) && ((pressure4 - pressure1) >= PRESSURE_GRAPH_BORDER)) {	// FIGIRE 6
+					if ((pressure2 > pressure1) && ((pressure2 - pressure1) >= PRESSURE_GRAPH_BORDER)) {	// FIGIRE 6
 						baroFigure = 6;
 					}
-					if ((pressure1 > pressure4) && ((pressure1 - pressure4) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 8
+					if ((pressure1 > pressure2) && ((pressure1 - pressure2) >= PRESSURE_GRAPH_BORDER)) {	// baroFigure 8
 						baroFigure = 8;
 					}
 				}
@@ -1392,7 +1392,7 @@ class SundanceView extends WatchUi.WatchFace {
  	// Each hour is the pressure saved (durring last 8 hours) for creation a simple graph
  	// storing 8 variables but working just with 4 right now (8,4.1)
  	function hadnlePressureHistorty(pressure) {
- 		var pressures = ["pressure8", "pressure7", "pressure6", "pressure5", "pressure4", "pressure3", "pressure2", "pressure1"];
+ 		var pressures = ["pressure3", "pressure2", "pressure1"];
  		var preindex = -1;
  		for(var pressure = pressures.size(); pressure > 1; pressure-=1) {
  			preindex = pressure - 2;
