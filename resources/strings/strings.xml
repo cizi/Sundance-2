@@ -53,6 +53,7 @@
     <string id="ColorLightGreen">Light Green</string>    
     <string id="ColorDarkBlue">Dark Blue</string>
     <string id="ColorPink">Pink</string>
+    <string id="ColorTransparent">Transparent</string>
     
     <string id="CurrentTimePointerTypeTitle">Type of current time pointer</string>
     <string id="PointIn">Point in dial</string>

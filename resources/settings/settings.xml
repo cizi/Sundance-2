@@ -202,6 +202,7 @@
             <listEntry value="0x00FF00">@Strings.ColorGreen</listEntry>
             <listEntry value="0x00FFAA">@Strings.ColorLightGreen</listEntry>            
             <listEntry value="0xFF00FF">@Strings.ColorPink</listEntry>
+            <listEntry value="-1">@Strings.ColorTransparent</listEntry>
         </settingConfig>
     </setting>
 
@@ -225,6 +226,7 @@
             <listEntry value="0x00FF00">@Strings.ColorGreen</listEntry>
             <listEntry value="0x00FFAA">@Strings.ColorLightGreen</listEntry>            
             <listEntry value="0xFF00FF">@Strings.ColorPink</listEntry>
+            <listEntry value="-1">@Strings.ColorTransparent</listEntry>
         </settingConfig>
     </setting>
     
