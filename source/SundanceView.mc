@@ -24,6 +24,7 @@ class SundanceView extends WatchUi.WatchFace {
 	const ALTITUDE = 7;
 	const PRESSURE = 8;
 	const NEXT_SUN_EVENT = 9;
+	const SECOND_TIME = 10;
 	const DISABLED = 100;
 	const PRESSURE_GRAPH_BORDER = 3;	// pressure border to change the graph in hPa
 
@@ -259,6 +260,10 @@ class SundanceView extends WatchUi.WatchFace {
         	case CALORIES:
 			drawCalories(field1[0], field1[1], dc, 1);
 			break;
+			
+			case SECOND_TIME:
+			drawSecondTime(field1[0], field1[1], dc, calculateSecondTime(today), today, 1);
+			break;
         }
 
         // FIELD 2
@@ -440,6 +445,18 @@ class SundanceView extends WatchUi.WatchFace {
 
     // Terminate any active timers and prepare for slow updates.
     function onEnterSleep() {
+    }
+    
+    
+    // Calculate second time from setting option
+    function calculateSecondTime(today) {
+    	var utcOffset = today.timeZoneOffset;
+    	System.println(utcOffset.toString());
+    }
+    
+    
+    function drawSecondTime(posX, posY, dc, secondTime, today, position) {
+    
     }
 
 

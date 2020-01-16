@@ -32,7 +32,11 @@
     <property id="NightModeTheme" type="boolean">false</property> 
     <property id="NightModeThemeColor" type="number">0xFF5500</property>    
     
-    <property id="CurrentTimePointerType" type="number">1</property>  
+    <property id="CurrentTimePointerType" type="number">1</property> 
     
+    <property id="ShowSecondTimeOnDial" type="boolean">false</property>
+    <property id="SecondTimeOnDialColor" type="number">0xFF00FF</property>
+    <property id="SecondTimePointerType" type="number">3</property>
+    <property id="SecondTimeUtcOffset" type="number">0</property>
 
 </properties>

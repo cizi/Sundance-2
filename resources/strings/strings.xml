@@ -89,6 +89,55 @@
     <string id="NightModeTitle">Night mode (better readability after sunset)</string>
     
     <string id="NightModeThemeTitle">Use different theme color during nigh mode</string>
-    <string id="NightModeThemeColorTitle">Night mode theme color</string>       
+    <string id="NightModeThemeColorTitle">Night mode theme color</string>  
+    
+    <string id="ShowSecondTimeOnDialTitle">Show second time pointer on dial</string>  
+    <string id="SecondTimeOnDialColorTitle">Second time pointer color on dial</string> 
+    <string id="SecondTimePointerTypeTitle">Second time pointer type (if enabled on dial)</string>   
+    <string id="SecondTimeUtcOffsetTitle">Second time UTC offset</string>  
+    <string id="SecondTime">Second time</string>
+        
+    
+    <string id="UtcMinus12">-12.00</string> 
+    <string id="UtcMinus11">-11.00</string> 
+    <string id="UtcMinus10">-10.00</string> 
+    <string id="UtcMinus95">-09.30</string> 
+    <string id="UtcMinus9">-09.00</string> 
+    <string id="UtcMinus8">-08.00</string> 
+    <string id="UtcMinus7">-07.00</string> 
+    <string id="UtcMinus6">-06.00</string> 
+    <string id="UtcMinus5">-05.00</string> 
+    <string id="UtcMinus45">-04.30</string>
+    <string id="UtcMinus4">-04.00</string> 
+    <string id="UtcMinus35">-03.30</string> 
+    <string id="UtcMinus3">-03.00</string> 
+    <string id="UtcMinus2">-02.00</string> 
+    <string id="UtcMinus1">-01.00</string> 
+    <string id="Utc">UTC</string> 
+    <string id="UtcPlus1">+01.00</string>
+    <string id="UtcPlus2">+02.00</string>
+    <string id="UtcPlus3">+03.00</string>
+    <string id="UtcPlus35">+03.30</string>
+    <string id="UtcPlus4">+04.00</string>
+    <string id="UtcPlus45">+04.30</string>
+    <string id="UtcPlus5">+05.00</string>
+    <string id="UtcPlus55">+05.30</string>
+    <string id="UtcPlus575">+05.45</string>
+    <string id="UtcPlus6">+06.00</string>
+    <string id="UtcPlus65">+06.30</string>
+    <string id="UtcPlus7">+07.00</string>
+    <string id="UtcPlus8">+08.00</string>
+    <string id="UtcPlus85">+08.30</string>
+    <string id="UtcPlus875">+08.45</string>
+    <string id="UtcPlus9">+09.00</string>
+    <string id="UtcPlus95">+09.30</string>
+    <string id="UtcPlus10">+10.00</string>
+    <string id="UtcPlus105">+10.30</string>
+    <string id="UtcPlus11">+11.00</string>
+    <string id="UtcPlus12">+12.00</string>
+    <string id="UtcPlus1275">+12.45</string>
+    <string id="UtcPlus13">+13.00</string>
+    <string id="UtcPlus14">+14.00</string>                 
+
 
 </strings>
