@@ -231,7 +231,9 @@
     <setting propertyKey="@Properties.CurrentTimePointerType" title="@Strings.CurrentTimePointerTypeTitle">
         <settingConfig type="list">
         	<listEntry value="1">@Strings.PointIn</listEntry>
-            <listEntry value="2">@Strings.Arrow</listEntry>
+            <listEntry value="2">@Strings.ArrowFilled</listEntry>
+            <listEntry value="3">@Strings.ArrowTransparent</listEntry>
+            <listEntry value="4">@Strings.LikeASuunto</listEntry>
             <listEntry value="100">@Strings.OptionDisabled</listEntry>
         </settingConfig>
     </setting>

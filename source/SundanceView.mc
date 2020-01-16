@@ -398,7 +398,16 @@ class SundanceView extends WatchUi.WatchFace {
 			break;
 
 			case 2:
-			drawDualTime(dc, App.getApp().getProperty("CurrentTimePointer"), today);
+			drawSuuntoLikePointer(dc, App.getApp().getProperty("CurrentTimePointer"), today);	// TODO
+			// drawPointToDialFilled(dc, App.getApp().getProperty("CurrentTimePointer"), today);
+			break;
+			
+			case 3:
+			drawPointToDialTransparent(dc, App.getApp().getProperty("CurrentTimePointer"), today);
+			break;
+			
+			case 4:
+			drawSuuntoLikePointer(dc, App.getApp().getProperty("CurrentTimePointer"), today);
 			break;
 		}
 		
@@ -1404,19 +1413,12 @@ class SundanceView extends WatchUi.WatchFace {
  	}
 
 
-	// Draw pointer like a trinagle to dial by the settings
-	function drawDualTime(dc, color, timeInfo) {
+	// Draw filled pointer like a trinagle to dial by the settings
+	function drawPointToDialFilled(dc, color, timeInfo) {
 		var angleToNrCorrection = 5.99;
 		var daylightProgessWidth = App.getApp().getProperty("DaylightProgessWidth");
-		var rLocal = halfWidth - (daylightProgessWidth) + 2;	// line in day light
+		var rLocal = halfWidth - daylightProgessWidth + 2;	// line in day light
 		dc.setColor(color, Gfx.COLOR_TRANSPARENT);
-		
-		// SECOND TIME
-		// dc.setPenWidth(daylightProgessWidth);
-		/*var secondTimeCoef = ((secondTime.hour + (secondTime.min.toFloat() / 60)) * 15) - 1;
-		var secondTimeStart = 271 - secondTimeCoef;	// 270 was corrected better placing of second time holder
-		var secondTimeEnd = 269 - secondTimeCoef;	// 270 was corrected better placing of second time holder		
-		dc.drawArc(halfWidth, halfWidth, rLocal, Gfx.ARC_CLOCKWISE, secondTimeStart, secondTimeEnd); */
 
 		var secondTimeCoef = ((timeInfo.hour + (timeInfo.min.toFloat() / 60) + angleToNrCorrection) * 15);
 		// the top  point touching the DaylightProgessWidth
@@ -1439,4 +1441,75 @@ class SundanceView extends WatchUi.WatchFace {
 		
 		dc.fillPolygon([[trianglPointX1, trianglPointY1], [trianglPointX2, trianglPointY2], [trianglPointX3, trianglPointY3]]); 
 	}
+	
+	// Draw filled pointer like a trinagle to dial by the settings
+	function drawPointToDialTransparent(dc, color, timeInfo) {
+		var angleToNrCorrection = 5.99;
+		var daylightProgessWidth = App.getApp().getProperty("DaylightProgessWidth");
+		var rLocal = halfWidth - daylightProgessWidth + 2;	// line in day light
+		dc.setPenWidth(2);
+		dc.setColor(color, Gfx.COLOR_TRANSPARENT);
+
+		var secondTimeCoef = ((timeInfo.hour + (timeInfo.min.toFloat() / 60) + angleToNrCorrection) * 15);
+		// the top  point touching the DaylightProgessWidth
+		var angleDeg = (secondTimeCoef * Math.PI) / 180;
+    	var trianglPointX1 = ((rLocal * Math.cos(angleDeg)) + halfWidth);
+    	var trianglPointY1 = ((rLocal * Math.sin(angleDeg)) + halfWidth);
+		
+        var secondTimeTriangleCircle = halfWidth - (daylightProgessWidth + App.getApp().getProperty("CurrentTimePointerWidth"));
+		// one of the lower point of tringle		
+		var trianglePointAngle = secondTimeCoef - 4;
+		angleDeg = (trianglePointAngle * Math.PI) / 180;
+		var trianglPointX2 = ((secondTimeTriangleCircle * Math.cos(angleDeg)) + halfWidth);
+    	var trianglPointY2 = ((secondTimeTriangleCircle * Math.sin(angleDeg)) + halfWidth);
+		
+		// one of the higher point of tringle
+		trianglePointAngle = secondTimeCoef + 4;
+		angleDeg = (trianglePointAngle * Math.PI) / 180;
+		var trianglPointX3 = ((secondTimeTriangleCircle * Math.cos(angleDeg)) + halfWidth);
+    	var trianglPointY3 = ((secondTimeTriangleCircle * Math.sin(angleDeg)) + halfWidth);
+    	
+    	dc.drawLine(trianglPointX1, trianglPointY1, trianglPointX2, trianglPointY2);
+    	dc.drawLine(trianglPointX2, trianglPointY2, trianglPointX3, trianglPointY3);
+    	dc.drawLine(trianglPointX3, trianglPointY3, trianglPointX1, trianglPointY1);
+	}
+	
+	// Draw pointer like a Suunto pointer to dial by the settings
+	function drawSuuntoLikePointer(dc, color, timeInfo) {
+		var angleToNrCorrection = 5.95;
+		var daylightProgessWidth = App.getApp().getProperty("DaylightProgessWidth");
+		var rLocal = halfWidth - daylightProgessWidth;	// line in day light
+		dc.setColor(color, Gfx.COLOR_TRANSPARENT);
+		
+		// SECOND TIME
+		dc.setPenWidth(daylightProgessWidth);
+		var secondTimeCoef = ((timeInfo.hour + (timeInfo.min.toFloat() / 60)) * 15);
+		var secondTimeStart = 272 - secondTimeCoef;	// 270 was corrected better placing of second time holder
+		var secondTimeEnd = 268 - secondTimeCoef;	// 270 was corrected better placing of second time holder		
+		dc.drawArc(halfWidth, halfWidth, rLocal, Gfx.ARC_CLOCKWISE, secondTimeStart, secondTimeEnd);
+
+		
+		// the top  point touching the DaylightProgessWidth
+        var secondTimeTriangleCircle = halfWidth - (daylightProgessWidth + App.getApp().getProperty("CurrentTimePointerWidth"));
+		secondTimeCoef = ((timeInfo.hour + (timeInfo.min.toFloat() / 60) + angleToNrCorrection) * 15);
+		var angleDeg = (secondTimeCoef * Math.PI) / 180;
+    	var trianglPointX1 = ((secondTimeTriangleCircle * Math.cos(angleDeg)) + halfWidth);
+    	var trianglPointY1 = ((secondTimeTriangleCircle * Math.sin(angleDeg)) + halfWidth);
+		
+		// one of the lower point of tringle		
+		var trianglePointAngle = secondTimeCoef - 2;
+		angleDeg = (trianglePointAngle * Math.PI) / 180;
+		var trianglPointX2 = ((rLocal * Math.cos(angleDeg)) + halfWidth);
+    	var trianglPointY2 = ((rLocal * Math.sin(angleDeg)) + halfWidth);
+		
+		// one of the higher point of tringle
+		trianglePointAngle = secondTimeCoef + 2;
+		angleDeg = (trianglePointAngle * Math.PI) / 180;
+		var trianglPointX3 = ((rLocal * Math.cos(angleDeg)) + halfWidth);
+    	var trianglPointY3 = ((rLocal * Math.sin(angleDeg)) + halfWidth);
+		
+		dc.fillPolygon([[trianglPointX1, trianglPointY1], [trianglPointX2, trianglPointY2], [trianglPointX3, trianglPointY3]]); 
+	}
+	
+	
 }

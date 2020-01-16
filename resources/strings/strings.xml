@@ -56,7 +56,10 @@
     
     <string id="CurrentTimePointerTypeTitle">Type of current time pointer</string>
     <string id="PointIn">Point in dial</string>
-    <string id="Arrow">Arrow to dial</string>   
+    <string id="ArrowFilled">Arrow to dial (filled)</string>  
+    <string id="ArrowTransparent">Arrow to dial (transparent)</string>  
+    <string id="LikeASuunto">Suunto like pointer</string> 
+        
 
     <string id="width2">2</string>
     <string id="width4">4</string>
