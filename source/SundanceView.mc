@@ -217,6 +217,33 @@ class SundanceView extends WatchUi.WatchFace {
         if (today.min == 0) {
 	        hadnlePressureHistorty(getPressure());
         }
+        
+        // second time calculation and dial drawing if any
+        var secondTime = calculateSecondTime(new Time.Moment(now.value()));
+        if (App.getApp().getProperty("ShowSecondTimeOnDial")) {
+        	switch(App.getApp().getProperty("SecondTimePointerType")) {			
+				case 1:
+				dc.setPenWidth(App.getApp().getProperty("CurrentTimePointerWidth"));
+				var secTimeCoef = (secondTime.hour + (secondTime.min.toFloat() / 60)) * 15;
+				var secTimeStart = 272 - secTimeCoef;	// 270 was corrected better placing of current time holder
+				var secTimeEnd = 268 - secTimeCoef;	// 270 was corrected better placing of current time holder
+				dc.setColor(App.getApp().getProperty("SecondTimeOnDialColor"), Gfx.COLOR_TRANSPARENT);
+				dc.drawArc(halfWidth, halfWidth, halfWidth - 2, Gfx.ARC_CLOCKWISE, secTimeStart, secTimeEnd);
+				break;
+	
+				case 2:
+				drawPointToDialFilled(dc, App.getApp().getProperty("SecondTimeOnDialColor"), secondTime);
+				break;
+				
+				case 3:
+				drawPointToDialTransparent(dc, App.getApp().getProperty("SecondTimeOnDialColor"), secondTime);
+				break;
+				
+				case 4:
+				drawSuuntoLikePointer(dc, App.getApp().getProperty("SecondTimeOnDialColor"), secondTime);
+				break;
+			}
+        }
 
         // FIELD 1
         switch (App.getApp().getProperty("Opt1")) {
@@ -449,9 +476,13 @@ class SundanceView extends WatchUi.WatchFace {
     
     
     // Calculate second time from setting option
-    function calculateSecondTime(today) {
-    	var utcOffset = today.timeZoneOffset;
-    	System.println(utcOffset.toString());
+    // returns Gregorian Info
+    function calculateSecondTime(todayMoment) {
+    	var utcOffset = System.getClockTime().timeZoneOffset * -1;
+    	var utcMoment = todayMoment.add(new Time.Duration(utcOffset));
+    	var secondTimeMoment = utcMoment.add(new Time.Duration(App.getApp().getProperty("SecondTimeUtcOffset")));
+    	
+    	return sc.momentToInfo(secondTimeMoment);
     }
     
     
@@ -1493,7 +1524,7 @@ class SundanceView extends WatchUi.WatchFace {
 	// Draw pointer like a Suunto pointer to dial by the settings
 	function drawSuuntoLikePointer(dc, color, timeInfo) {
 		var angleToNrCorrection = 5.95;
-		var daylightProgessWidth = App.getApp().getProperty("DaylightProgessWidth");
+		var daylightProgessWidth = (App.getApp().getProperty("DaylightProgessWidth") / 2).toNumber();
 		dc.setColor(color, Gfx.COLOR_TRANSPARENT);
 		
 		dc.setPenWidth(daylightProgessWidth);
