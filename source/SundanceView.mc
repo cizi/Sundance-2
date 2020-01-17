@@ -213,8 +213,8 @@ class SundanceView extends WatchUi.WatchFace {
 			dc.drawText(halfWidth + moonCentering, 65, Gfx.FONT_TINY, dateString, Gfx.TEXT_JUSTIFY_CENTER);
 		}
 		
-		// Logging pressure history all the time - every 4th hour
-        if ((today.hour % 6 == 0) && (today.min == 0)) {
+		// Logging pressure history all the time
+        if (today.min == 0) {
 	        hadnlePressureHistorty(getPressure());
         }
 
@@ -1169,10 +1169,10 @@ class SundanceView extends WatchUi.WatchFace {
 		if ((position == 3) && is240dev) {
 			xPos -= 4;
 		}
-		if ((today.hour % 6 == 0) && (today.min == 0)) {	// grap is redrawning only in whole and only every 4th hour
+		if (today.min == 0) {	// grap is redrawning only in whole hour
 			var baroFigure = 0;
-			var pressure3 = app.getProperty("pressure3");
-			var pressure2 = app.getProperty("pressure2");
+			var pressure3 = app.getProperty("pressure8");
+			var pressure2 = app.getProperty("pressure4");
 			var pressure1 = app.getProperty("pressure1");
 			if (pressure1 != null) {	// always should have at least pressure1 but test it for sure
 				pressure1 = pressure1.toNumber();
@@ -1417,7 +1417,7 @@ class SundanceView extends WatchUi.WatchFace {
  	// Each hour is the pressure saved (durring last 8 hours) for creation a simple graph
  	// storing 8 variables but working just with 4 right now (8,4.1)
  	function hadnlePressureHistorty(pressure) {
- 		var pressures = ["pressure3", "pressure2", "pressure1"];
+ 		var pressures = ["pressure8", "pressure7", "pressure6", "pressure5", "pressure4", "pressure3", "pressure2", "pressure1"];
  		var preindex = -1;
  		for(var pressure = pressures.size(); pressure > 1; pressure-=1) {
  			preindex = pressure - 2;
