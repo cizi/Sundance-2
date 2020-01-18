@@ -221,194 +221,14 @@ class SundanceView extends WatchUi.WatchFace {
         // second time calculation and dial drawing if any
         var secondTime = calculateSecondTime(new Time.Moment(now.value()));
         if (App.getApp().getProperty("ShowSecondTimeOnDial")) {
-        	switch(App.getApp().getProperty("SecondTimePointerType")) {			
-				case 1:
-				dc.setPenWidth(App.getApp().getProperty("CurrentTimePointerWidth"));
-				var secTimeCoef = (secondTime.hour + (secondTime.min.toFloat() / 60)) * 15;
-				var secTimeStart = 272 - secTimeCoef;	// 270 was corrected better placing of current time holder
-				var secTimeEnd = 268 - secTimeCoef;	// 270 was corrected better placing of current time holder
-				dc.setColor(App.getApp().getProperty("SecondTimeOnDialColor"), Gfx.COLOR_TRANSPARENT);
-				dc.drawArc(halfWidth, halfWidth, halfWidth - 2, Gfx.ARC_CLOCKWISE, secTimeStart, secTimeEnd);
-				break;
-	
-				case 2:
-				drawPointToDialFilled(dc, App.getApp().getProperty("SecondTimeOnDialColor"), secondTime);
-				break;
-				
-				case 3:
-				drawPointToDialTransparent(dc, App.getApp().getProperty("SecondTimeOnDialColor"), secondTime);
-				break;
-				
-				case 4:
-				drawSuuntoLikePointer(dc, App.getApp().getProperty("SecondTimeOnDialColor"), secondTime);
-				break;
-			}
+        	drawTimePointerInDial(secondTime, App.getApp().getProperty("SecondTimePointerType"), App.getApp().getProperty("SecondTimeOnDialColor"), dc);
         }
-
-        // FIELD 1
-        switch (App.getApp().getProperty("Opt1")) {
-			case MOON_PHASE:
-			today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-			drawMoonPhase(halfWidth, (dc.getHeight() / 5).toNumber(), dc, getMoonPhase(today), 1);
-        	break;
-
-        	case SUNSET_SUNSRISE:
-			drawSunsetSunriseTime(field1[0], field1[1], dc, 1);
-        	break;
-
-        	case NEXT_SUN_EVENT:
-        	drawNextSunTime(field1[0], field1[1], dc, 1);
-        	break;
-
-        	case BATTERY:
-	        drawBattery(field1[0], field1[1], dc, 1);
-        	break;
-
-        	case HR:
-			drawHr(field1[0], field1[1], dc, 1);
-			break;
-
-        	case PRESSURE:
-        	drawPressure(field1[0], field1[1], dc, getPressure(), today, 1);
-			break;
-
-        	case STEPS:
-			drawSteps(field1[0], field1[1], dc, 1);
-			break;
-
-			case ALTITUDE:
-        	drawAltitude(field1[0], field1[1], dc, 1);
-        	break;
-
-			case FLOORS:
-        	drawFloors(field1[0], field1[1], dc, 1);
-        	break;
-
-        	case CALORIES:
-			drawCalories(field1[0], field1[1], dc, 1);
-			break;
-			
-			case SECOND_TIME:
-			drawSecondTime(field1[0], field1[1], dc, calculateSecondTime(today), today, 1);
-			break;
-        }
-
-        // FIELD 2
-        switch (App.getApp().getProperty("Opt2")) {
-			case MOON_PHASE:
-			today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-			drawMoonPhase(field2[0], field2[1], dc, getMoonPhase(today), 2);
-        	break;
-
-        	case FLOORS:
-        	drawFloors(field2[0], field2[1], dc, 2);
-        	break;
-
-        	case CALORIES:
-			drawCalories(field2[0], field2[1], dc, 2);
-			break;
-
-        	case STEPS:
-			drawSteps(field2[0], field2[1], dc, 2);
-			break;
-
-			case ALTITUDE:
-        	drawAltitude(field2[0], field2[1], dc, 2);
-        	break;
-
-        	case BATTERY:
-	        drawBattery(field2[0], field2[1], dc, 2);
-        	break;
-
-			case HR:
-			drawHr(field2[0], field2[1], dc, 2);
-			break;
-
-			case PRESSURE:
-        	drawPressure(field2[0], field2[1], dc, getPressure(), today, 2);
-			break;
-        }
-
-        // FIELD 3
-        switch (App.getApp().getProperty("Opt3")) {
-			case MOON_PHASE:
-			today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-			drawMoonPhase(field3[0], field3[1], dc, getMoonPhase(today), 3);
-        	break;
-
-        	case FLOORS:
-        	drawFloors(field3[0], field3[1], dc, 3);
-        	break;
-
-	    	case CALORIES:
-			drawCalories(field3[0], field3[1], dc, 3);
-			break;
-
-        	case STEPS:
-			drawSteps(field3[0], field3[1], dc, 3);
-			break;
-
-			case ALTITUDE:
-        	drawAltitude(field3[0], field3[1], dc, 3);
-        	break;
-
-        	case BATTERY:
-	        drawBattery(field3[0], field3[1], dc, 3);
-        	break;
-
-        	case HR:
-	        drawHr(field3[0], field3[1], dc, 3);
-					break;
-
-			case PRESSURE:
-	    	drawPressure(field3[0], field3[1], dc, getPressure(), today, 3);
-			break;
-        }
-
-        // FIELD 4
-        switch (App.getApp().getProperty("Opt4")) {
-			case MOON_PHASE:
-			today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-			drawMoonPhase(halfWidth, field4[1], dc, getMoonPhase(today), 4);
-        	break;
-
-        	case SUNSET_SUNSRISE:
-			drawSunsetSunriseTime(field4[0], field4[1], dc, 4);
-        	break;
-
-        	case NEXT_SUN_EVENT:
-        	drawNextSunTime(field4[0], field4[1], dc, 4);
-        	break;
-
-        	case FLOORS:
-        	drawFloors(field4[0], field4[1], dc, 4);
-        	break;
-
-        	case CALORIES:
-			drawCalories(field4[0], field4[1], dc, 4);
-			break;
-
-        	case STEPS:
-			drawSteps(field4[0], field4[1], dc, 4);
-			break;
-
-        	case ALTITUDE:
-        	drawAltitude(field4[0], field4[1], dc, 4);
-        	break;
-
-        	case BATTERY:
-	        drawBattery(field4[0], field4[1], dc, 4);
-        	break;
-
-        	case HR:
-        	drawHr(field4[0], field4[1], dc, 4);
-        	break;
-
-        	case PRESSURE:
-        	drawPressure(field4[0], field4[1], dc, getPressure(), today, 4);
-        	break;
-        }
-
+              
+        drawDataField(App.getApp().getProperty("Opt1"), 1, field1, today, secondTime, dc);	// FIELD 1
+        drawDataField(App.getApp().getProperty("Opt2"), 2, field2, today, secondTime, dc);	// FIELD 2
+        drawDataField(App.getApp().getProperty("Opt3"), 3, field3, today, secondTime, dc);	// FIELD 3
+        drawDataField(App.getApp().getProperty("Opt4"), 4, field4, today, secondTime, dc);	// FIELD 4
+        
         if (App.getApp().getProperty("ShowNotificationAndConnection")) {
 	      	drawBtConnection(dc);
 	      	drawNotification(dc);
@@ -424,28 +244,7 @@ class SundanceView extends WatchUi.WatchFace {
 		dc.drawText(halfWidth, halfWidth - (Gfx.getFontHeight(Gfx.FONT_SYSTEM_NUMBER_HOT) / 2), Gfx.FONT_SYSTEM_NUMBER_HOT, timeString[:formatted], Gfx.TEXT_JUSTIFY_CENTER);
 
 		// CURRENT TIME POINTER
-		switch(App.getApp().getProperty("CurrentTimePointerType")) {			
-			case 1:
-			dc.setPenWidth(App.getApp().getProperty("CurrentTimePointerWidth"));
-			var currTimeCoef = (today.hour + (today.min.toFloat() / 60)) * 15;
-			var currTimeStart = 272 - currTimeCoef;	// 270 was corrected better placing of current time holder
-			var currTimeEnd = 268 - currTimeCoef;	// 270 was corrected better placing of current time holder
-			dc.setColor(App.getApp().getProperty("CurrentTimePointer"), Gfx.COLOR_TRANSPARENT);
-			dc.drawArc(halfWidth, halfWidth, halfWidth - 2, Gfx.ARC_CLOCKWISE, currTimeStart, currTimeEnd);
-			break;
-
-			case 2:
-			drawPointToDialFilled(dc, App.getApp().getProperty("CurrentTimePointer"), today);
-			break;
-			
-			case 3:
-			drawPointToDialTransparent(dc, App.getApp().getProperty("CurrentTimePointer"), today);
-			break;
-			
-			case 4:
-			drawSuuntoLikePointer(dc, App.getApp().getProperty("CurrentTimePointer"), today);
-			break;
-		}
+		drawTimePointerInDial(today, App.getApp().getProperty("CurrentTimePointerType"), App.getApp().getProperty("CurrentTimePointer"), dc);
     }
 
 
@@ -475,6 +274,83 @@ class SundanceView extends WatchUi.WatchFace {
     }
     
     
+    // Draw data field by params. One function do all the fields by coordinates and position
+    function drawDataField(dataFiled, position, fieldCors, today, secondTime, dc) {
+    	switch (dataFiled) {
+			case MOON_PHASE:
+			today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+			drawMoonPhase(halfWidth, (dc.getHeight() / 5).toNumber(), dc, getMoonPhase(today), position);
+        	break;
+
+        	case SUNSET_SUNSRISE:
+			drawSunsetSunriseTime(fieldCors[0], fieldCors[1], dc, position);
+        	break;
+
+        	case NEXT_SUN_EVENT:
+        	drawNextSunTime(fieldCors[0], fieldCors[1], dc, position);
+        	break;
+
+        	case BATTERY:
+	        drawBattery(fieldCors[0], fieldCors[1], dc, position);
+        	break;
+
+        	case HR:
+			drawHr(fieldCors[0], fieldCors[1], dc, position);
+			break;
+
+        	case PRESSURE:
+        	drawPressure(fieldCors[0], fieldCors[1], dc, getPressure(), today, position);
+			break;
+
+        	case STEPS:
+			drawSteps(fieldCors[0], fieldCors[1], dc, position);
+			break;
+
+			case ALTITUDE:
+        	drawAltitude(fieldCors[0], fieldCors[1], dc, position);
+        	break;
+
+			case FLOORS:
+        	drawFloors(fieldCors[0], fieldCors[1], dc, position);
+        	break;
+
+        	case CALORIES:
+			drawCalories(fieldCors[0], fieldCors[1], dc, position);
+			break;
+			
+			case SECOND_TIME:
+			drawSecondTime(fieldCors[0], fieldCors[1], dc, secondTime, position);
+			break;
+        }
+    }
+    
+    // Draw time pointer in dial by type, color and of course time
+    function drawTimePointerInDial(time, pointerType, pointerColor, dc) {
+    	switch(pointerType) {			
+			case 1:
+			dc.setPenWidth(App.getApp().getProperty("CurrentTimePointerWidth"));
+			var timeCoef = (time.hour + (time.min.toFloat() / 60)) * 15;
+			var timeStart = 272 - timeCoef;	// 270 was corrected better placing of current time holder
+			var timeEnd = 268 - timeCoef;	// 270 was corrected better placing of current time holder
+			dc.setColor(pointerColor, Gfx.COLOR_TRANSPARENT);
+			dc.drawArc(halfWidth, halfWidth, halfWidth - 2, Gfx.ARC_CLOCKWISE, timeStart, timeEnd);
+			break;
+
+			case 2:
+			drawPointToDialFilled(dc, pointerColor, time);
+			break;
+			
+			case 3:
+			drawPointToDialTransparent(dc, pointerColor, time);
+			break;
+			
+			case 4:
+			drawSuuntoLikePointer(dc, pointerColor, time);
+			break;
+		}
+    }
+    
+    
     // Calculate second time from setting option
     // returns Gregorian Info
     function calculateSecondTime(todayMoment) {
@@ -486,8 +362,20 @@ class SundanceView extends WatchUi.WatchFace {
     }
     
     
-    function drawSecondTime(posX, posY, dc, secondTime, today, position) {
-    
+    // Draw second time liek a data field
+    function drawSecondTime(xPos, yPos, dc, secondTime, position) {
+    	if (position == 1) {
+    		xPos -= 6;
+    		yPos -= 2;
+    	}
+    	if (position == 4) {
+    		xPos -= 34;
+    		yPos += 14;
+    	}
+    	var value = getFormattedTime(secondTime.hour, secondTime.min);
+		value = value[:formatted] + value[:amPm];
+        dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
+        dc.drawText(xPos + 21, yPos - 15, fntDataFields, value, Gfx.TEXT_JUSTIFY_LEFT);
     }
 
 
