@@ -52,7 +52,6 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var goldenPmMoment;
 	hidden var location = null;
 	hidden var moonPhase;
-	hidden var baroFigure;
 
 	// night mode
 	hidden var frColor = null;
@@ -148,7 +147,6 @@ class SundanceView extends WatchUi.WatchFace {
 		goldenAmMoment = null;
 		goldenPmMoment = null;
 		moonPhase = null;
-		baroFigure = 0;
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -1130,6 +1128,7 @@ class SundanceView extends WatchUi.WatchFace {
 			xPos -= 4;
 		}
 		if (today.min == 0) {	// grap is redrawning only in whole hour
+			var baroFigure = 0;
 			var pressure3 = app.getProperty("pressure8");
 			var pressure2 = app.getProperty("pressure4");
 			var pressure1 = app.getProperty("pressure1");
@@ -1164,7 +1163,9 @@ class SundanceView extends WatchUi.WatchFace {
 					}
 				}
 			}
+			app.setProperty("baroFigure", baroFigure);
 		}
+		var baroFigure = (app.getProperty("baroFigure") == null ? 0 : app.getProperty("baroFigure").toNumber());
 		drawPressureGraph(xPos - 34, yPos + 10, dc, baroFigure);
 		dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
 		dc.drawText(xPos - 6, yPos, fntDataFields, pressure.toString(), Gfx.TEXT_JUSTIFY_LEFT);
