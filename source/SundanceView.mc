@@ -26,6 +26,7 @@ class SundanceView extends WatchUi.WatchFace {
 	const NEXT_SUN_EVENT = 9;
 	const SECOND_TIME = 10;
 	const DISABLED = 100;
+	const DISTANCE = 11;
 	const PRESSURE_GRAPH_BORDER = 3;	// pressure border to change the graph in hPa
 
 	// others
@@ -51,6 +52,7 @@ class SundanceView extends WatchUi.WatchFace {
 	hidden var goldenPmMoment;
 	hidden var location = null;
 	hidden var moonPhase;
+	hidden var baroFigure;
 
 	// night mode
 	hidden var frColor = null;
@@ -146,6 +148,7 @@ class SundanceView extends WatchUi.WatchFace {
 		goldenAmMoment = null;
 		goldenPmMoment = null;
 		moonPhase = null;
+		baroFigure = 0;
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -305,6 +308,10 @@ class SundanceView extends WatchUi.WatchFace {
         	case STEPS:
 			drawSteps(fieldCors[0], fieldCors[1], dc, position);
 			break;
+			
+			case DISTANCE:
+			drawDistance(fieldCors[0], fieldCors[1], dc, position);
+			break;
 
 			case ALTITUDE:
         	drawAltitude(fieldCors[0], fieldCors[1], dc, position);
@@ -365,19 +372,23 @@ class SundanceView extends WatchUi.WatchFace {
     // Draw second time liek a data field
     function drawSecondTime(xPos, yPos, dc, secondTime, position) {
     	if (position == 1) {
-    		xPos -= 6;
-    		yPos -= 2;
+    		xPos += 24;
+    		yPos -= 17;
+    	}
+    	if (position == 2) {
+    		xPos += 21;
+    	}
+    	if (position == 3) {
+    		xPos -= (is280dev ? -2 : (is240dev ? 9 : 3));
     	}
     	if (position == 4) {
-    		xPos -= 34;
-    		yPos += 14;
+    		xPos -= ((is240dev == false) && (is280dev == false) ? 9 : 5);
     	}
     	var value = getFormattedTime(secondTime.hour, secondTime.min);
 		value = value[:formatted] + value[:amPm];
         dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
-        dc.drawText(xPos + 21, yPos - 15, fntDataFields, value, Gfx.TEXT_JUSTIFY_LEFT);
+        dc.drawText(xPos, yPos, fntDataFields, value, Gfx.TEXT_JUSTIFY_CENTER);
     }
-
 
 	// Load or refresh the sun times
 	function reloadSuntimes(now) {
@@ -826,7 +837,7 @@ class SundanceView extends WatchUi.WatchFace {
     }
 
 
-    // Draw steps image
+    // Draw steps info
     function drawSteps(posX, posY, dc, position) {
     	if (position == 1) {
     		posX -= 10;
@@ -854,8 +865,38 @@ class SundanceView extends WatchUi.WatchFace {
 		//dc.drawText(posX + 22, posY, fntDataFields, stepsCount.toString(), Gfx.TEXT_JUSTIFY_LEFT);
 		dc.drawText(posX + 22, posY, fntDataFields, stepsCount.toString(), Gfx.TEXT_JUSTIFY_LEFT);
     }
+    
+    
+    // Draw steps info
+    function drawDistance(posX, posY, dc, position) {
+    	if (position == 1) {
+    		posX -= 10;
+    		posY -= (is240dev ? 18 : 16);
+    	}
+    	if (position == 2) {
+			posX -= (is240dev ? 6 : (is280dev ? 14 : 4));
+      	}
+    	if (position == 3) {
+			posX -= (is240dev ? 40 : 36);
+      	}
+      	if (position == 4) {
+      		posX -= (is240dev ? 40 : 41);
+      	}
 
-    // Draw steps image
+    	dc.setColor(themeColor, bgColor);
+    	dc.drawText(posX - 4, posY - 4, fntIcons, "7", Gfx.TEXT_JUSTIFY_LEFT);
+
+    	dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
+    	var info = ActivityMonitor.getInfo();
+    	var distanceKm = (info.distance / 100000).format("%.2f");
+    	if (is280dev || (position == 1) || (position == 4))  {
+    		distanceKm = distanceKm.toString() + "km";
+    	}
+		dc.drawText(posX + 22, posY, fntDataFields, distanceKm.toString(), Gfx.TEXT_JUSTIFY_LEFT);
+    }
+
+
+    // Draw floors info
     function drawFloors(posX, posY, dc, position) {
     	if (position == 1) {
     		posX += 2;
@@ -1089,7 +1130,6 @@ class SundanceView extends WatchUi.WatchFace {
 			xPos -= 4;
 		}
 		if (today.min == 0) {	// grap is redrawning only in whole hour
-			var baroFigure = 0;
 			var pressure3 = app.getProperty("pressure8");
 			var pressure2 = app.getProperty("pressure4");
 			var pressure1 = app.getProperty("pressure1");
@@ -1124,9 +1164,7 @@ class SundanceView extends WatchUi.WatchFace {
 					}
 				}
 			}
-			app.setProperty("baroFigure", baroFigure);
 		}
-		var baroFigure = (app.getProperty("baroFigure") == null ? 0 : app.getProperty("baroFigure").toNumber());
 		drawPressureGraph(xPos - 34, yPos + 10, dc, baroFigure);
 		dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
 		dc.drawText(xPos - 6, yPos, fntDataFields, pressure.toString(), Gfx.TEXT_JUSTIFY_LEFT);

@@ -1,6 +1,9 @@
 Version 2.5
 - added second time option
-- 
+- Suunto like pointer modified (make little bit smaller base)
+- Baro graph redraw every hour
+- Added distance option in km
+- Code simplified
 Version 2.4
 - pressure algorithm simplified and optimized
 - added transparent colour for blue and golden hour

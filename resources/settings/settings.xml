@@ -71,6 +71,7 @@
             <listEntry value="2">@Strings.Floors</listEntry>
             <listEntry value="3">@Strings.Calories</listEntry>
             <listEntry value="4">@Strings.Steps</listEntry>
+            <listEntry value="11">@Strings.Distance</listEntry>
             <listEntry value="5">@Strings.HR</listEntry>
             <listEntry value="6">@Strings.Battery</listEntry>
             <listEntry value="7">@Strings.Altitude</listEntry>
@@ -86,6 +87,7 @@
         	<listEntry value="2">@Strings.Floors</listEntry>
         	<listEntry value="3">@Strings.Calories</listEntry>
             <listEntry value="4">@Strings.Steps</listEntry>
+            <listEntry value="11">@Strings.Distance</listEntry>
             <listEntry value="5">@Strings.HR</listEntry>
             <listEntry value="6">@Strings.Battery</listEntry>
             <listEntry value="7">@Strings.Altitude</listEntry>
@@ -101,6 +103,7 @@
         	<listEntry value="2">@Strings.Floors</listEntry>
         	<listEntry value="3">@Strings.Calories</listEntry>
         	<listEntry value="4">@Strings.Steps</listEntry>
+        	<listEntry value="11">@Strings.Distance</listEntry>
             <listEntry value="5">@Strings.HR</listEntry>
             <listEntry value="6">@Strings.Battery</listEntry>
             <listEntry value="7">@Strings.Altitude</listEntry>
@@ -118,6 +121,7 @@
         	<listEntry value="2">@Strings.Floors</listEntry>
         	<listEntry value="3">@Strings.Calories</listEntry>
         	<listEntry value="4">@Strings.Steps</listEntry>
+        	<listEntry value="11">@Strings.Distance</listEntry>
             <listEntry value="5">@Strings.HR</listEntry>
             <listEntry value="6">@Strings.Battery</listEntry>
             <listEntry value="7">@Strings.Altitude</listEntry>
