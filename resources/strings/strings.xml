@@ -5,16 +5,16 @@
     <string id="BackgroundColorTitle">Background Color</string>
     <string id="ForegroundColorTitle">Text Color</string>
     <string id="DaylightProgessTitle">Daylight Progress Line Color (theme color)</string>
-    <string id="DaylightProgessWidthTitle">Daylight Progress Line Width</string>
+    
+    <string id="BatteryTypeTitle">Battery type</string>
+    
 
-    <string id="CurrentTimePointerTitle">Current Time Pointer Color</string>
     <string id="CurrentTimePointerWidthTitle">Current Time Pointer Size</string>
 
     <string id="Opt1Title">Field 1</string>
     <string id="Opt2Title">Field 2</string>
     <string id="Opt3Title">Field 3</string>
     <string id="Opt4Title">Field 4</string>
-    <string id="MoonPhase">Moon Phase</string>
     <string id="SunsetSunrise">Sunset / Sunrise</string>
     <string id="NextSunEvent">BH/GH/Full Sun/GH/BH</string>
     <string id="Steps">Today's steps</string>
@@ -22,13 +22,13 @@
     <string id="Calories">Today's calories (kCal / MCal)</string>
     <string id="HR">HR</string>
     <string id="Battery">Battery</string>
+    <string id="BatteryInDays">Battery remaining in days</string>
     <string id="Altitude">Altitude</string>
     <string id="Pressure">Pressure</string>
     <string id="Floors">Floors</string>
 
     <string id="MilitaryFormatTitle">Military Format for 24 Hour Time</string>
     <string id="DateFormatTitle">Date Format</string>
-    <string id="ShowMoonPhaseBeforeDateTitle">Show Moon Phase Before Date</string>    
 
     <string id="DateFormat1">Day Date Month</string>
     <string id="DateFormat2">Day Month Date </string>
@@ -55,13 +55,6 @@
     <string id="ColorDarkBlue">Dark Blue</string>
     <string id="ColorPink">Pink</string>
     <string id="ColorTransparent">Transparent</string>
-    
-    <string id="CurrentTimePointerTypeTitle">Type of current time pointer</string>
-    <string id="PointIn">Point in dial</string>
-    <string id="ArrowFilled">Arrow to dial (filled)</string>  
-    <string id="ArrowTransparent">Arrow to dial (transparent)</string>  
-    <string id="LikeASuunto">Suunto like pointer</string> 
-        
 
     <string id="width2">2</string>
     <string id="width3">3</string>
@@ -82,11 +75,7 @@
     <string id="OptionDisabled">Disabled</string>
 
     <string id="SmallHoursIndicatorSizeTitle">Small hour indicators size</string>
-    <string id="ShowGoldenBlueHoursTitle">Show 'Golden' and 'Blue' hours on dial</string>
-
-    <string id="GoldenHourColorTitle">Golden hours color</string>
-    <string id="BlueHourColorTitle">Blue hours color</string>
-    
+   
     <string id="ShowSecondsTitle">Show seconds (causes more battery drain)</string>
     <string id="NightModeTitle">Night mode (better readability after sunset)</string>
     
@@ -95,7 +84,6 @@
     
     <string id="ShowSecondTimeOnDialTitle">Show second time pointer on dial</string>  
     <string id="SecondTimeOnDialColorTitle">Second time pointer color on dial</string> 
-    <string id="SecondTimePointerTypeTitle">Second time pointer type (if enabled on dial)</string>   
     <string id="SecondTimeUtcOffsetTitle">Second time UTC offset</string>  
     <string id="SecondTime">Second time</string>
         
