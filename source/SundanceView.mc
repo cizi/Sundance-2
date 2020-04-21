@@ -198,10 +198,10 @@ class SundanceView extends WatchUi.WatchFace {
             //drawTimePointerInDial(secondTime, App.getApp().getProperty("SecondTimePointerType"), App.getApp().getProperty("SecondTimeOnDialColor"), dc);
         }
               
-        drawDataField(App.getApp().getProperty("Opt1"), 1, field1, today, secondTime, dc);  // FIELD 1
-        drawDataField(App.getApp().getProperty("Opt2"), 2, field2, today, secondTime, dc);  // FIELD 2
-        drawDataField(App.getApp().getProperty("Opt3"), 3, field3, today, secondTime, dc);  // FIELD 3
-        drawDataField(App.getApp().getProperty("Opt4"), 4, field4, today, secondTime, dc);  // FIELD 4
+        // drawDataField(App.getApp().getProperty("Opt1"), 1, field1, today, secondTime, dc);  // FIELD 1
+        // drawDataField(App.getApp().getProperty("Opt2"), 2, field2, today, secondTime, dc);  // FIELD 2
+        // drawDataField(App.getApp().getProperty("Opt3"), 3, field3, today, secondTime, dc);  // FIELD 3
+        // drawDataField(App.getApp().getProperty("Opt4"), 4, field4, today, secondTime, dc);  // FIELD 4
         
         if (App.getApp().getProperty("ShowNotificationAndConnection")) {
             drawBtConnection(dc);
@@ -509,81 +509,44 @@ class SundanceView extends WatchUi.WatchFace {
 
 
     // draw next sun event
-    /* function drawNextSunTime(xPos, yPos, dc, position) {
-        if (location != null) {
-            if ((sunriseMoment != null) && (sunsetMoment != null)) {
-                var nextSunEvent = 0;
-                var now = new Time.Moment(Time.now().value());
-                // Convert to same format as sunTimes, for easier comparison. Add a minute, so that e.g. if sun rises at
-                // 07:38:17, then 07:38 is already consided daytime (seconds not shown to user).
-                now = now.add(new Time.Duration(60));
-
-                if (blueAmMoment.compare(now) > 0) {            // Before blue hour today: today's blue hour is next.
-                    nextSunEvent = sc.momentToInfo(blueAmMoment);
-                    drawSun(xPos, yPos, dc, false, App.getApp().getProperty("BlueHourColor"));
-                } else if (sunriseMoment.compare(now) > 0) {        // Before sunrise today: today's sunrise is next.
-                    nextSunEvent = sc.momentToInfo(sunriseMoment);
-                    drawSun(xPos, yPos, dc, false, App.getApp().getProperty("GoldenHourColor"));
-                } else if (goldenAmMoment.compare(now) > 0) {
-                    nextSunEvent = sc.momentToInfo(goldenAmMoment);
-                    drawSun(xPos, yPos, dc, false, themeColor);
-                } else if (goldenPmMoment.compare(now) > 0) {
-                    nextSunEvent = sc.momentToInfo(goldenPmMoment);
-                    drawSun(xPos, yPos, dc, true, App.getApp().getProperty("GoldenHourColor"));
-                } else if (sunsetMoment.compare(now) > 0) { // After sunrise today, before sunset today: today's sunset is next.
-                    nextSunEvent = sc.momentToInfo(sunsetMoment);
-                    drawSun(xPos, yPos, dc, true, App.getApp().getProperty("BlueHourColor"));
-                } else {    // This is here just for sure if some time condition won't meet the timing
-                            // comparation. It menas I will force calculate the next event, the rest will be updated in
-                            // the next program iteration - After sunset today: tomorrow's blue hour (if any) is next.
-                    now = now.add(new Time.Duration(Gregorian.SECONDS_PER_DAY));
-                    var blueHrAm = sc.calculate(now, location, BLUE_HOUR_AM);
-                    nextSunEvent = sc.momentToInfo(blueHrAm);
-                    drawSun(xPos, yPos, dc, false, App.getApp().getProperty("BlueHourColor"));
-                }
-
-                var value = getFormattedTime(nextSunEvent.hour, nextSunEvent.min); // App.getApp().getFormattedTime(hour, min);
-                value = value[:formatted] + value[:amPm];
-                dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
-                dc.drawText(xPos, yPos, Gfx.FONT_SYSTEM_XTINY, value, Gfx.TEXT_JUSTIFY_LEFT);   // TODO
-            }
-        }
-    } */
-
-
-    // draw next sun event
     function drawSunsetSunriseTime(xPos, yPos, dc) {
         if (location != null) {
             var now = new Time.Moment(Time.now().value());
-            if ((sunriseMoment != null) && (sunsetMoment != null)) {
-                var nextSunEvent = 0;
+            if ((sunriseMoment != null) && (sunsetMoment != null)) {        
+                var currSunriseMoment = sc.momentToInfo(sunriseMoment);
+                var currSunsetMoment = sc.momentToInfo(sunsetMoment);
+                
                 // Convert to same format as sunTimes, for easier comparison. Add a minute, so that e.g. if sun rises at
                 // 07:38:17, then 07:38 is already consided daytime (seconds not shown to user).
                 now = now.add(new Time.Duration(60));
 
                 // Before sunrise today: today's sunrise is next.
-                if (sunriseMoment.compare(now) > 0) {       // now < sc.momentToInfo(sunrise)
-                    nextSunEvent = sc.momentToInfo(sunriseMoment);
-                    //drawSun(xPos, yPos, dc, false, themeColor);
+                /* if (sunriseMoment.compare(now) > 0) {       // now < sc.momentToInfo(sunrise)
+                    // nextSunEvent = sc.momentToInfo(sunriseMoment);
                     // After sunrise today, before sunset today: today's sunset is next.
                 } else if (sunsetMoment.compare(now) > 0) { // now < sc.momentToInfo(sunset)
-                    nextSunEvent = sc.momentToInfo(sunsetMoment);
-                    //drawSun(xPos, yPos, dc, true, themeColor);
-                } else {    // This is here just for sure if some time condition won't meet the timing
+                    // nextSunEvent = sc.momentToInfo(sunsetMoment);
+                } else */
+                
+                if (sunsetMoment.compare(now) <= 0) {    // This is here just for sure if some time condition won't meet the timing
                             // comparation. It menas I will force calculate the next event, the rest will be updated in
                             // the next program iteration -  After sunset today: tomorrow's sunrise (if any) is next.
                     now = now.add(new Time.Duration(Gregorian.SECONDS_PER_DAY));
                     var sunrise = sc.calculate(now, location, SUNRISE);
-                    nextSunEvent = sc.momentToInfo(sunrise);
-                    //drawSun(xPos, yPos, dc, false, themeColor);
+                    currSunriseMoment = sc.momentToInfo(sunrise);
                 }
+                
+                dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);               
+                var value = getFormattedTime(currSunriseMoment.hour, currSunriseMoment.min);
+                value = value[:formatted] + value[:amPmFullSmall];
+                dc.drawText(halfWidth - 30, halfWidth + 4, fntDataFields, value, Gfx.TEXT_JUSTIFY_RIGHT);
+                
+                value = getFormattedTime(currSunsetMoment.hour, currSunsetMoment.min); 
+                value = value[:formatted] + value[:amPmFullSmall];
+                dc.drawText(halfWidth + 30, halfWidth + 4, fntDataFields, value, Gfx.TEXT_JUSTIFY_LEFT);
 
-                var value = getFormattedTime(nextSunEvent.hour, nextSunEvent.min); // App.getApp().getFormattedTime(hour, min);
-                value = value[:formatted] + value[:amPm];
-                dc.setColor(frColor, Gfx.COLOR_TRANSPARENT);
                 dc.drawText(halfWidth - 14, halfWidth + 4, fntIcons, "@", Gfx.TEXT_JUSTIFY_LEFT);   // up
                 dc.drawText(halfWidth - 8, halfWidth + 10, fntIcons, "<", Gfx.TEXT_JUSTIFY_LEFT);    // down
-                // dc.drawText(xPos + 21, yPos - 15, Gfx.FONT_SYSTEM_XTINY, value, Gfx.TEXT_JUSTIFY_LEFT);
             }
         }
     }
@@ -679,20 +642,6 @@ class SundanceView extends WatchUi.WatchFace {
             char = value.substring(i, i + 1);
             dc.drawText(coordinatesArray[i * 2], coordinatesArray[(i * 2) + 1], font, char, Gfx.TEXT_JUSTIFY_CENTER);
         }
-    }
-
-
-    // Draw sunset or sunrice image
-    function drawSun(posX, posY, dc, up, color) {
-        dc.setColor(color, bgColor);
-        if (up) {
-            dc.drawText(posX - 10, posY - 18, fntIcons, "?", Gfx.TEXT_JUSTIFY_LEFT);
-        } else {    // down
-            dc.drawText(posX - 10, posY - 18, fntIcons, ">", Gfx.TEXT_JUSTIFY_LEFT);
-        }
-
-
-       
     }
 
 
@@ -1140,6 +1089,7 @@ class SundanceView extends WatchUi.WatchFace {
             :min => min.format("%02d"),
             :amPm => amPm,
             :amPmFull => amPmFull,
+            :amPmFullSmall => amPmFull.toLower(),
             :isMilitary => isMilitary,
             :formatted => Lang.format(timeFormat, [hour, min.format("%02d")])
         };
