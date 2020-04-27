@@ -28,10 +28,6 @@
         <settingConfig type="boolean" />
     </setting>
     
-    <setting propertyKey="@Properties.NightModeTheme" title="@Strings.NightModeThemeTitle">
-        <settingConfig type="boolean" />
-    </setting>
-    
     <setting propertyKey="@Properties.BatteryType" title="@Strings.BatteryTypeTitle">
         <settingConfig type="list">
 			<listEntry value="6">@Strings.Battery</listEntry>
@@ -39,7 +35,10 @@
         </settingConfig>
     </setting>
     
-    
+    <!-- setting propertyKey="@Properties.NightModeTheme" title="@Strings.NightModeThemeTitle">
+        <settingConfig type="boolean" />
+    </setting>
+        
     
     <setting propertyKey="@Properties.NightModeThemeColor" title="@Strings.NightModeThemeColorTitle">
         <settingConfig type="list">
@@ -62,11 +61,8 @@
             <listEntry value="0x00FFAA">@Strings.ColorLightGreen</listEntry>            
             <listEntry value="0xFF00FF">@Strings.ColorPink</listEntry>
         </settingConfig>
-    </setting>
-    
-    <setting propertyKey="@Properties.NightModeTheme" title="@Strings.NightModeThemeTitle">
-        <settingConfig type="boolean" />
-    </setting>
+    </setting -->
+
 
     <setting propertyKey="@Properties.Opt1" title="@Strings.Opt1Title">
         <settingConfig type="list">
@@ -147,28 +143,8 @@
         </settingConfig>
     </setting>
 
-    <setting propertyKey="@Properties.SmallHoursIndicatorSize" title="@Strings.SmallHoursIndicatorSizeTitle">
-        <settingConfig type="list">
-            <listEntry value="4">@Strings.width4</listEntry>
-            <listEntry value="6">@Strings.width6</listEntry>
-            <listEntry value="8">@Strings.width8</listEntry>
-            <listEntry value="10">@Strings.width10</listEntry>
-        </settingConfig>
-    </setting>
-
-    <setting propertyKey="@Properties.ShowFullDial" title="@Strings.ShowFullDiaTitle">
-        <settingConfig type="boolean" />
-    </setting>
-
-    <setting propertyKey="@Properties.AlarmIndicator" title="@Strings.ShowAlarmIndicatorTitle">
-        <settingConfig type="boolean" />
-    </setting>
-
-    <setting propertyKey="@Properties.ShowNotificationAndConnection" title="@Strings.ShowNotificationAndConnectionTitle">
-        <settingConfig type="boolean" />
-    </setting>
-    
-    <setting propertyKey="@Properties.ShowSecondTimeOnDial" title="@Strings.ShowSecondTimeOnDialTitle">
+   
+    <!-- setting propertyKey="@Properties.ShowSecondTimeOnDial" title="@Strings.ShowSecondTimeOnDialTitle">
         <settingConfig type="boolean" />
     </setting>
     
@@ -193,7 +169,7 @@
             <listEntry value="0x00FFAA">@Strings.ColorLightGreen</listEntry>            
             <listEntry value="0xFF00FF">@Strings.ColorPink</listEntry>
         </settingConfig>
-    </setting>
+    </setting -->
     
     <setting propertyKey="@Properties.SecondTimeUtcOffset" title="@Strings.SecondTimeUtcOffsetTitle">
         <settingConfig type="list">
@@ -241,9 +217,9 @@
     
     <setting propertyKey="@Properties.PressureGraphBorder" title="@Strings.PressureGraphBorderTitle">
         <settingConfig type="list">
-            <listEntry value="2">@Strings.width2</listEntry>
-            <listEntry value="3">@Strings.width3</listEntry>
-            <listEntry value="4">@Strings.width4</listEntry>
+            <listEntry value="2">@Strings.value2</listEntry>
+            <listEntry value="3">@Strings.value3</listEntry>
+            <listEntry value="4">@Strings.value4</listEntry>
         </settingConfig>
     </setting>
       
